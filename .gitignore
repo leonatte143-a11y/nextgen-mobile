@@ -26,6 +26,9 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+# IDEs (JetBrains — avoid committing machine-specific paths)
+.idea/
+
 # macOS
 .DS_Store
 *.pem
