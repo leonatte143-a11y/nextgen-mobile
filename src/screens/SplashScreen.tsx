@@ -4,8 +4,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { PrimaryButton } from '../components/PrimaryButton';
 
-type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'> };
+ type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'> };
 
 export function SplashScreen({ navigation }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
@@ -29,15 +30,7 @@ export function SplashScreen({ navigation }: Props) {
         navigation.replace('Language');
         return;
       }
-      if (userToken) {
-        navigation.replace('MainTabs');
-        return;
-      }
-      if (partnerToken) {
-        navigation.replace('PartnerHome');
-        return;
-      }
-      navigation.replace('UserLogin');
+      navigation.replace('RoleSelection');
     }, 1400);
     return () => clearTimeout(t);
   }, [isHydrating, hasCompletedLanguageOnboarding, userToken, partnerToken, navigation]);
@@ -49,6 +42,10 @@ export function SplashScreen({ navigation }: Props) {
       </Animated.View>
       <Text style={styles.brand}>NEXGEN</Text>
       <Text style={styles.tag}>Your Local Service Expert</Text>
+      <View style={styles.buttonRow}>
+        <PrimaryButton title="Continue as User" onPress={() => navigation.replace('UserLogin')} style={styles.entryButton} />
+        <PrimaryButton title="Service Partner" onPress={() => navigation.replace('PartnerLogin')} style={styles.entryButton} />
+      </View>
       <View style={styles.icons}>
         <Text style={styles.mini}>🔧</Text>
         <Text style={styles.mini}>🩺</Text>
@@ -73,6 +70,8 @@ const styles = StyleSheet.create({
   logoLetter: { fontSize: 44, fontWeight: '900', color: colors.white },
   brand: { fontSize: 28, fontWeight: '800', color: colors.charcoal },
   tag: { marginTop: spacing.sm, fontSize: 14, color: colors.grey },
+  buttonRow: { width: '100%', paddingHorizontal: spacing.lg, marginTop: spacing.xl },
+  entryButton: { marginBottom: spacing.sm },
   icons: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.xl, opacity: 0.35 },
   mini: { fontSize: 22 },
 });

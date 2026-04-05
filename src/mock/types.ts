@@ -21,6 +21,57 @@ export interface PartnerSummary {
   photoUrl?: string;
 }
 
+export type PartnerRequestStatus = 'new' | 'pending' | 'in_progress' | 'completed' | 'rejected';
+
+export interface PartnerRequest {
+  id: string;
+  serviceName: string;
+  category: string;
+  customerName: string;
+  address: string;
+  distanceKm: number;
+  scheduledAt: string;
+  status: PartnerRequestStatus;
+  amount: number;
+  commission: number;
+  partnerShare: number;
+  startOtp: string;
+  notes: string;
+  requestedAt: string;
+  extraServices?: Array<{ id: string; name: string; price: number }>;
+}
+
+export interface PartnerProfile {
+  id: string;
+  name: string;
+  phone: string;
+  photoUrl: string;
+  rating: number;
+  jobsCompleted: number;
+  isOnline: boolean;
+  skills: string[];
+  categories: string[];
+  walletBalance: number;
+  todayEarnings: number;
+  lifetimeEarnings: number;
+  bankName: string;
+  bankAccount: string;
+  verificationStatus: 'Verified' | 'Pending' | 'Needs Review';
+  trainingProgress: number;
+  badges: string[];
+  strikeCount: number;
+}
+
+export interface PartnerEarningsSummary {
+  todayEarnings: number;
+  lifetimeEarnings: number;
+  availableBalance: number;
+  totalJobs: number;
+  completedJobs: number;
+  commissionRate: number;
+  pendingPayout: number;
+}
+
 export interface CatalogService {
   id: string;
   bucketId: BucketId;

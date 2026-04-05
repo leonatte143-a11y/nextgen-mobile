@@ -51,6 +51,9 @@ export function PartnerLoginScreen({ navigation }: Props) {
       />
       {err ? <Text style={styles.err}>{err}</Text> : null}
       <PrimaryButton title="Get OTP & Login" onPress={go} loading={loading} />
+      <Text style={styles.registerLink} onPress={() => navigation.navigate('PartnerRegister')}>
+        New partner? Register here.
+      </Text>
     </View>
   );
 }
@@ -60,4 +63,5 @@ const styles = StyleSheet.create({
   h1: { fontSize: 22, fontWeight: '800' },
   sub: { color: colors.grey, marginVertical: spacing.md },
   err: { color: colors.error, marginBottom: spacing.sm },
+  registerLink: { marginTop: spacing.md, color: colors.primary, fontWeight: '700' },
 });

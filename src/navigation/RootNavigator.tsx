@@ -12,12 +12,14 @@ import { LiveBookingScreen } from '../screens/LiveBookingScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
 import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
+import { PartnerRegisterScreen } from '../screens/PartnerRegisterScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
 import { RewardsScreen } from '../screens/RewardsScreen';
+import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
 import { ServiceDetailScreen } from '../screens/ServiceDetailScreen';
 import { ServiceListScreen } from '../screens/ServiceListScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -32,12 +34,14 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="UserLogin" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Language" component={LanguageScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       <Stack.Screen name="UserLogin" component={UserLoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="PartnerLogin" component={PartnerLoginScreen} />
+      <Stack.Screen name="PartnerRegister" component={PartnerRegisterScreen} />
       <Stack.Screen name="PartnerHome" component={PartnerHomeScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="AllServices" component={AllServicesScreen} />

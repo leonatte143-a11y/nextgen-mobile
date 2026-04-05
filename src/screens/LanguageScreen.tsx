@@ -20,7 +20,7 @@ export function LanguageScreen({ navigation }: Props) {
       return;
     }
     await completeLanguageOnboarding();
-    navigation.replace('UserLogin');
+    navigation.replace('RoleSelection');
   };
 
   return (

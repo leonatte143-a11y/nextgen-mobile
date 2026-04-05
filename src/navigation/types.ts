@@ -6,9 +6,11 @@ import type { BucketId } from '../mock/types';
 export type RootStackParamList = {
   Splash: undefined;
   Language: undefined;
+  RoleSelection: undefined;
   UserLogin: undefined;
   Register: undefined;
   PartnerLogin: undefined;
+  PartnerRegister: undefined;
   PartnerHome: undefined;
   MainTabs: undefined;
   AllServices: undefined;
