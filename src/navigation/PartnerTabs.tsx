@@ -6,17 +6,15 @@ import { colors } from '../constants/theme';
 import {
   PartnerDashboardScreen,
   PartnerEarningsScreen,
+  PartnerLocationEditScreen,
   PartnerProfileScreen,
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
+  PartnerServicePricingScreen,
 } from '../screens';
+import type { PartnerStackParamList, PartnerTabParamList } from './partnerStackTypes';
 
-type PartnerStackParamList = {
-  PartnerTabs: undefined;
-  PartnerRequestDetail: { requestId: string };
-};
-
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<PartnerTabParamList>();
 const Stack = createNativeStackNavigator<PartnerStackParamList>();
 
 function PartnerTabNavigator() {
@@ -52,6 +50,8 @@ export function PartnerTabs() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
       <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
+      <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
+      <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
     </Stack.Navigator>
   );
 }

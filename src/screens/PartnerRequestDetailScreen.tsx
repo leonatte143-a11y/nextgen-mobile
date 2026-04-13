@@ -3,11 +3,7 @@ import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'r
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
-
-type PartnerStackParamList = {
-  PartnerTabs: undefined;
-  PartnerRequestDetail: { requestId: string };
-};
+import type { PartnerStackParamList } from '../navigation/partnerStackTypes';
 
 type Props = NativeStackScreenProps<PartnerStackParamList, 'PartnerRequestDetail'>;
 

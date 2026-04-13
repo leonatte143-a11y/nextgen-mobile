@@ -1,10 +1,16 @@
 import { mockRequest } from './api';
-import { MOCK_PARTNER_EARNINGS, MOCK_PARTNER_PROFILE, MOCK_PARTNER_REQUESTS } from '../mock/partnerData';
-import type { PartnerEarningsSummary, PartnerProfile, PartnerRequest } from '../mock/types';
+import {
+  MOCK_PARTNER_EARNINGS,
+  MOCK_PARTNER_PRICING_ROWS,
+  MOCK_PARTNER_PROFILE,
+  MOCK_PARTNER_REQUESTS,
+} from '../mock/partnerData';
+import type { PartnerEarningsSummary, PartnerPricingRow, PartnerProfile, PartnerRequest } from '../mock/types';
 
 let activeProfile: PartnerProfile = { ...MOCK_PARTNER_PROFILE };
 let activeRequests: PartnerRequest[] = [...MOCK_PARTNER_REQUESTS];
 let activeEarnings: PartnerEarningsSummary = { ...MOCK_PARTNER_EARNINGS };
+let activePricing: PartnerPricingRow[] = MOCK_PARTNER_PRICING_ROWS.map((row) => ({ ...row }));
 
 function recalcEarnings() {
   activeEarnings = {
@@ -98,6 +104,25 @@ export const partnerService = {
     return mockRequest(() => {
       activeProfile = { ...activeProfile, ...payload };
       return { ...activeProfile };
+    });
+  },
+
+  async getPricingRows(): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => activePricing.map((row) => ({ ...row })));
+  },
+
+  async updatePricingBase(id: string, baseCost: number): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => {
+      activePricing = activePricing.map((row) => (row.id === id ? { ...row, baseCost } : row));
+      return activePricing.map((row) => ({ ...row }));
+    });
+  },
+
+  async addPricingRow(serviceName: string, category: string, baseCost: number): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => {
+      const id = `pp_${Date.now()}`;
+      activePricing = [...activePricing, { id, serviceName, category, baseCost }];
+      return activePricing.map((row) => ({ ...row }));
     });
   },
 };
