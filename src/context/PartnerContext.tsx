@@ -14,6 +14,8 @@ type PartnerContextValue = {
   rejectRequest: (requestId: string) => Promise<void>;
   startJob: (requestId: string) => Promise<void>;
   completeJob: (requestId: string) => Promise<void>;
+  requestHeavyWorkEstimate: (requestId: string, payload: { extraLabor: number; materialCost: number; description: string }) => Promise<void>;
+  declineHeavyWorkEstimate: (requestId: string) => Promise<void>;
   withdrawBalance: () => Promise<void>;
   updateProfile: (payload: Partial<PartnerProfile>) => Promise<void>;
 };
@@ -61,38 +63,87 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   );
 
   const acceptRequest = useCallback(async (requestId: string) => {
-    await partnerService.acceptRequest(requestId);
-    const requestsResult = await partnerService.getRequests();
-    setRequests(requestsResult);
+    try {
+      await partnerService.acceptRequest(requestId);
+      const requestsResult = await partnerService.getRequests();
+      setRequests(requestsResult);
+    } catch (error) {
+      console.warn('Accept request failed', error);
+    }
   }, []);
 
   const rejectRequest = useCallback(async (requestId: string) => {
-    await partnerService.rejectRequest(requestId);
-    const requestsResult = await partnerService.getRequests();
-    setRequests(requestsResult);
+    try {
+      await partnerService.rejectRequest(requestId);
+      const requestsResult = await partnerService.getRequests();
+      setRequests(requestsResult);
+    } catch (error) {
+      console.warn('Reject request failed', error);
+    }
   }, []);
 
   const startJob = useCallback(async (requestId: string) => {
-    await partnerService.startJob(requestId);
-    const requestsResult = await partnerService.getRequests();
-    setRequests(requestsResult);
+    try {
+      await partnerService.startJob(requestId);
+      const requestsResult = await partnerService.getRequests();
+      setRequests(requestsResult);
+    } catch (error) {
+      console.warn('Start job failed', error);
+    }
   }, []);
 
   const completeJob = useCallback(async (requestId: string) => {
-    await partnerService.completeJob(requestId);
-    const [requestsResult, profileResult, earningsResult] = await Promise.all([
-      partnerService.getRequests(),
-      partnerService.getProfile(),
-      partnerService.getEarnings(),
-    ]);
-    setRequests(requestsResult);
-    setProfile(profileResult);
-    setEarnings(earningsResult);
+    try {
+      await partnerService.completeJob(requestId);
+      const [requestsResult, profileResult, earningsResult] = await Promise.all([
+        partnerService.getRequests(),
+        partnerService.getProfile(),
+        partnerService.getEarnings(),
+      ]);
+      setRequests(requestsResult);
+      setProfile(profileResult);
+      setEarnings(earningsResult);
+    } catch (error) {
+      console.warn('Complete job failed', error);
+    }
+  }, []);
+
+  const requestHeavyWorkEstimate = useCallback(
+    async (requestId: string, payload: { extraLabor: number; materialCost: number; description: string }) => {
+      try {
+        await partnerService.requestHeavyWorkEstimate(requestId, payload);
+        const requestsResult = await partnerService.getRequests();
+        setRequests(requestsResult);
+      } catch (error) {
+        console.warn('Heavy work estimate request failed', error);
+      }
+    },
+    [],
+  );
+
+  const declineHeavyWorkEstimate = useCallback(async (requestId: string) => {
+    try {
+      await partnerService.declineHeavyWorkEstimate(requestId);
+      const [requestsResult, profileResult, earningsResult] = await Promise.all([
+        partnerService.getRequests(),
+        partnerService.getProfile(),
+        partnerService.getEarnings(),
+      ]);
+      setRequests(requestsResult);
+      setProfile(profileResult);
+      setEarnings(earningsResult);
+    } catch (error) {
+      console.warn('Decline heavy work estimate failed', error);
+    }
   }, []);
 
   const withdrawBalance = useCallback(async () => {
-    const earningsResult = await partnerService.withdrawBalance();
-    setEarnings(earningsResult);
+    try {
+      const earningsResult = await partnerService.withdrawBalance();
+      setEarnings(earningsResult);
+    } catch (error) {
+      console.warn('Withdraw balance failed', error);
+    }
   }, []);
 
   const updateProfile = useCallback(async (payload: Partial<PartnerProfile>) => {
@@ -112,6 +163,8 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       rejectRequest,
       startJob,
       completeJob,
+      requestHeavyWorkEstimate,
+      declineHeavyWorkEstimate,
       withdrawBalance,
       updateProfile,
     }),

@@ -21,7 +21,18 @@ export interface PartnerSummary {
   photoUrl?: string;
 }
 
-export type PartnerRequestStatus = 'new' | 'pending' | 'in_progress' | 'completed' | 'rejected';
+export type PartnerRequestStatus = 'new' | 'pending' | 'in_progress' | 'completed' | 'rejected' | 'cancelled';
+
+export type HeavyWorkEstimateStatus = 'pending_user_approval' | 'approved' | 'declined';
+
+export interface HeavyWorkEstimate {
+  extraLabor: number;
+  materialCost: number;
+  totalExtra: number;
+  description: string;
+  requestedAt: string;
+  status: HeavyWorkEstimateStatus;
+}
 
 export interface PartnerRequest {
   id: string;
@@ -39,6 +50,9 @@ export interface PartnerRequest {
   notes: string;
   requestedAt: string;
   extraServices?: Array<{ id: string; name: string; price: number }>;
+  heavyWorkEstimate?: HeavyWorkEstimate;
+  visitingFee?: number;
+  isPartnerArrived?: boolean;
 }
 
 export interface PartnerProfile {
@@ -133,6 +147,9 @@ export interface Booking {
   address: string;
   /** Minutes until arrival when en_route */
   etaMins?: number;
+  visitingFee?: number;
+  isPartnerArrived?: boolean;
+  heavyWorkEstimateRequested?: boolean;
 }
 
 export interface AppNotification {

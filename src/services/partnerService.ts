@@ -92,6 +92,52 @@ export const partnerService = {
     });
   },
 
+  async requestHeavyWorkEstimate(requestId: string, details: { extraLabor: number; materialCost: number; description: string }): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      const request = activeRequests.find((r) => r.id === requestId);
+      if (!request) throw new Error('Request not found');
+      const totalExtra = details.extraLabor + details.materialCost;
+      const updated: PartnerRequest = {
+        ...request,
+        heavyWorkEstimate: {
+          extraLabor: details.extraLabor,
+          materialCost: details.materialCost,
+          totalExtra,
+          description: details.description,
+          requestedAt: new Date().toISOString(),
+          status: 'pending_user_approval',
+        },
+        isPartnerArrived: true,
+      };
+      activeRequests = activeRequests.map((r) => (r.id === requestId ? updated : r));
+      return { ...updated };
+    });
+  },
+
+  async declineHeavyWorkEstimate(requestId: string): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      const request = activeRequests.find((r) => r.id === requestId);
+      if (!request) throw new Error('Request not found');
+      const updated: PartnerRequest = {
+        ...request,
+        status: 'cancelled',
+        visitingFee: 50,
+        heavyWorkEstimate: request.heavyWorkEstimate
+          ? { ...request.heavyWorkEstimate, status: 'declined' }
+          : undefined,
+      };
+      activeRequests = activeRequests.map((r) => (r.id === requestId ? updated : r));
+      activeProfile = {
+        ...activeProfile,
+        walletBalance: activeProfile.walletBalance + 45,
+        todayEarnings: activeProfile.todayEarnings + 45,
+        lifetimeEarnings: activeProfile.lifetimeEarnings + 45,
+      };
+      recalcEarnings();
+      return { ...updated };
+    });
+  },
+
   async withdrawBalance(): Promise<PartnerEarningsSummary> {
     return mockRequest(() => {
       activeProfile = { ...activeProfile, walletBalance: 0 };
