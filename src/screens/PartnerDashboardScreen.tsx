@@ -15,18 +15,21 @@ export function PartnerDashboardScreen(_props: Props) {
   const { profile, earnings, requests, toggleOnline, isLoading } = usePartner();
 
   if (isLoading || !profile || !earnings) {
-    return null;
+    return (
+      <View style={[styles.center, { paddingTop: insets.top }]}>
+        <Text style={styles.loading}>Loading dashboard…</Text>
+      </View>
+    );
   }
 
   const newCount = requests.filter((item) => item.status === 'new').length;
   const pendingCount = requests.filter((item) => item.status === 'pending').length;
-  const nexgenPoints = 240;
 
   return (
     <View style={styles.wrap}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={[styles.content, { paddingBottom: 120 + insets.bottom }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm, paddingBottom: 120 + insets.bottom }]}
       >
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>
@@ -43,7 +46,7 @@ export function PartnerDashboardScreen(_props: Props) {
           pendingCount={pendingCount}
           newCount={newCount}
           lifetimeCompleted={profile.jobsCompleted}
-          nexgenPoints={nexgenPoints}
+          nexgenPoints={earnings.rewardPoints}
         />
         <PartnerSocialProofSection />
         <Text style={styles.section}>Recent Activity</Text>
@@ -94,12 +97,17 @@ export function PartnerDashboardScreen(_props: Props) {
           <Text style={styles.infoText}>Verified: {profile.verificationStatus}</Text>
         </View>
       </ScrollView>
-      <PartnerServiceLocationBar initialCity="Rajahmundry" initialRadius={10} />
+      <PartnerServiceLocationBar
+        initialCity={profile.primaryCity}
+        initialRadius={profile.serviceOuterRadiusKm}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loading: { color: colors.grey },
   wrap: { flex: 1, backgroundColor: colors.greyLight },
   root: { flex: 1 },
   content: { padding: spacing.lg, paddingTop: 16 + 8, paddingBottom: spacing.xl },

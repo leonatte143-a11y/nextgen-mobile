@@ -4,17 +4,18 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
-import { PartnerServicePricingScreen } from '../screens/PartnerServicePricingScreen';
 import {
   PartnerDashboardScreen,
   PartnerEarningsScreen,
+  PartnerLocationEditScreen,
   PartnerProfileScreen,
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
+  PartnerServicePricingScreen,
 } from '../screens';
-import type { PartnerStackParamList } from './PartnerStackTypes';
+import type { PartnerStackParamList, PartnerTabParamList } from './PartnerStackTypes';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<PartnerTabParamList>();
 const Stack = createNativeStackNavigator<PartnerStackParamList>();
 
 function PartnerTabNavigator() {
@@ -51,6 +52,7 @@ export function PartnerTabs() {
       <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
       <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
       <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
+      <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
       <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
     </Stack.Navigator>
   );

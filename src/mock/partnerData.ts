@@ -1,4 +1,4 @@
-import type { PartnerEarningsSummary, PartnerProfile, PartnerRequest } from './types';
+import type { PartnerCustomerReview, PartnerEarningsSummary, PartnerPricingRow, PartnerProfile, PartnerRequest } from './types';
 
 export const MOCK_PARTNER_PROFILE: PartnerProfile = {
   id: 'partner_phani',
@@ -19,7 +19,41 @@ export const MOCK_PARTNER_PROFILE: PartnerProfile = {
   trainingProgress: 80,
   badges: ['Top Rated', '500+ Jobs', 'Safety Certified'],
   strikeCount: 0,
+  primaryCity: 'Rajahmundry',
+  serviceInnerRadiusKm: 5,
+  serviceOuterRadiusKm: 10,
+  allowOutOfStation: false,
 };
+
+export const MOCK_PARTNER_PRICING_ROWS: PartnerPricingRow[] = [
+  { id: 'pp1', serviceName: 'Fan Repair', category: 'Electrical', baseCost: 250 },
+  { id: 'pp2', serviceName: 'Light Fitting', category: 'Electrical', baseCost: 200 },
+  { id: 'pp3', serviceName: 'Switch Board Repair', category: 'Electrical', baseCost: 300 },
+];
+
+export const MOCK_PARTNER_CUSTOMER_REVIEWS: PartnerCustomerReview[] = [
+  {
+    id: 'rv1',
+    customerName: 'Sita Reddy',
+    rating: 5,
+    comment: 'Very punctual and clean work on our fan repair.',
+    timeLabel: '2d ago',
+  },
+  {
+    id: 'rv2',
+    customerName: 'Ravi Kumar',
+    rating: 5,
+    comment: 'Professional — explained the switchboard issue clearly.',
+    timeLabel: '5d ago',
+  },
+  {
+    id: 'rv3',
+    customerName: 'Lakshmi',
+    rating: 4,
+    comment: 'Good service, arrived within promised time.',
+    timeLabel: '1w ago',
+  },
+];
 
 export const MOCK_PARTNER_REQUESTS: PartnerRequest[] = [
   {
@@ -97,4 +131,5 @@ export const MOCK_PARTNER_EARNINGS: PartnerEarningsSummary = {
   completedJobs: 240,
   commissionRate: 10,
   pendingPayout: 450,
+  rewardPoints: 3200,
 };

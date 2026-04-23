@@ -1,10 +1,16 @@
 import { mockRequest } from './api';
-import { MOCK_PARTNER_EARNINGS, MOCK_PARTNER_PROFILE, MOCK_PARTNER_REQUESTS } from '../mock/partnerData';
-import type { PartnerEarningsSummary, PartnerProfile, PartnerRequest } from '../mock/types';
+import {
+  MOCK_PARTNER_EARNINGS,
+  MOCK_PARTNER_PRICING_ROWS,
+  MOCK_PARTNER_PROFILE,
+  MOCK_PARTNER_REQUESTS,
+} from '../mock/partnerData';
+import type { PartnerEarningsSummary, PartnerPricingRow, PartnerProfile, PartnerRequest } from '../mock/types';
 
 let activeProfile: PartnerProfile = { ...MOCK_PARTNER_PROFILE };
 let activeRequests: PartnerRequest[] = [...MOCK_PARTNER_REQUESTS];
 let activeEarnings: PartnerEarningsSummary = { ...MOCK_PARTNER_EARNINGS };
+let activePricing: PartnerPricingRow[] = MOCK_PARTNER_PRICING_ROWS.map((row) => ({ ...row }));
 
 function recalcEarnings() {
   activeEarnings = {
@@ -105,10 +111,57 @@ export const partnerService = {
       }
       activeProfile = { ...activeProfile, walletBalance: activeProfile.walletBalance + 50 };
       recalcEarnings();
-      activeRequests = activeRequests.map((r) =>
-        r.id === requestId ? { ...r, status: 'cancelled' } : r,
-      );
+      activeRequests = activeRequests.map((r) => (r.id === requestId ? { ...r, status: 'cancelled' } : r));
       return { ...(activeRequests.find((r) => r.id === requestId) as PartnerRequest) };
+    });
+  },
+
+  async requestHeavyWorkEstimate(
+    requestId: string,
+    details: { extraLabor: number; materialCost: number; description: string },
+  ): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      const request = activeRequests.find((r) => r.id === requestId);
+      if (!request) throw new Error('Request not found');
+      const totalExtra = details.extraLabor + details.materialCost;
+      const updated: PartnerRequest = {
+        ...request,
+        heavyWorkEstimate: {
+          extraLabor: details.extraLabor,
+          materialCost: details.materialCost,
+          totalExtra,
+          description: details.description,
+          requestedAt: new Date().toISOString(),
+          status: 'pending_user_approval',
+        },
+        isPartnerArrived: true,
+      };
+      activeRequests = activeRequests.map((r) => (r.id === requestId ? updated : r));
+      return { ...updated };
+    });
+  },
+
+  async declineHeavyWorkEstimate(requestId: string): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      const request = activeRequests.find((r) => r.id === requestId);
+      if (!request) throw new Error('Request not found');
+      const updated: PartnerRequest = {
+        ...request,
+        status: 'cancelled',
+        visitingFee: 50,
+        heavyWorkEstimate: request.heavyWorkEstimate
+          ? { ...request.heavyWorkEstimate, status: 'declined' }
+          : undefined,
+      };
+      activeRequests = activeRequests.map((r) => (r.id === requestId ? updated : r));
+      activeProfile = {
+        ...activeProfile,
+        walletBalance: activeProfile.walletBalance + 45,
+        todayEarnings: activeProfile.todayEarnings + 45,
+        lifetimeEarnings: activeProfile.lifetimeEarnings + 45,
+      };
+      recalcEarnings();
+      return { ...updated };
     });
   },
 
@@ -124,6 +177,25 @@ export const partnerService = {
     return mockRequest(() => {
       activeProfile = { ...activeProfile, ...payload };
       return { ...activeProfile };
+    });
+  },
+
+  async getPricingRows(): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => activePricing.map((row) => ({ ...row })));
+  },
+
+  async updatePricingBase(id: string, baseCost: number): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => {
+      activePricing = activePricing.map((row) => (row.id === id ? { ...row, baseCost } : row));
+      return activePricing.map((row) => ({ ...row }));
+    });
+  },
+
+  async addPricingRow(serviceName: string, category: string, baseCost: number): Promise<PartnerPricingRow[]> {
+    return mockRequest(() => {
+      const id = `pp_${Date.now()}`;
+      activePricing = [...activePricing, { id, serviceName, category, baseCost }];
+      return activePricing.map((row) => ({ ...row }));
     });
   },
 };

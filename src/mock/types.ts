@@ -29,6 +29,17 @@ export type PartnerRequestStatus =
   | 'rejected'
   | 'cancelled';
 
+export type HeavyWorkEstimateStatus = 'pending_user_approval' | 'approved' | 'declined';
+
+export interface HeavyWorkEstimate {
+  extraLabor: number;
+  materialCost: number;
+  totalExtra: number;
+  description: string;
+  requestedAt: string;
+  status: HeavyWorkEstimateStatus;
+}
+
 export interface PartnerRequest {
   id: string;
   serviceName: string;
@@ -47,6 +58,9 @@ export interface PartnerRequest {
   extraServices?: Array<{ id: string; name: string; price: number }>;
   /** Mock: updated amount waiting for user approval */
   pendingEstimateAmount?: number;
+  heavyWorkEstimate?: HeavyWorkEstimate;
+  visitingFee?: number;
+  isPartnerArrived?: boolean;
 }
 
 export interface PartnerProfile {
@@ -68,6 +82,27 @@ export interface PartnerProfile {
   trainingProgress: number;
   badges: string[];
   strikeCount: number;
+  /** Service area — partner dashboard location bar */
+  primaryCity: string;
+  serviceInnerRadiusKm: number;
+  serviceOuterRadiusKm: number;
+  allowOutOfStation: boolean;
+}
+
+/** Partner-editable service line for pricing / commission screen */
+export interface PartnerPricingRow {
+  id: string;
+  serviceName: string;
+  category: string;
+  baseCost: number;
+}
+
+export interface PartnerCustomerReview {
+  id: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  timeLabel: string;
 }
 
 export interface PartnerEarningsSummary {
@@ -78,6 +113,8 @@ export interface PartnerEarningsSummary {
   completedJobs: number;
   commissionRate: number;
   pendingPayout: number;
+  /** Loyalty points shown on dashboard */
+  rewardPoints: number;
 }
 
 export interface CatalogService {
@@ -118,6 +155,9 @@ export interface Booking {
   address: string;
   /** Minutes until arrival when en_route */
   etaMins?: number;
+  visitingFee?: number;
+  isPartnerArrived?: boolean;
+  heavyWorkEstimateRequested?: boolean;
 }
 
 export interface AppNotification {

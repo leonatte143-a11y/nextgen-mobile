@@ -10,7 +10,7 @@ import type { PartnerRequest } from '../mock/types';
 type Props = { navigation: any };
 
 export function PartnerRequestsScreen({ navigation }: Props) {
-  const { requests, acceptRequest, rejectRequest, startJob, completeJob, isLoading } = usePartner();
+  const { requests, acceptRequest, rejectRequest, startJob, completeJob, refreshPartner, isLoading } = usePartner();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const visibleRequests = useMemo(
@@ -84,7 +84,17 @@ export function PartnerRequestsScreen({ navigation }: Props) {
   }
 
   if (visibleRequests.length === 0) {
-    return <EmptyState icon="✅" title="No active partner requests" subtitle="You are all caught up. Check back soon for new lead alerts." actionLabel="Refresh" onAction={() => {}} />;
+    return (
+      <EmptyState
+        icon="✅"
+        title="No active partner requests"
+        subtitle="You are all caught up. Check back soon for new lead alerts."
+        actionLabel="Refresh"
+        onAction={() => {
+          void refreshPartner();
+        }}
+      />
+    );
   }
 
   return (
