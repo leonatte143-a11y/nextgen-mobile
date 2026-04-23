@@ -9,6 +9,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
+import { useFavorites } from '../context/FavoritesContext';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import type { RootStackParamList } from '../navigation/types';
@@ -21,6 +22,7 @@ export function ServiceDetailScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { addService } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [svc, setSvc] = useState<CatalogService | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +39,9 @@ export function ServiceDetailScreen() {
     return <ScreenLoader />;
   }
 
+  const isRemote = svc.bucketId === 'tech_supply';
+  const favorited = isFavorite(svc.partner.id);
+
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
       <View style={styles.top}>
@@ -51,17 +56,52 @@ export function ServiceDetailScreen() {
           {svc.categoryLabel} · ★ {svc.rating.toFixed(1)} ({svc.reviewsCount})
         </Text>
         <Text style={styles.desc}>{svc.description}</Text>
-        <View style={styles.row}>
-          <Ionicons name="location-outline" size={18} color={colors.primary} />
-          <Text style={styles.near}>Nearby · {svc.distanceKm.toFixed(1)} km</Text>
-        </View>
+        {isRemote ? (
+          <View style={styles.remoteBox}>
+            <Text style={styles.remoteLab}>Remote service</Text>
+            <Text style={styles.deadlineTxt}>
+              Project deadline: <Text style={styles.deadlineStrong}>30 Apr 2026</Text> (static)
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.row}>
+            <Ionicons name="location-outline" size={18} color={colors.primary} />
+            <Text style={styles.near}>Nearby · {svc.distanceKm.toFixed(1)} km</Text>
+          </View>
+        )}
         <Text style={styles.price}>₹{svc.basePrice}</Text>
         <View style={styles.partner}>
-          <Text style={styles.pTitle}>Service Provider</Text>
-          <Text style={styles.pName}>{svc.partner.name}</Text>
-          <Text style={styles.pSub}>
-            ★ {svc.partner.rating.toFixed(1)} · {svc.partner.jobsCompleted} jobs
-          </Text>
+          <Pressable
+            style={styles.heartFab}
+            hitSlop={12}
+            onPress={() =>
+              void toggleFavorite({
+                partnerId: svc.partner.id,
+                name: svc.partner.name,
+                rating: svc.partner.rating,
+                jobsCompleted: svc.partner.jobsCompleted,
+                serviceId: svc.id,
+              })
+            }
+          >
+            <Ionicons
+              name={favorited ? 'heart' : 'heart-outline'}
+              size={22}
+              color={favorited ? colors.error : colors.primary}
+            />
+          </Pressable>
+          <View style={styles.pRow}>
+            <View style={styles.pPhoto}>
+              <Text style={styles.pPhotoTxt}>{svc.partner.name[0]}</Text>
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.pTitle}>Service Provider</Text>
+              <Text style={styles.pName}>{svc.partner.name}</Text>
+              <Text style={styles.pSub}>
+                ★ {svc.partner.rating.toFixed(1)} · {svc.partner.jobsCompleted} jobs
+              </Text>
+            </View>
+          </View>
         </View>
         <View style={styles.actions}>
           <Pressable
@@ -118,10 +158,33 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     backgroundColor: colors.greyLight,
     borderRadius: radius.md,
+    position: 'relative',
   },
+  heartFab: { position: 'absolute', top: spacing.sm, right: spacing.sm, zIndex: 2, padding: spacing.xs },
+  pRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingRight: 36 },
+  pPhoto: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.orangeTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pPhotoTxt: { fontSize: 20, fontWeight: '800', color: colors.primary },
   pTitle: { fontSize: 12, color: colors.grey },
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },
   pSub: { color: colors.grey, marginTop: 4 },
+  remoteBox: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.orangeTint,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  remoteLab: { fontWeight: '800', color: colors.charcoal },
+  deadlineTxt: { marginTop: spacing.xs, color: colors.charcoal, fontSize: 13 },
+  deadlineStrong: { fontWeight: '800', color: colors.primary },
   actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   secondary: {
     flex: 1,

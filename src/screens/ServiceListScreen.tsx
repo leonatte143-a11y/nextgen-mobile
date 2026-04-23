@@ -9,6 +9,7 @@ import { EmptyState } from '../components/EmptyState';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, spacing } from '../constants/theme';
 import type { CatalogService } from '../mock/types';
+import { sortByFavoritePartner, useFavorites } from '../context/FavoritesContext';
 import { catalogService } from '../services/catalogService';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -19,6 +20,7 @@ export function ServiceListScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { bucketId, title } = route.params ?? {};
+  const { isFavorite, favorites } = useFavorites();
   const [items, setItems] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,10 +28,10 @@ export function ServiceListScreen() {
     (async () => {
       setLoading(true);
       const data = await catalogService.getServicesByBucket(bucketId ?? null);
-      setItems(data);
+      setItems(sortByFavoritePartner(data, isFavorite));
       setLoading(false);
     })();
-  }, [bucketId]);
+  }, [bucketId, isFavorite, favorites]);
 
   return (
     <View style={styles.root}>

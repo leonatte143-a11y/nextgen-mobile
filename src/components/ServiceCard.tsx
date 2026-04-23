@@ -17,7 +17,11 @@ export function ServiceCard({ service, onPress }: Props) {
         <Text style={styles.sub}>{service.categoryLabel} · {service.subtext}</Text>
         <View style={styles.row}>
           <Text style={styles.rating}>★ {service.rating.toFixed(1)} ({service.reviewsCount})</Text>
-          <Text style={styles.dist}>📍 {service.distanceKm.toFixed(1)} km</Text>
+          {service.bucketId === 'tech_supply' ? (
+            <Text style={styles.dist}>Remote</Text>
+          ) : (
+            <Text style={styles.dist}>📍 {service.distanceKm.toFixed(1)} km</Text>
+          )}
         </View>
         <Text style={styles.price}>from ₹{service.basePrice}</Text>
       </View>

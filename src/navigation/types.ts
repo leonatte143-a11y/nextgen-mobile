@@ -28,6 +28,7 @@ export type RootStackParamList = {
   Referrals: undefined;
   Terms: undefined;
   Privacy: undefined;
+  MyFavorites: undefined;
 };
 
 export type MainTabParamList = {

@@ -35,7 +35,7 @@ export function ConfirmBookingScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { user } = useAuth();
-  const { lines, subtotal, visitingFee, estimatedTotal, clear } = useCart();
+  const { lines, subtotal, visitingFee, clear } = useCart();
   const fromCart = route.params.fromCart && lines.length > 0;
 
   const [svc, setSvc] = useState<CatalogService | null>(null);
@@ -44,6 +44,11 @@ export function ConfirmBookingScreen() {
   const [promo, setPromo] = useState('');
   const [pay, setPay] = useState<(typeof PAY)[number]>('Google Pay');
   const [submitting, setSubmitting] = useState(false);
+  /** Visiting fee in ₹30–₹50 for single-service checkout (mock). */
+  const [singleVisiting] = useState(() => 30 + Math.floor(Math.random() * 21));
+  const [tipCents, setTipCents] = useState<0 | 10 | 20 | 50 | 'custom'>(0);
+  const [customTip, setCustomTip] = useState('');
+  const [projectDeadline] = useState('30 Apr 2026');
 
   useEffect(() => {
     (async () => {
@@ -56,13 +61,17 @@ export function ConfirmBookingScreen() {
 
   const bill = useMemo(() => {
     const base = fromCart ? subtotal : svc?.basePrice ?? 0;
-    const vf = visitingFee;
-    const pre = base + vf;
-    const admin = Math.round(pre * 0.1);
-    let total = pre + admin;
+    const vf = fromCart ? visitingFee : singleVisiting;
+    const tipRupees =
+      tipCents === 'custom'
+        ? Math.max(0, Math.floor(parseFloat(customTip.replace(/[^0-9.]/g, '')) || 0))
+        : tipCents;
+    const beforeGst = base + vf;
+    const gst = Math.round(beforeGst * 0.18);
+    let total = beforeGst + gst + tipRupees;
     if (promo.trim().toUpperCase() === 'NEXGEN2026') total = Math.max(0, total - 50);
-    return { base, vf, admin, total };
-  }, [fromCart, subtotal, svc, visitingFee, promo]);
+    return { base, vf, gst, tip: tipRupees, total };
+  }, [fromCart, subtotal, svc, visitingFee, singleVisiting, tipCents, customTip, promo]);
 
   const titleName = fromCart
     ? `${lines.length} services`
@@ -95,6 +104,10 @@ export function ConfirmBookingScreen() {
     return <ScreenLoader />;
   }
 
+  const isRemote = fromCart
+    ? lines[0]?.service.bucketId === 'tech_supply'
+    : svc!.bucketId === 'tech_supply';
+
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
       <View style={styles.top}>
@@ -115,22 +128,38 @@ export function ConfirmBookingScreen() {
               Partner: {fromCart ? 'Assigned per service' : svc!.partner.name} (
               {fromCart ? '—' : `★ ${svc!.partner.rating}`})
             </Text>
-            <View style={styles.locRow}>
-              <Ionicons name="location-outline" size={16} color={colors.primary} />
-              <Text style={styles.loc}>Nearby · {user?.address ?? 'Rajahmundry'}</Text>
-            </View>
+            {isRemote ? (
+              <View style={styles.locRow}>
+                <Ionicons name="globe-outline" size={16} color={colors.primary} />
+                <Text style={styles.loc}>Remote · Tech & Supply</Text>
+              </View>
+            ) : (
+              <View style={styles.locRow}>
+                <Ionicons name="location-outline" size={16} color={colors.primary} />
+                <Text style={styles.loc}>Nearby · {user?.address ?? 'Rajahmundry'}</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.sumPrice}>₹{fromCart ? subtotal : svc!.basePrice}</Text>
         </View>
 
-        <Text style={styles.label}>Work location</Text>
-        <Text style={styles.box}>{user?.address ?? 'Detecting…'}</Text>
-        <Pressable>
-          <Text style={styles.change}>Change</Text>
-        </Pressable>
+        {isRemote ? (
+          <>
+            <Text style={styles.label}>Project deadline</Text>
+            <Text style={styles.box}>{projectDeadline} (static)</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>Work location</Text>
+            <Text style={styles.box}>{user?.address ?? 'Detecting…'}</Text>
+            <Pressable>
+              <Text style={styles.change}>Change</Text>
+            </Pressable>
 
-        <Text style={styles.label}>Arrival</Text>
-        <Text style={styles.box}>Within 45 mins (mock)</Text>
+            <Text style={styles.label}>Arrival</Text>
+            <Text style={styles.box}>Within 45 mins (mock)</Text>
+          </>
+        )}
 
         <Text style={styles.label}>Describe problem (optional)</Text>
         <TextInput
@@ -146,12 +175,38 @@ export function ConfirmBookingScreen() {
 
         <Text style={styles.h2}>Bill</Text>
         <Text style={styles.row}>Service total: ₹{bill.base}</Text>
-        <Text style={styles.row}>Visiting fee: ₹{bill.vf}</Text>
-        <Text style={styles.row}>Admin (10%): ₹{bill.admin}</Text>
+        <Text style={styles.row}>Visiting fee (₹30–₹50): ₹{bill.vf}</Text>
+        <Text style={styles.row}>GST (18%): ₹{bill.gst}</Text>
+        <Text style={styles.h2sub}>Tip the expert</Text>
+        <View style={styles.tipRow}>
+          {([10, 20, 50] as const).map((n) => (
+            <Pressable
+              key={n}
+              style={[styles.tipChip, tipCents === n && styles.tipChipOn]}
+              onPress={() => setTipCents(tipCents === n ? 0 : n)}
+            >
+              <Text style={[styles.tipTxt, tipCents === n && styles.tipTxtOn]}>₹{n}</Text>
+            </Pressable>
+          ))}
+          <Pressable
+            style={[styles.tipChip, tipCents === 'custom' && styles.tipChipOn]}
+            onPress={() => setTipCents(tipCents === 'custom' ? 0 : 'custom')}
+          >
+            <Text style={[styles.tipTxt, tipCents === 'custom' && styles.tipTxtOn]}>Custom</Text>
+          </Pressable>
+        </View>
+        {tipCents === 'custom' ? (
+          <NexgenTextInput
+            placeholder="Tip amount (₹)"
+            value={customTip}
+            onChangeText={setCustomTip}
+            keyboardType="numeric"
+          />
+        ) : null}
         {promo.trim().toUpperCase() === 'NEXGEN2026' ? (
           <Text style={styles.promo}>Applied: NEXGEN2026 (−₹50)</Text>
         ) : null}
-        <Text style={styles.payable}>Amount payable: ₹{bill.total}</Text>
+        <Text style={styles.payable}>Total payable: ₹{bill.total}</Text>
 
         <Text style={styles.h2}>Payment</Text>
         <View style={styles.payRow}>
@@ -228,7 +283,20 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   h2: { fontWeight: '800', fontSize: 16, marginTop: spacing.lg },
+  h2sub: { fontWeight: '700', fontSize: 14, marginTop: spacing.md, color: colors.charcoal },
   row: { color: colors.grey, marginTop: 6 },
+  tipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  tipChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  tipChipOn: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.orangeTint },
+  tipTxt: { fontWeight: '700', color: colors.charcoal },
+  tipTxtOn: { color: colors.primary },
   promo: { color: colors.success, marginTop: 6, fontWeight: '600' },
   payable: { fontSize: 18, fontWeight: '800', marginTop: spacing.md, color: colors.charcoal },
   payRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },

@@ -13,10 +13,19 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuTarget = 'EditProfile' | 'Settings' | 'Rewards' | 'Referrals' | 'Terms' | 'Privacy' | 'Language';
+type MenuTarget =
+  | 'EditProfile'
+  | 'MyFavorites'
+  | 'Settings'
+  | 'Rewards'
+  | 'Referrals'
+  | 'Terms'
+  | 'Privacy'
+  | 'Language';
 
 const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
   { label: 'Edit profile', icon: 'person-outline', target: 'EditProfile' },
+  { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
   { label: 'Settings', icon: 'settings-outline', target: 'Settings' },
   { label: 'Rewards', icon: 'gift-outline', target: 'Rewards' },
   { label: 'Referrals', icon: 'people-outline', target: 'Referrals' },

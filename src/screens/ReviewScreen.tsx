@@ -20,9 +20,21 @@ export function ReviewScreen() {
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recSim, setRecSim] = useState(false);
+  const [videoMockUri, setVideoMockUri] = useState<string | null>(null);
 
   const toggle = (t: string) => {
     setPicked((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
+  };
+
+  const recordVideoMock = () => {
+    if (recSim) return;
+    setRecSim(true);
+    // Simulates 15s capped capture; real app would use expo-camera / file output.
+    setTimeout(() => {
+      setRecSim(false);
+      setVideoMockUri('file:///mock/nexgen_feedback_15s.mp4');
+    }, 1600);
   };
 
   const submit = async () => {
@@ -47,6 +59,28 @@ export function ReviewScreen() {
         ))}
       </View>
       {stars === 5 ? <Text style={styles.exc}>Excellent!</Text> : null}
+      <Text style={styles.vidLab}>Video feedback (max 15s, mock)</Text>
+      <PrimaryButton
+        title="Record video feedback"
+        variant="outline"
+        onPress={recordVideoMock}
+        loading={recSim}
+        disabled={recSim}
+      />
+      {recSim ? (
+        <Text style={styles.recHint}>Camera (mock) · auto-stop at 15s…</Text>
+      ) : null}
+      {videoMockUri ? (
+        <View style={styles.vidPreview} accessibilityLabel="Video preview mock">
+          <View style={styles.vidThumb}>
+            <Text style={styles.vidPlay}>▶</Text>
+            <Text style={styles.vidMeta}>15s · saved locally (mock)</Text>
+          </View>
+          <Text style={styles.vidUri} numberOfLines={1}>
+            {videoMockUri}
+          </Text>
+        </View>
+      ) : null}
       <View style={styles.tags}>
         {TAGS.map((t) => (
           <Pressable
@@ -82,7 +116,21 @@ const styles = StyleSheet.create({
   starBtn: { padding: spacing.sm },
   star: { fontSize: 44, color: colors.primary },
   exc: { textAlign: 'center', color: colors.primary, fontWeight: '700', marginBottom: spacing.lg },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
+  vidLab: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
+  recHint: { color: colors.grey, fontSize: 12, marginTop: spacing.sm, marginBottom: spacing.sm, textAlign: 'center' },
+  vidPreview: { marginBottom: spacing.lg },
+  vidThumb: {
+    minHeight: 120,
+    borderRadius: radius.md,
+    backgroundColor: colors.charcoal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.md,
+  },
+  vidPlay: { fontSize: 36, color: colors.white, marginBottom: spacing.xs },
+  vidMeta: { color: colors.white, fontSize: 12, fontWeight: '600' },
+  vidUri: { fontSize: 11, color: colors.grey, marginTop: spacing.xs },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg, marginTop: spacing.sm },
   tag: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

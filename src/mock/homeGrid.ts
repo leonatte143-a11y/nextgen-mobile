@@ -20,4 +20,5 @@ export const HOME_GRID_TILES: HomeGridTile[] = [
   { id: 'hg7', label: 'RMP Doctors', sub: 'Quick Consult', emoji: '🩺', bucketId: 'life_health', serviceId: 'svc_rmp' },
   { id: 'hg8', label: 'Medicine', sub: '30 Mins', emoji: '💊', bucketId: 'life_health', serviceId: 'svc_medicine' },
   { id: 'hg9', label: 'Photographer', sub: 'Events', emoji: '📷', bucketId: 'events', serviceId: 'svc_photographer' },
+  { id: 'hg10', label: 'Tech & Supply', sub: 'Remote gigs', emoji: '💻', bucketId: 'tech_supply', serviceId: 'svc_tech_uiux' },
 ];

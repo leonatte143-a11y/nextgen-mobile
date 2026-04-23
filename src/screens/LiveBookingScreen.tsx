@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import type { Booking } from '../mock/types';
@@ -52,6 +53,7 @@ export function LiveBookingScreen() {
         <Text style={styles.title}>Live tracking</Text>
         <View style={{ width: 24 }} />
       </View>
+      <LiveTrackingAdBanner />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.map}>
           <Text style={styles.mapLabel}>Map view (mock)</Text>

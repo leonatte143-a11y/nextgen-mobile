@@ -9,6 +9,7 @@ import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LanguageScreen } from '../screens/LanguageScreen';
 import { LiveBookingScreen } from '../screens/LiveBookingScreen';
+import { MyFavoritesScreen } from '../screens/MyFavoritesScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
 import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
@@ -59,6 +60,7 @@ export function RootNavigator() {
       <Stack.Screen name="Referrals" component={ReferralsScreen} />
       <Stack.Screen name="Terms" component={TermsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
+      <Stack.Screen name="MyFavorites" component={MyFavoritesScreen} />
     </Stack.Navigator>
   );
 }

@@ -16,7 +16,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function CartScreen(_props: MainTabScreenProps<'Cart'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { lines, setQty, removeLine, subtotal, visitingFee, estimatedTotal } = useCart();
+  const { lines, setQty, removeLine, subtotal, visitingFee } = useCart();
 
   if (lines.length === 0) {
     return (
@@ -73,9 +73,15 @@ export function CartScreen(_props: MainTabScreenProps<'Cart'>) {
           </Text>
         </View>
         <View style={styles.bill}>
-          <Text style={styles.billRow}>Services total: ₹{subtotal}</Text>
-          <Text style={styles.billRow}>Visiting fee: ₹{visitingFee}</Text>
-          <Text style={styles.billTotal}>Estimated: ₹{estimatedTotal}</Text>
+          <Text style={styles.billRow}>Service total: ₹{subtotal}</Text>
+          <Text style={styles.billRow}>Visiting fee (₹30–₹50): ₹{visitingFee}</Text>
+          <Text style={styles.billRow}>
+            GST (18%): ₹{Math.round((subtotal + visitingFee) * 0.18)}
+          </Text>
+          <Text style={styles.billNote}>Tip is added on the next step.</Text>
+          <Text style={styles.billTotal}>
+            Estimated: ₹{subtotal + visitingFee + Math.round((subtotal + visitingFee) * 0.18)}
+          </Text>
         </View>
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
@@ -142,6 +148,7 @@ const styles = StyleSheet.create({
   noteTxt: { fontSize: 12, color: colors.charcoal },
   bill: { marginTop: spacing.lg },
   billRow: { color: colors.grey, marginBottom: 4 },
+  billNote: { fontSize: 12, color: colors.grey, marginTop: spacing.sm, fontStyle: 'italic' },
   billTotal: { fontSize: 18, fontWeight: '800', color: colors.charcoal, marginTop: spacing.sm },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
 });
