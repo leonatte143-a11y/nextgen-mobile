@@ -16,6 +16,8 @@ type PartnerContextValue = {
   completeJob: (requestId: string) => Promise<void>;
   withdrawBalance: () => Promise<void>;
   updateProfile: (payload: Partial<PartnerProfile>) => Promise<void>;
+  submitEstimateUpdate: (requestId: string, newAmount: number) => Promise<void>;
+  cancelActiveJobWithFee: (requestId: string) => Promise<void>;
 };
 
 const PartnerContext = createContext<PartnerContextValue | undefined>(undefined);
@@ -100,6 +102,30 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
     setProfile(updated);
   }, []);
 
+  const submitEstimateUpdate = useCallback(async (requestId: string, newAmount: number) => {
+    await partnerService.submitEstimateUpdate(requestId, newAmount);
+    const [requestsResult, profileResult, earningsResult] = await Promise.all([
+      partnerService.getRequests(),
+      partnerService.getProfile(),
+      partnerService.getEarnings(),
+    ]);
+    setRequests(requestsResult);
+    setProfile(profileResult);
+    setEarnings(earningsResult);
+  }, []);
+
+  const cancelActiveJobWithFee = useCallback(async (requestId: string) => {
+    await partnerService.cancelActiveJobWithFee(requestId);
+    const [requestsResult, profileResult, earningsResult] = await Promise.all([
+      partnerService.getRequests(),
+      partnerService.getProfile(),
+      partnerService.getEarnings(),
+    ]);
+    setRequests(requestsResult);
+    setProfile(profileResult);
+    setEarnings(earningsResult);
+  }, []);
+
   const value = useMemo(
     () => ({
       profile,
@@ -114,8 +140,10 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       completeJob,
       withdrawBalance,
       updateProfile,
+      submitEstimateUpdate,
+      cancelActiveJobWithFee,
     }),
-    [profile, requests, earnings, isLoading, refreshPartner, toggleOnline, acceptRequest, rejectRequest, startJob, completeJob, withdrawBalance, updateProfile],
+    [profile, requests, earnings, isLoading, refreshPartner, toggleOnline, acceptRequest, rejectRequest, startJob, completeJob, withdrawBalance, updateProfile, submitEstimateUpdate, cancelActiveJobWithFee],
   );
 
   return <PartnerContext.Provider value={value}>{children}</PartnerContext.Provider>;

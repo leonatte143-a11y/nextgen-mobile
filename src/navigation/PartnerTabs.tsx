@@ -3,6 +3,8 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { colors } from '../constants/theme';
+import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
+import { PartnerServicePricingScreen } from '../screens/PartnerServicePricingScreen';
 import {
   PartnerDashboardScreen,
   PartnerEarningsScreen,
@@ -10,11 +12,7 @@ import {
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
 } from '../screens';
-
-type PartnerStackParamList = {
-  PartnerTabs: undefined;
-  PartnerRequestDetail: { requestId: string };
-};
+import type { PartnerStackParamList } from './PartnerStackTypes';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<PartnerStackParamList>();
@@ -52,6 +50,8 @@ export function PartnerTabs() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
       <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
+      <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
+      <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
     </Stack.Navigator>
   );
 }

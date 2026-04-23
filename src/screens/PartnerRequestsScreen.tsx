@@ -14,7 +14,7 @@ export function PartnerRequestsScreen({ navigation }: Props) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const visibleRequests = useMemo(
-    () => requests.filter((request) => request.status !== 'rejected'),
+    () => requests.filter((request) => request.status !== 'rejected' && request.status !== 'cancelled'),
     [requests],
   );
 
@@ -37,7 +37,14 @@ export function PartnerRequestsScreen({ navigation }: Props) {
   };
 
   const renderItem = ({ item }: { item: PartnerRequest }) => {
-    const badgeStyle = [styles.statusBadge, item.status === 'new' ? styles.badgeNew : item.status === 'pending' ? styles.badgePending : styles.badgeComplete];
+    const badgeStyle = [
+      styles.statusBadge,
+      item.status === 'new'
+        ? styles.badgeNew
+        : item.status === 'pending' || item.status === 'in_progress'
+          ? styles.badgeProgress
+          : styles.badgeComplete,
+    ];
     return (
       <Pressable style={styles.requestCard} onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}>
         <View style={styles.requestHeader}>
@@ -109,6 +116,7 @@ const styles = StyleSheet.create({
   statusBadge: { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: radius.sm },
   badgeNew: { backgroundColor: colors.primary },
   badgePending: { backgroundColor: colors.orangeTint },
+  badgeProgress: { backgroundColor: '#1E90FF' },
   badgeComplete: { backgroundColor: colors.success },
   badgeText: { color: colors.white, fontWeight: '700', fontSize: 12 },
   requestMeta: { color: colors.grey, marginTop: spacing.xs },

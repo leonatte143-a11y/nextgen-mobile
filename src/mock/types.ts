@@ -21,7 +21,13 @@ export interface PartnerSummary {
   photoUrl?: string;
 }
 
-export type PartnerRequestStatus = 'new' | 'pending' | 'in_progress' | 'completed' | 'rejected';
+export type PartnerRequestStatus =
+  | 'new'
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'rejected'
+  | 'cancelled';
 
 export interface PartnerRequest {
   id: string;
@@ -39,6 +45,8 @@ export interface PartnerRequest {
   notes: string;
   requestedAt: string;
   extraServices?: Array<{ id: string; name: string; price: number }>;
+  /** Mock: updated amount waiting for user approval */
+  pendingEstimateAmount?: number;
 }
 
 export interface PartnerProfile {

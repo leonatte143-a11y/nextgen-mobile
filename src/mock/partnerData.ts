@@ -71,6 +71,22 @@ export const MOCK_PARTNER_REQUESTS: PartnerRequest[] = [
     notes: 'Routine AC filter clean and airflow check.',
     requestedAt: '1 day ago',
   },
+  {
+    id: 'req_005',
+    serviceName: 'Wiring Check',
+    category: 'Electrical',
+    customerName: 'Hari K.',
+    address: '55 Pushkar Ghat, Rajahmundry',
+    distanceKm: 1.1,
+    scheduledAt: 'Today, 1:00 PM',
+    status: 'in_progress',
+    amount: 500,
+    commission: 50,
+    partnerShare: 450,
+    startOtp: '2211',
+    notes: 'On-site for heavy work estimate (mock).',
+    requestedAt: 'Now',
+  },
 ];
 
 export const MOCK_PARTNER_EARNINGS: PartnerEarningsSummary = {

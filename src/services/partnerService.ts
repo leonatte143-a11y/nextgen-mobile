@@ -86,6 +86,32 @@ export const partnerService = {
     });
   },
 
+  async submitEstimateUpdate(requestId: string, newAmount: number): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      activeRequests = activeRequests.map((request) =>
+        request.id === requestId && (request.status === 'in_progress' || request.status === 'pending')
+          ? { ...request, pendingEstimateAmount: newAmount }
+          : request,
+      );
+      return { ...(activeRequests.find((request) => request.id === requestId) as PartnerRequest) };
+    });
+  },
+
+  async cancelActiveJobWithFee(requestId: string): Promise<PartnerRequest> {
+    return mockRequest(() => {
+      const current = activeRequests.find((r) => r.id === requestId);
+      if (!current || (current.status !== 'pending' && current.status !== 'in_progress')) {
+        throw new Error('Cannot cancel this request');
+      }
+      activeProfile = { ...activeProfile, walletBalance: activeProfile.walletBalance + 50 };
+      recalcEarnings();
+      activeRequests = activeRequests.map((r) =>
+        r.id === requestId ? { ...r, status: 'cancelled' } : r,
+      );
+      return { ...(activeRequests.find((r) => r.id === requestId) as PartnerRequest) };
+    });
+  },
+
   async withdrawBalance(): Promise<PartnerEarningsSummary> {
     return mockRequest(() => {
       activeProfile = { ...activeProfile, walletBalance: 0 };
