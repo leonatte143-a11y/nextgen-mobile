@@ -1,18 +1,8 @@
 /**
- * Mock API layer — swap `mockRequest` calls for real fetch() when backend is ready.
+ * API feature flags and re-exports (HTTP client: apiService).
  */
-import { delay } from '../utils/delay';
+import { BASE_URL, USE_API } from '../config/api';
 
-export const MOCK_NETWORK_DELAY_MS = 650;
-
-export async function mockRequest<T>(factory: () => T, ms: number = MOCK_NETWORK_DELAY_MS): Promise<T> {
-  await delay(ms);
-  return factory();
-}
-
-export async function mockRequestVoid(ms: number = MOCK_NETWORK_DELAY_MS): Promise<void> {
-  await delay(ms);
-}
-
-/** Placeholder for future real HTTP client */
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.nexgen.example';
+export { BASE_URL };
+export const SHOULD_USE_API = USE_API;
+export const API_BASE_URL = BASE_URL;

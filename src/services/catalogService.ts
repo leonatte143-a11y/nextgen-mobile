@@ -1,43 +1,30 @@
-import { CATALOG_SERVICES } from '../mock/catalog';
-import { SERVICE_BUCKETS } from '../mock/buckets';
 import type { BucketId, CatalogService } from '../mock/types';
-import { mockRequest } from './api';
+import { apiService } from './apiService';
 
 export const catalogService = {
   async getBuckets() {
-    return mockRequest(() => [...SERVICE_BUCKETS]);
+    return apiService.get('/api/v1/catalog/buckets');
   },
 
   async getCatalog(): Promise<CatalogService[]> {
-    return mockRequest(() => [...CATALOG_SERVICES]);
+    return apiService.get('/api/v1/catalog/services');
   },
 
   async getServicesByBucket(bucketId: BucketId | null): Promise<CatalogService[]> {
-    return mockRequest(() =>
-      bucketId ? CATALOG_SERVICES.filter((s) => s.bucketId === bucketId) : [...CATALOG_SERVICES],
-    );
+    if (!bucketId) return apiService.get('/api/v1/catalog/services');
+    return apiService.get(`/api/v1/catalog/buckets/${bucketId}/services`);
   },
 
   async getServiceById(id: string): Promise<CatalogService | null> {
-    return mockRequest(() => CATALOG_SERVICES.find((s) => s.id === id) ?? null);
+    return apiService.get(`/api/v1/catalog/services/${id}`);
   },
 
   async searchServices(query: string): Promise<CatalogService[]> {
-    const q = query.trim().toLowerCase();
-    return mockRequest(() => {
-      if (!q) return [...CATALOG_SERVICES];
-      return CATALOG_SERVICES.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.categoryLabel.toLowerCase().includes(q) ||
-          s.subtext.toLowerCase().includes(q),
-      );
-    });
+    const q = encodeURIComponent(query.trim());
+    return apiService.get(`/api/v1/catalog/search?q=${q}`);
   },
 
   async getTopRated(limit = 6): Promise<CatalogService[]> {
-    return mockRequest(() =>
-      [...CATALOG_SERVICES].sort((a, b) => b.rating - a.rating).slice(0, limit),
-    );
+    return apiService.get(`/api/v1/catalog/top-rated?limit=${limit}`);
   },
 };

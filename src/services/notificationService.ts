@@ -1,18 +1,12 @@
-import { MOCK_NOTIFICATIONS } from '../mock/notifications';
 import type { AppNotification } from '../mock/types';
-import { mockRequest } from './api';
-
-let list = [...MOCK_NOTIFICATIONS];
+import { apiService } from './apiService';
 
 export const notificationService = {
   async list(): Promise<AppNotification[]> {
-    return mockRequest(() => [...list]);
+    return apiService.get('/api/v1/notifications', 'user');
   },
 
   async markAllRead(): Promise<void> {
-    await mockRequest(() => {
-      list = list.map((n) => ({ ...n, read: true }));
-      return true;
-    });
+    await apiService.post('/api/v1/notifications/read-all', {}, 'user');
   },
 };

@@ -1,18 +1,15 @@
-import { DEFAULT_MOCK_USER } from '../mock/defaultUser';
-import type { MockUser } from '../mock/types';
-import { mockRequest } from './api';
-
-let profile: MockUser = { ...DEFAULT_MOCK_USER };
+import type { User, UserProfileUpdate } from '../types/user';
+import { coerceUser } from '../types/user';
+import { apiService } from './apiService';
 
 export const userService = {
-  async getProfile(): Promise<MockUser> {
-    return mockRequest(() => ({ ...profile }));
+  async getProfile(): Promise<User> {
+    const data = await apiService.get<unknown>('/api/v1/users/me', 'user');
+    return coerceUser(data);
   },
 
-  async updateProfile(partial: Partial<MockUser>): Promise<MockUser> {
-    return mockRequest(() => {
-      profile = { ...profile, ...partial };
-      return { ...profile };
-    });
+  async updateProfile(partial: UserProfileUpdate): Promise<User> {
+    const data = await apiService.put<unknown>('/api/v1/users/me', partial, 'user');
+    return coerceUser(data);
   },
 };

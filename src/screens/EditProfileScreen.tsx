@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, spacing } from '../constants/theme';
@@ -21,16 +21,34 @@ export function EditProfileScreen() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const p = await userService.getProfile();
-      setFirstName(p.firstName);
-      setLastName(p.lastName);
-      setEmail(p.email);
-      setPhone(p.phone);
-      setAddress(p.address);
+      setInitialLoading(true);
+      setLoadError(null);
+      try {
+        const p = await userService.getProfile();
+        if (cancelled) return;
+        setFirstName(p.firstName);
+        setLastName(p.lastName);
+        setEmail(p.email);
+        setPhone(p.phone);
+        setAddress(p.address);
+      } catch (e: unknown) {
+        if (!cancelled) {
+          const msg = e instanceof Error ? e.message : 'Could not load profile.';
+          setLoadError(msg);
+        }
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const save = async () => {
@@ -39,10 +57,51 @@ export function EditProfileScreen() {
       await userService.updateProfile({ firstName, lastName, email, address });
       await refreshProfile();
       navigation.goBack();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not save profile.';
+      Alert.alert('Update failed', msg);
     } finally {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <Text style={styles.muted}>Loading profile…</Text>
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View style={[styles.root, styles.center, { padding: spacing.lg }]}>
+        <Text style={styles.errorTitle}>Could not load profile</Text>
+        <Text style={styles.muted}>{loadError}</Text>
+        <PrimaryButton
+          title="Try again"
+          onPress={async () => {
+            setLoadError(null);
+            setInitialLoading(true);
+            try {
+              const p = await userService.getProfile();
+              setFirstName(p.firstName);
+              setLastName(p.lastName);
+              setEmail(p.email);
+              setPhone(p.phone);
+              setAddress(p.address);
+            } catch (e: unknown) {
+              setLoadError(e instanceof Error ? e.message : 'Could not load profile.');
+            } finally {
+              setInitialLoading(false);
+            }
+          }}
+          style={{ marginTop: spacing.lg }}
+        />
+        <PrimaryButton title="Go back" onPress={() => navigation.goBack()} style={{ marginTop: spacing.sm }} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.body}>
@@ -72,6 +131,9 @@ export function EditProfileScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   body: { padding: spacing.lg, paddingTop: 48 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
   title: { fontSize: 18, fontWeight: '800' },
+  muted: { color: colors.grey, textAlign: 'center', marginTop: spacing.sm },
+  errorTitle: { fontSize: 18, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.sm },
 });

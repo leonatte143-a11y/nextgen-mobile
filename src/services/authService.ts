@@ -1,51 +1,97 @@
-import { DEFAULT_MOCK_USER } from '../mock/defaultUser';
-import type { MockUser } from '../mock/types';
-import { mockRequest, mockRequestVoid } from './api';
-
-/** In-memory OTP for demo — any 4 digits after "send" succeeds */
-let lastSentOtp = '';
+import type { User, UserRegistrationInput } from '../types/user';
+import { coerceUser } from '../types/user';
+import { apiService } from './apiService';
 
 export const authService = {
-  async requestOtp(phoneDigits: string): Promise<{ ok: boolean; message: string }> {
-    return mockRequest(() => {
-      if (phoneDigits.length !== 10) {
-        return { ok: false, message: 'Enter a valid 10-digit number.' };
-      }
-      lastSentOtp = '1234'; // mock fixed OTP for predictable QA
-      return { ok: true, message: 'OTP sent (mock: use 1234).' };
-    });
+  async requestOtp(phoneDigits: string): Promise<{
+    ok: boolean;
+    message: string;
+    expiresInSec?: number;
+    otpLength?: number;
+    debugOtp?: string;
+  }> {
+    try {
+      const data = await apiService.post<{
+        ok: boolean;
+        expiresInSec?: number;
+        otpLength?: number;
+        debugOtp?: string;
+      }>('/api/v1/auth/otp/request', { phone: phoneDigits });
+      return {
+        ok: true,
+        message: '',
+        expiresInSec: data.expiresInSec,
+        otpLength: data.otpLength,
+        debugOtp: data.debugOtp,
+      };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to send OTP.';
+      return { ok: false, message: msg };
+    }
   },
 
-  async verifyOtp(phoneDigits: string, otp: string): Promise<{ ok: boolean; token?: string; message: string }> {
-    return mockRequest(() => {
-      if (otp.length !== 4) {
-        return { ok: false, message: 'Enter the 4-digit OTP.' };
-      }
-      if (otp !== lastSentOtp && otp !== '1234') {
-        return { ok: false, message: 'Invalid OTP. Try 1234 in mock mode.' };
-      }
-      return { ok: true, token: `mock_user_token_${phoneDigits}`, message: 'Logged in.' };
-    });
+  async verifyOtp(
+    phoneDigits: string,
+    otp: string,
+  ): Promise<{
+    ok: boolean;
+    token?: string;
+    message: string;
+    user?: User;
+    attemptsLeft?: number;
+    code?: string;
+  }> {
+    try {
+      const data = await apiService.post<{
+        ok: boolean;
+        token?: string;
+        message?: string;
+        user?: unknown;
+        attemptsLeft?: number;
+        code?: string;
+      }>('/api/v1/auth/otp/verify', { phone: phoneDigits, otp });
+      const ok = !!data.ok && !!data.token;
+      return {
+        ok,
+        token: data.token,
+        message: data.message ?? (ok ? '' : 'Invalid OTP.'),
+        user: data.user != null ? coerceUser(data.user) : undefined,
+        attemptsLeft: data.attemptsLeft,
+        code: data.code,
+      };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'OTP verify failed.';
+      return { ok: false, message: msg };
+    }
   },
 
-  async registerProfile(payload: Partial<MockUser> & { phone: string }): Promise<MockUser> {
-    return mockRequest(() => ({
-      ...DEFAULT_MOCK_USER,
-      ...payload,
-      id: `user_${payload.phone}`,
-    }));
+  async registerProfile(payload: UserRegistrationInput): Promise<User> {
+    const data = await apiService.post<unknown>('/api/v1/auth/register', payload);
+    return coerceUser(data);
   },
 
-  async partnerLogin(phoneDigits: string, otp: string): Promise<{ ok: boolean; token?: string }> {
-    return mockRequest(() => {
-      if (phoneDigits.length === 10 && otp === '1234') {
-        return { ok: true, token: `mock_partner_token_${phoneDigits}` };
-      }
-      return { ok: false };
-    });
+  async partnerLogin(
+    phoneDigits: string,
+    otp: string,
+  ): Promise<{ ok: boolean; token?: string; message: string }> {
+    try {
+      const data = await apiService.post<{ ok: boolean; token?: string; message?: string }>(
+        '/api/v1/auth/partner/login',
+        { phone: phoneDigits, otp },
+      );
+      const ok = !!data.ok && !!data.token;
+      return { ok, token: data.token, message: data.message ?? (ok ? '' : 'Could not sign in.') };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Partner login failed.';
+      return { ok: false, message: msg };
+    }
   },
 
   async logout(): Promise<void> {
-    await mockRequestVoid(200);
+    try {
+      await apiService.post('/api/v1/auth/logout', {});
+    } catch {
+      /* ignore */
+    }
   },
 };

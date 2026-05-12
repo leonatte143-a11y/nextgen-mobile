@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
 import { NexgenTextInput } from '../components/NexgenTextInput';
@@ -27,6 +27,9 @@ export function RegisterScreen({ navigation }: Props) {
         phone: phone.replace(/\D/g, '').slice(0, 10),
       });
       navigation.replace('UserLogin');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not save profile.';
+      Alert.alert('Registration failed', msg);
     } finally {
       setLoading(false);
     }
@@ -37,7 +40,7 @@ export function RegisterScreen({ navigation }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Create account</Text>
-      <Text style={styles.sub}>Mock registration — then sign in with OTP (1234).</Text>
+      <Text style={styles.sub}>Save your profile, then sign in with the OTP sent to your mobile.</Text>
       <NexgenTextInput label="First name" value={firstName} onChangeText={setFirstName} />
       <NexgenTextInput label="Last name" value={lastName} onChangeText={setLastName} />
       <NexgenTextInput

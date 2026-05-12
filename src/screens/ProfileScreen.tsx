@@ -40,12 +40,21 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const { user, refreshProfile, logoutUser } = useAuth();
   const [bookingsCount, setBookingsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    await refreshProfile();
-    const all = await bookingService.getBookings();
-    setBookingsCount(all.filter((b) => b.status === 'completed').length);
+    setProfileError(null);
+    const pr = await refreshProfile();
+    if (!pr.ok) {
+      setProfileError(pr.message);
+    }
+    try {
+      const all = await bookingService.getBookings();
+      setBookingsCount(all.filter((b) => b.status === 'completed').length);
+    } catch {
+      setBookingsCount(0);
+    }
     setLoading(false);
   }, [refreshProfile]);
 
@@ -53,8 +62,31 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     load();
   }, [load]);
 
-  if (loading || !user) {
+  if (loading) {
     return <ScreenLoader />;
+  }
+
+  if (!user) {
+    return (
+      <ScrollView style={styles.root} contentContainerStyle={{ padding: spacing.lg, paddingTop: 48 }}>
+        <Text style={styles.errTitle}>Profile unavailable</Text>
+        <Text style={styles.errSub}>
+          {profileError ?? 'We could not load your account. Check your connection and try again.'}
+        </Text>
+        <Pressable style={styles.editBtn} onPress={() => load()}>
+          <Text style={styles.editTxt}>Retry</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.editBtn, { marginTop: spacing.sm }]}
+          onPress={async () => {
+            await logoutUser();
+            navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
+          }}
+        >
+          <Text style={styles.editTxt}>Sign out</Text>
+        </Pressable>
+      </ScrollView>
+    );
   }
 
   const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || 'N';
@@ -203,4 +235,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   logoutTxt: { color: colors.error, fontWeight: '800', fontSize: 16 },
+  errTitle: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
+  errSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg },
 });

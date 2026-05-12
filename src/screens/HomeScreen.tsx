@@ -15,8 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { HOME_GRID_TILES } from '../mock/homeGrid';
-import { SERVICE_BUCKETS } from '../mock/buckets';
 import type { BucketId, CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { t } from '../i18n/strings';
@@ -32,14 +30,22 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const [location, setLocation] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
+  const [buckets, setBuckets] = useState<Array<{ id: string; nameEn: string; nameTe: string; emoji: string }>>([]);
+  const [popular, setPopular] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
   const [bucket, setBucket] = useState<BucketId | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const tr = await catalogService.getTopRated(8);
+      const [tr, b, pop] = await Promise.all([
+        catalogService.getTopRated(8),
+        catalogService.getBuckets(),
+        catalogService.getTopRated(9),
+      ]);
       setTopRated(tr);
+      setBuckets(b as any);
+      setPopular(pop);
     } finally {
       setLoading(false);
     }
@@ -123,12 +129,12 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buckets}>
-          {SERVICE_BUCKETS.map((b) => (
+          {buckets.map((b) => (
             <Pressable
               key={b.id}
               onPress={() => {
-                setBucket(b.id);
-                navigation.navigate('ServiceList', { bucketId: b.id, title: b.nameEn });
+                setBucket(b.id as BucketId);
+                navigation.navigate('ServiceList', { bucketId: b.id as BucketId, title: b.nameEn });
               }}
               style={[styles.bucket, bucket === b.id && styles.bucketOn]}
             >
@@ -142,18 +148,18 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
 
         <Text style={styles.gridTitle}>Popular services</Text>
         <View style={styles.grid}>
-          {HOME_GRID_TILES.map((tile) => (
+          {popular.map((svc) => (
             <Pressable
-              key={tile.id}
+              key={svc.id}
               style={styles.gridItem}
-              onPress={() => navigation.navigate('ServiceDetail', { serviceId: tile.serviceId })}
+              onPress={() => navigation.navigate('ServiceDetail', { serviceId: svc.id })}
             >
-              <Text style={styles.gridEmoji}>{tile.emoji}</Text>
+              <Text style={styles.gridEmoji}>🔧</Text>
               <Text style={styles.gridLabel} numberOfLines={2}>
-                {tile.label}
+                {svc.name}
               </Text>
               <Text style={styles.gridSub} numberOfLines={1}>
-                {tile.sub}
+                {svc.subtext}
               </Text>
             </Pressable>
           ))}

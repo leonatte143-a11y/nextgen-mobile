@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { DEFAULT_MOCK_USER } from '../mock/defaultUser';
-import type { MockUser } from '../mock/types';
+import type { User, UserRegistrationInput } from '../types/user';
 import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 
@@ -14,21 +13,23 @@ const KEYS = {
 
 type LangCode = 'en' | 'te';
 
+export type RefreshProfileResult = { ok: true } | { ok: false; message: string };
+
 type AuthContextValue = {
   userToken: string | null;
   partnerToken: string | null;
-  user: MockUser | null;
+  user: User | null;
   language: LangCode;
   hasCompletedLanguageOnboarding: boolean;
   isHydrating: boolean;
   setLanguage: (code: LangCode) => Promise<void>;
   completeLanguageOnboarding: () => Promise<void>;
-  loginUser: (phone: string, otp: string) => Promise<boolean>;
-  loginPartner: (phone: string, otp: string) => Promise<boolean>;
+  loginUser: (phone: string, otp: string) => Promise<{ ok: boolean; message?: string }>;
+  loginPartner: (phone: string, otp: string) => Promise<{ ok: boolean; message?: string }>;
   logoutUser: () => Promise<void>;
   logoutPartner: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  registerUser: (data: Partial<MockUser> & { phone: string }) => Promise<void>;
+  refreshProfile: () => Promise<RefreshProfileResult>;
+  registerUser: (data: UserRegistrationInput) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -36,7 +37,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userToken, setUserToken] = useState<string | null>(null);
   const [partnerToken, setPartnerToken] = useState<string | null>(null);
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [language, setLanguageState] = useState<LangCode>('en');
   const [hasCompletedLanguageOnboarding, setHasCompletedLanguageOnboarding] = useState(false);
   const [isHydrating, setIsHydrating] = useState(true);
@@ -55,10 +56,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (lang === 'te' || lang === 'en') setLanguageState(lang);
         setHasCompletedLanguageOnboarding(lo === '1');
         if (ut) {
-          const p = await userService.getProfile();
-          setUser(p);
+          try {
+            const p = await userService.getProfile();
+            setUser(p);
+          } catch {
+            setUser(null);
+          }
         } else {
-          setUser({ ...DEFAULT_MOCK_USER });
+          setUser(null);
         }
       } finally {
         setIsHydrating(false);
@@ -78,34 +83,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginUser = useCallback(async (phone: string, otp: string) => {
     const res = await authService.verifyOtp(phone, otp);
-    if (!res.ok || !res.token) return false;
+    if (!res.ok || !res.token) {
+      return { ok: false, message: res.message || 'Invalid or expired OTP.' };
+    }
     await AsyncStorage.setItem(KEYS.userToken, res.token);
     setUserToken(res.token);
-    await userService.updateProfile({ phone });
-    const p = await userService.getProfile();
-    setUser(p);
-    return true;
+    try {
+      const p = await userService.getProfile();
+      setUser(p);
+    } catch {
+      if (res.user) {
+        setUser(res.user);
+      } else {
+        setUser(null);
+      }
+    }
+    return { ok: true };
   }, []);
 
-  const registerUser = useCallback(async (data: Partial<MockUser> & { phone: string }) => {
-    const profile = await authService.registerProfile(data);
-    await userService.updateProfile(profile);
-    setUser(profile);
+  const registerUser = useCallback(async (data: UserRegistrationInput) => {
+    await authService.registerProfile(data);
   }, []);
 
   const loginPartner = useCallback(async (phone: string, otp: string) => {
     const res = await authService.partnerLogin(phone, otp);
-    if (!res.ok || !res.token) return false;
+    if (!res.ok || !res.token) {
+      return { ok: false, message: res.message || 'Could not sign in as partner.' };
+    }
     await AsyncStorage.setItem(KEYS.partnerToken, res.token);
     setPartnerToken(res.token);
-    return true;
+    return { ok: true };
   }, []);
 
   const logoutUser = useCallback(async () => {
     await authService.logout();
     await AsyncStorage.removeItem(KEYS.userToken);
     setUserToken(null);
-    setUser({ ...DEFAULT_MOCK_USER });
+    setUser(null);
   }, []);
 
   const logoutPartner = useCallback(async () => {
@@ -113,10 +127,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPartnerToken(null);
   }, []);
 
-  const refreshProfile = useCallback(async () => {
-    const p = await userService.getProfile();
-    setUser(p);
-  }, []);
+  const refreshProfile = useCallback(async (): Promise<RefreshProfileResult> => {
+    if (!userToken) {
+      setUser(null);
+      return { ok: false, message: 'Not signed in.' };
+    }
+    try {
+      const p = await userService.getProfile();
+      setUser(p);
+      return { ok: true };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Could not load profile.';
+      return { ok: false, message };
+    }
+  }, [userToken]);
 
   const value = useMemo(
     () => ({

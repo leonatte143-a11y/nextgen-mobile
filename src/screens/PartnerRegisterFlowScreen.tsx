@@ -140,7 +140,10 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         bankName: `${bName} · IFSC ${bIfsc}`,
         bankAccount: bAcc,
       });
-      Alert.alert('NEXGEN Partner', 'Onboarding complete (mock). Login with your mobile + OTP 1234.');
+      Alert.alert(
+        'NEXGEN Partner',
+        'Onboarding complete. On the partner login screen, request an OTP to the mobile you registered.',
+      );
       navigation.replace('PartnerLogin');
     } finally {
       setSaving(false);

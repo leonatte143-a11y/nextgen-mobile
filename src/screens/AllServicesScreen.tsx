@@ -5,7 +5,6 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
-import { SERVICE_BUCKETS } from '../mock/buckets';
 import type { BucketId, CatalogService } from '../mock/types';
 import { sortByFavoritePartner, useFavorites } from '../context/FavoritesContext';
 import { catalogService } from '../services/catalogService';
@@ -17,13 +16,18 @@ export function AllServicesScreen() {
   const navigation = useNavigation<Nav>();
   const { isFavorite, favorites } = useFavorites();
   const [items, setItems] = useState<CatalogService[]>([]);
+  const [buckets, setBuckets] = useState<Array<{ id: string; nameEn: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<BucketId | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const data = await catalogService.getServicesByBucket(filter);
+      const [data, b] = await Promise.all([
+        catalogService.getServicesByBucket(filter),
+        catalogService.getBuckets(),
+      ]);
+      setBuckets(b as any);
       setItems(sortByFavoritePartner(data, isFavorite));
       setLoading(false);
     })();
@@ -40,7 +44,7 @@ export function AllServicesScreen() {
       </View>
       <FlatList
         horizontal
-        data={[{ id: 'all', label: 'All' } as const, ...SERVICE_BUCKETS.map((b) => ({ id: b.id, label: b.nameEn }))]}
+        data={[{ id: 'all', label: 'All' } as const, ...buckets.map((b) => ({ id: b.id, label: b.nameEn }))]}
         keyExtractor={(x) => x.id}
         style={styles.tabs}
         contentContainerStyle={styles.tabsIn}

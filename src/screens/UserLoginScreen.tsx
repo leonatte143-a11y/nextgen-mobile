@@ -1,39 +1,72 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { apiService } from '../services/apiService';
+import { BASE_URL } from '../config/api';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'UserLogin'> };
+
+const RESEND_SEC = 60;
 
 export function UserLoginScreen({ navigation }: Props) {
   const { loginUser } = useAuth();
   const [phone, setPhone] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otpLength, setOtpLength] = useState(6);
+  const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
-  const [resend, setResend] = useState(30);
-  const refs = [useRef<TextInput>(null), useRef<TextInput>(null), useRef<TextInput>(null), useRef<TextInput>(null)];
+  const [conn, setConn] = useState<'unknown' | 'ok' | 'fail'>('unknown');
+  const [resend, setResend] = useState(0);
+  const [devOtpHint, setDevOtpHint] = useState('');
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const validPhone = phone.replace(/\D/g, '').length === 10;
 
+  const startResendTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setResend(RESEND_SEC);
+    intervalRef.current = setInterval(() => {
+      setResend((s) => {
+        if (s <= 1) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
   const sendOtp = async () => {
     setErr('');
+    setDevOtpHint('');
     setLoading(true);
     try {
       const r = await authService.requestOtp(phone.replace(/\D/g, ''));
       if (!r.ok) setErr(r.message);
       else {
         setOtpSent(true);
-        setResend(30);
-        setTimeout(() => refs[0].current?.focus(), 100);
-        const iv = setInterval(() => setResend((s) => (s <= 0 ? 0 : s - 1)), 1000);
-        setTimeout(() => clearInterval(iv), 31000);
+        setOtpLength(r.otpLength ?? 6);
+        setOtpCode('');
+        startResendTimer();
+        if (__DEV__ && r.debugOtp) {
+          setDevOtpHint(`Dev: OTP ${r.debugOtp} (server OTP_DEBUG_RESPONSE)`);
+        }
       }
     } finally {
       setLoading(false);
@@ -44,21 +77,31 @@ export function UserLoginScreen({ navigation }: Props) {
     setErr('');
     setLoading(true);
     try {
-      const code = otp.join('');
-      const ok = await loginUser(phone.replace(/\D/g, ''), code);
-      if (!ok) setErr('Invalid OTP. Mock: use 1234');
-      else navigation.replace('MainTabs');
+      const code = otpCode.replace(/\D/g, '').slice(0, otpLength);
+      const r = await loginUser(phone.replace(/\D/g, ''), code);
+      if (!r.ok) {
+        setErr(r.message ?? 'Could not verify OTP.');
+      } else {
+        navigation.replace('MainTabs');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const onOtpChange = (i: number, v: string) => {
-    const d = v.replace(/\D/g, '').slice(-1);
-    const next = [...otp];
-    next[i] = d;
-    setOtp(next);
-    if (d && i < 3) refs[i + 1].current?.focus();
+  const otpComplete = otpCode.replace(/\D/g, '').length === otpLength;
+
+  const testConnection = async () => {
+    setErr('');
+    setConn('unknown');
+    try {
+      await apiService.health();
+      setConn('ok');
+    } catch (e: unknown) {
+      setConn('fail');
+      const msg = e instanceof Error ? e.message : 'Network request failed';
+      setErr(msg);
+    }
   };
 
   return (
@@ -68,7 +111,7 @@ export function UserLoginScreen({ navigation }: Props) {
       </View>
       <Text style={styles.title}>NEXGEN</Text>
       <Text style={styles.h1}>Login</Text>
-      <Text style={styles.sub}>Enter your mobile number to get started.</Text>
+      <Text style={styles.sub}>Enter your mobile number. We will send a one-time code.</Text>
       <NexgenTextInput
         prefix="+91"
         placeholder="Enter 10-digit mobile number"
@@ -79,25 +122,27 @@ export function UserLoginScreen({ navigation }: Props) {
         editable={!otpSent}
       />
       {otpSent ? (
-        <View style={styles.otpRow}>
-          {otp.map((d, i) => (
-            <TextInput
-              key={i}
-              ref={refs[i]}
-              style={styles.otpBox}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={d}
-              onChangeText={(t) => onOtpChange(i, t)}
-            />
-          ))}
-        </View>
+        <NexgenTextInput
+          label={`${otpLength}-digit code`}
+          placeholder={`Enter ${otpLength}-digit OTP`}
+          keyboardType="number-pad"
+          maxLength={otpLength}
+          value={otpCode}
+          onChangeText={(t) => setOtpCode(t.replace(/\D/g, '').slice(0, otpLength))}
+        />
       ) : null}
+      {devOtpHint ? <Text style={styles.devHint}>{devOtpHint}</Text> : null}
       {err ? <Text style={styles.err}>{err}</Text> : null}
+      <Text style={styles.baseUrl}>API: {BASE_URL}</Text>
+      <Pressable onPress={testConnection} style={styles.testConn}>
+        <Text style={styles.testConnTxt}>
+          Test connection {conn === 'ok' ? '✓' : conn === 'fail' ? '✕' : ''}
+        </Text>
+      </Pressable>
       <PrimaryButton
         title={otpSent ? 'Verify & Login' : 'Get OTP'}
         onPress={otpSent ? verify : sendOtp}
-        disabled={!validPhone}
+        disabled={!validPhone || (otpSent && !otpComplete)}
         loading={loading}
       />
       {otpSent ? (
@@ -132,18 +177,11 @@ const styles = StyleSheet.create({
   title: { textAlign: 'center', fontSize: 20, fontWeight: '800', color: colors.charcoal, marginTop: spacing.sm },
   h1: { fontSize: 22, fontWeight: '800', marginTop: spacing.xl },
   sub: { color: colors.grey, marginBottom: spacing.lg },
-  otpRow: { flexDirection: 'row', gap: 10, marginBottom: spacing.lg, justifyContent: 'center' },
-  otpBox: {
-    width: 48,
-    height: 52,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderRadius: 10,
-    textAlign: 'center',
-    fontSize: 22,
-    fontWeight: '700',
-  },
   err: { color: colors.error, marginBottom: spacing.sm },
+  devHint: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm },
+  baseUrl: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm },
+  testConn: { alignSelf: 'flex-start', marginBottom: spacing.md },
+  testConnTxt: { color: colors.primary, fontWeight: '700' },
   resend: { marginTop: spacing.md, alignItems: 'center' },
   resendTxt: { color: colors.primary, fontWeight: '600' },
   resendDis: { color: colors.grey },
