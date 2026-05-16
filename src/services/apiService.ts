@@ -5,9 +5,11 @@ import { authStorageKeys } from '../context/AuthContext';
 type ApiEnvelope<T> = { success: boolean; data: T; message?: string };
 
 async function getToken(kind: 'user' | 'partner' | 'admin'): Promise<string | null> {
-  if (kind === 'user') return AsyncStorage.getItem(authStorageKeys.userToken);
-  if (kind === 'partner') return AsyncStorage.getItem(authStorageKeys.partnerToken);
-  return null;
+  let raw: string | null = null;
+  if (kind === 'user') raw = await AsyncStorage.getItem(authStorageKeys.userToken);
+  else if (kind === 'partner') raw = await AsyncStorage.getItem(authStorageKeys.partnerToken);
+  const t = raw?.trim();
+  return t && t.length ? t : null;
 }
 
 async function requestJson<T>(
