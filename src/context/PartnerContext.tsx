@@ -34,15 +34,18 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const refreshPartner = useCallback(async () => {
     if (!partnerToken) return;
     setIsLoading(true);
-    const [profileResult, requestsResult, earningsResult] = await Promise.all([
-      partnerService.getProfile(),
-      partnerService.getRequests(),
-      partnerService.getEarnings(),
-    ]);
-    setProfile(profileResult);
-    setRequests(requestsResult);
-    setEarnings(earningsResult);
-    setIsLoading(false);
+    try {
+      const [profileResult, requestsResult, earningsResult] = await Promise.allSettled([
+        partnerService.getProfile(),
+        partnerService.getRequests(),
+        partnerService.getEarnings(),
+      ]);
+      if (profileResult.status === 'fulfilled') setProfile(profileResult.value);
+      if (requestsResult.status === 'fulfilled') setRequests(requestsResult.value);
+      if (earningsResult.status === 'fulfilled') setEarnings(earningsResult.value);
+    } finally {
+      setIsLoading(false);
+    }
   }, [partnerToken]);
 
   useEffect(() => {

@@ -8,10 +8,13 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors, radius, spacing } from '../constants/theme';
+import { logAction } from '../lib/devLog';
 
 type Props = {
   title: string;
   onPress: () => void;
+  /** Dev-only: logs [ACTION] when pressed */
+  debugAction?: string;
   disabled?: boolean;
   loading?: boolean;
   variant?: 'primary' | 'outline' | 'ghost' | 'danger' | 'inverse';
@@ -21,17 +24,22 @@ type Props = {
 export function PrimaryButton({
   title,
   onPress,
+  debugAction,
   disabled,
   loading,
   variant = 'primary',
   style,
 }: Props) {
+  const handlePress = () => {
+    if (debugAction) logAction(debugAction, { button: title });
+    onPress();
+  };
   const isPrimary = variant === 'primary';
   const isDanger = variant === 'danger';
   const isInverse = variant === 'inverse';
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,

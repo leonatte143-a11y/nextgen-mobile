@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { User, UserRegistrationInput } from '../types/user';
+import { logAuth } from '../lib/devLog';
 import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 
@@ -56,14 +57,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (lang === 'te' || lang === 'en') setLanguageState(lang);
         setHasCompletedLanguageOnboarding(lo === '1');
         if (ut) {
+          logAuth('hydrate_user_token', { present: true });
           try {
             const p = await userService.getProfile();
             setUser(p);
-          } catch {
+          } catch (e: unknown) {
+            logAuth('hydrate_profile_failed', {
+              message: e instanceof Error ? e.message : 'unknown',
+            });
             setUser(null);
           }
         } else {
           setUser(null);
+        }
+        if (pt) {
+          logAuth('hydrate_partner_token', { present: true });
         }
       } finally {
         setIsHydrating(false);
@@ -84,10 +92,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginUser = useCallback(async (phone: string, otp: string) => {
     const res = await authService.verifyOtp(phone, otp);
     if (!res.ok || !res.token) {
+      logAuth('login_user_failed', { message: res.message });
       return { ok: false, message: res.message || 'Invalid or expired OTP.' };
     }
     await AsyncStorage.setItem(KEYS.userToken, res.token);
     setUserToken(res.token);
+    logAuth('login_user_token_stored', { userId: res.user?.id });
     try {
       const p = await userService.getProfile();
       setUser(p);
@@ -108,14 +118,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginPartner = useCallback(async (phone: string, otp: string) => {
     const res = await authService.partnerLogin(phone, otp);
     if (!res.ok || !res.token) {
+      logAuth('login_partner_failed', { message: res.message });
       return { ok: false, message: res.message || 'Could not sign in as partner.' };
     }
     await AsyncStorage.setItem(KEYS.partnerToken, res.token);
     setPartnerToken(res.token);
+    logAuth('login_partner_token_stored', { partnerId: res.partner?.id });
     return { ok: true };
   }, []);
 
   const logoutUser = useCallback(async () => {
+    logAuth('logout_user');
     await authService.logout();
     await AsyncStorage.removeItem(KEYS.userToken);
     setUserToken(null);
@@ -123,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logoutPartner = useCallback(async () => {
+    logAuth('logout_partner');
     await AsyncStorage.removeItem(KEYS.partnerToken);
     setPartnerToken(null);
   }, []);

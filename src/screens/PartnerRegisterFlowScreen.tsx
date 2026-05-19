@@ -7,13 +7,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
+import { authService } from '../services/authService';
 import { partnerService } from '../services/partnerService';
+import { logAuth } from '../lib/devLog';
 import type { RootStackParamList } from '../navigation/types';
 
 const CATS = [
@@ -47,8 +48,10 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   // Step 0 — KYC
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLength, setOtpLength] = useState(6);
   const [otpVisible, setOtpVisible] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
   const [category, setCategory] = useState<typeof CATS[number]>(CATS[0]);
   const [workLocation, setWorkLocation] = useState<typeof LOCATIONS[number]>(LOCATIONS[0]);
   const [idType, setIdType] = useState<'Aadhaar' | 'Voter ID'>('Aadhaar');
@@ -78,12 +81,26 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const needsDl = category === 'Drivers';
   const quizPass = qIdx >= Q10.length ? qScore >= 8 : null;
 
-  const sendOtp = () => {
-    if (phone.length !== 10) {
+  const sendOtp = async () => {
+    const digits = phone.replace(/\D/g, '').slice(0, 10);
+    if (digits.length !== 10) {
       Alert.alert('Phone', 'Enter 10 digits first.');
       return;
     }
-    setOtpVisible(true);
+    setOtpSending(true);
+    try {
+      const r = await authService.requestOtp(digits);
+      if (!r.ok) {
+        Alert.alert('OTP', r.message || 'Could not send OTP.');
+        return;
+      }
+      setOtpVisible(true);
+      setOtpLength(r.otpLength ?? 6);
+      setOtpCode('');
+      logAuth('partner_register_otp_sent', { phoneLast4: digits.slice(-4), otpLength: r.otpLength });
+    } finally {
+      setOtpSending(false);
+    }
   };
 
   const onQuizPick = (idx: number) => {
@@ -104,7 +121,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const canNext0 =
     name.trim().length > 1 &&
     phone.length === 10 &&
-    (otpVisible ? otp.join('').length === 4 : true) &&
+    (otpVisible ? otpCode.replace(/\D/g, '').length === otpLength : true) &&
     idNo.length > 3 &&
     idFront &&
     idBack &&
@@ -131,20 +148,36 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       return;
     }
     setSaving(true);
+    const digits = phone.replace(/\D/g, '').slice(0, 10);
     try {
-      await partnerService.updateProfile({
+      const profile = await partnerService.applyOnboarding({
+        phone: digits,
         name: name.trim(),
-        phone: phone,
-        skills: [category, certNo],
-        categories: [category, workLocation],
+        serviceCategory: category,
+        categories: [category],
+        primaryCity: workLocation,
+        skills: [
+          category,
+          certNo,
+          `exp:${exp}`,
+          `addr:${addr.slice(0, 80)}`,
+          `pin:${pin}`,
+          ...(needsDl && dl ? [`DL:${dl}`] : []),
+        ],
         bankName: `${bName} · IFSC ${bIfsc}`,
         bankAccount: bAcc,
+        trainingProgress: 100,
       });
+      logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
         'NEXGEN Partner',
-        'Onboarding complete. On the partner login screen, request an OTP to the mobile you registered.',
+        'Registration saved. On the partner login screen, request an OTP to sign in.',
       );
       navigation.replace('PartnerLogin');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not save registration.';
+      logAuth('partner_register_failed', { message: msg });
+      Alert.alert('Registration failed', msg);
     } finally {
       setSaving(false);
     }
@@ -163,27 +196,17 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
           maxLength={10}
           onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
         />
-        <Pressable onPress={sendOtp} style={styles.otpLink}>
-          <Text style={styles.otpLinkTxt}>Send OTP (mock)</Text>
+        <Pressable onPress={sendOtp} disabled={otpSending} style={styles.otpLink}>
+          <Text style={styles.otpLinkTxt}>{otpSending ? 'Sending OTP…' : 'Send OTP to verify mobile'}</Text>
         </Pressable>
         {otpVisible ? (
-          <View style={styles.otpRow}>
-            {otp.map((d, i) => (
-              <TextInput
-                key={i}
-                value={d}
-                maxLength={1}
-                keyboardType="number-pad"
-                style={styles.otpBox}
-                onChangeText={(t) => {
-                  const v = t.replace(/\D/g, '').slice(-1);
-                  const c = [...otp];
-                  c[i] = v;
-                  setOtp(c);
-                }}
-              />
-            ))}
-          </View>
+          <NexgenTextInput
+            label={`${otpLength}-digit OTP`}
+            value={otpCode}
+            keyboardType="number-pad"
+            maxLength={otpLength}
+            onChangeText={(t) => setOtpCode(t.replace(/\D/g, '').slice(0, otpLength))}
+          />
         ) : null}
         <Text style={styles.lab}>Service category</Text>
         <View style={styles.chips}>

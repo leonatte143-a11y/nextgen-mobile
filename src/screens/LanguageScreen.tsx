@@ -15,8 +15,12 @@ export function LanguageScreen({ navigation }: Props) {
 
   const onContinue = async () => {
     await setLanguage(sel);
-    if (userToken || partnerToken) {
-      navigation.goBack();
+    if (partnerToken) {
+      navigation.replace('PartnerHome');
+      return;
+    }
+    if (userToken) {
+      navigation.replace('MainTabs');
       return;
     }
     await completeLanguageOnboarding();
