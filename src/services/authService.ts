@@ -1,3 +1,4 @@
+import type { PartnerProfile } from '../mock/types';
 import type { User, UserRegistrationInput } from '../types/user';
 import { coerceUser } from '../types/user';
 import { apiService } from './apiService';
@@ -73,14 +74,21 @@ export const authService = {
   async partnerLogin(
     phoneDigits: string,
     otp: string,
-  ): Promise<{ ok: boolean; token?: string; message: string }> {
+  ): Promise<{ ok: boolean; token?: string; message: string; partner?: PartnerProfile }> {
     try {
-      const data = await apiService.post<{ ok: boolean; token?: string; message?: string }>(
-        '/api/v1/auth/partner/login',
-        { phone: phoneDigits, otp },
-      );
+      const data = await apiService.post<{
+        ok: boolean;
+        token?: string;
+        message?: string;
+        partner?: PartnerProfile;
+      }>('/api/v1/auth/partner/login', { phone: phoneDigits, otp });
       const ok = !!data.ok && !!data.token;
-      return { ok, token: data.token, message: data.message ?? (ok ? '' : 'Could not sign in.') };
+      return {
+        ok,
+        token: data.token,
+        message: data.message ?? (ok ? '' : 'Could not sign in.'),
+        partner: data.partner,
+      };
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Partner login failed.';
       return { ok: false, message: msg };

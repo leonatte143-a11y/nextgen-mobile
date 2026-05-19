@@ -30,6 +30,14 @@ export function SplashScreen({ navigation }: Props) {
         navigation.replace('Language');
         return;
       }
+      if (partnerToken) {
+        navigation.replace('PartnerHome');
+        return;
+      }
+      if (userToken) {
+        navigation.replace('MainTabs');
+        return;
+      }
       navigation.replace('RoleSelection');
     }, 1400);
     return () => clearTimeout(t);

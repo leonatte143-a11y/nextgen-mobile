@@ -1,7 +1,33 @@
 import { apiService } from './apiService';
 import type { PartnerEarningsSummary, PartnerPricingRow, PartnerProfile, PartnerRequest } from '../mock/types';
 
+export type PartnerOnboardingPayload = {
+  phone: string;
+  name: string;
+  skills?: string[];
+  categories?: string[];
+  serviceCategory?: string;
+  primaryCity?: string;
+  workLocation?: string;
+  bankName?: string;
+  bankAccount?: string;
+  trainingProgress?: number;
+};
+
 export const partnerService = {
+  /** Public — creates or updates partner before first login */
+  async applyOnboarding(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
+    return apiService.post('/api/v1/partners/onboarding', payload);
+  },
+
+  /** Public — new partner only; 409 if phone already registered */
+  async registerPartner(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
+    const data = await apiService.post<{ partner: PartnerProfile; created: boolean }>(
+      '/api/v1/auth/partner/register',
+      payload,
+    );
+    return data.partner;
+  },
   async getProfile(): Promise<PartnerProfile> {
     return apiService.get('/api/v1/partners/profile', 'partner');
   },
