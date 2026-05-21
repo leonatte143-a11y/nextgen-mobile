@@ -1,31 +1,38 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import * as ExpoSplashScreen from 'expo-splash-screen';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/types';
-import { colors, spacing } from '../constants/theme';
+import { SplashScreenView } from '../components/SplashScreen';
 import { useAuth } from '../context/AuthContext';
-import { PrimaryButton } from '../components/PrimaryButton';
+import type { RootStackParamList } from '../navigation/types';
 
- type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'> };
+const SPLASH_MIN_MS = 2500;
+
+type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'> };
 
 export function SplashScreen({ navigation }: Props) {
-  const scale = useRef(new Animated.Value(1)).current;
   const { isHydrating, hasCompletedLanguageOnboarding, userToken, partnerToken } = useAuth();
+  const [animationDone, setAnimationDone] = useState(false);
+  const mountedAt = useRef(Date.now());
+  const hasNavigated = useRef(false);
+
+  const onAnimationComplete = useCallback(() => {
+    setAnimationDone(true);
+  }, []);
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scale, { toValue: 1.05, duration: 1000, useNativeDriver: true }),
-        Animated.timing(scale, { toValue: 1, duration: 1000, useNativeDriver: true }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [scale]);
+    ExpoSplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   useEffect(() => {
-    if (isHydrating) return;
-    const t = setTimeout(() => {
+    if (isHydrating || !animationDone || hasNavigated.current) return;
+
+    const elapsed = Date.now() - mountedAt.current;
+    const waitMs = Math.max(0, SPLASH_MIN_MS - elapsed);
+
+    const timer = setTimeout(() => {
+      if (hasNavigated.current) return;
+      hasNavigated.current = true;
+
       if (!hasCompletedLanguageOnboarding) {
         navigation.replace('Language');
         return;
@@ -38,48 +45,18 @@ export function SplashScreen({ navigation }: Props) {
         navigation.replace('MainTabs');
         return;
       }
-      navigation.replace('RoleSelection');
-    }, 1400);
-    return () => clearTimeout(t);
-  }, [isHydrating, hasCompletedLanguageOnboarding, userToken, partnerToken, navigation]);
+      navigation.replace('UserLogin');
+    }, waitMs);
 
-  return (
-    <View style={styles.root}>
-      <Animated.View style={[styles.logoWrap, { transform: [{ scale }] }]}>
-        <Text style={styles.logoLetter}>N</Text>
-      </Animated.View>
-      <Text style={styles.brand}>NEXGEN</Text>
-      <Text style={styles.tag}>Your Local Service Expert</Text>
-      <View style={styles.buttonRow}>
-        <PrimaryButton title="Continue as User" onPress={() => navigation.replace('UserLogin')} style={styles.entryButton} />
-        <PrimaryButton title="Service Partner" onPress={() => navigation.replace('PartnerLogin')} style={styles.entryButton} />
-      </View>
-      <View style={styles.icons}>
-        <Text style={styles.mini}>🔧</Text>
-        <Text style={styles.mini}>🩺</Text>
-        <Text style={styles.mini}>🚗</Text>
-        <Text style={styles.mini}>🎓</Text>
-      </View>
-    </View>
-  );
+    return () => clearTimeout(timer);
+  }, [
+    isHydrating,
+    animationDone,
+    hasCompletedLanguageOnboarding,
+    userToken,
+    partnerToken,
+    navigation,
+  ]);
+
+  return <SplashScreenView onAnimationComplete={onAnimationComplete} />;
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
-  logoWrap: {
-    width: 88,
-    height: 88,
-    borderRadius: 24,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  logoLetter: { fontSize: 44, fontWeight: '900', color: colors.white },
-  brand: { fontSize: 28, fontWeight: '800', color: colors.charcoal },
-  tag: { marginTop: spacing.sm, fontSize: 14, color: colors.grey },
-  buttonRow: { width: '100%', paddingHorizontal: spacing.lg, marginTop: spacing.xl },
-  entryButton: { marginBottom: spacing.sm },
-  icons: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.xl, opacity: 0.35 },
-  mini: { fontSize: 22 },
-});

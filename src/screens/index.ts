@@ -5,4 +5,3 @@ export { PartnerProfileScreen } from './PartnerProfileScreen';
 export { PartnerRequestsScreen } from './PartnerRequestsScreen';
 export { PartnerRequestDetailScreen } from './PartnerRequestDetailScreen';
 export { PartnerServicePricingScreen } from './PartnerServicePricingScreen';
-export { RoleSelectionScreen } from './RoleSelectionScreen';

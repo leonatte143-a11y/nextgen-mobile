@@ -20,7 +20,6 @@ import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
 import { RewardsScreen } from '../screens/RewardsScreen';
-import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
 import { ServiceDetailScreen } from '../screens/ServiceDetailScreen';
 import { ServiceListScreen } from '../screens/ServiceListScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -29,16 +28,20 @@ import { SupportScreen } from '../screens/SupportScreen';
 import { TermsScreen } from '../screens/TermsScreen';
 import { UserLoginScreen } from '../screens/UserLoginScreen';
 import { MainTabs } from './MainTabs';
+import { colors } from '../constants/theme';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   return (
-    <Stack.Navigator initialRouteName="UserLogin" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
+    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{ contentStyle: { backgroundColor: colors.primary } }}
+      />
       <Stack.Screen name="Language" component={LanguageScreen} />
-      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       <Stack.Screen name="UserLogin" component={UserLoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="PartnerLogin" component={PartnerLoginScreen} />
