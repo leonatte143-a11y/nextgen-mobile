@@ -145,9 +145,9 @@ export function PartnerLoginScreen({ navigation }: Props) {
           </Text>
         </Pressable>
       ) : null}
-      <Text style={styles.registerLink} onPress={() => navigation.navigate('PartnerRegister')}>
-        New partner? Register here.
-      </Text>
+      <Pressable onPress={() => navigation.navigate('PartnerRegister')} style={styles.link}>
+        <Text style={styles.linkTxt}>New Partner</Text>
+      </Pressable>
     </View>
   );
 }
@@ -164,5 +164,6 @@ const styles = StyleSheet.create({
   resend: { marginTop: spacing.md, alignItems: 'center' },
   resendTxt: { color: colors.primary, fontWeight: '600' },
   resendDis: { color: colors.grey },
-  registerLink: { marginTop: spacing.md, color: colors.primary, fontWeight: '700' },
+  link: { marginTop: spacing.md, alignItems: 'center' },
+  linkTxt: { color: colors.primary, fontWeight: '600' },
 });

@@ -26,7 +26,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { user, language } = useAuth();
+  const { language } = useAuth();
   const [location, setLocation] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
@@ -82,18 +82,13 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             </View>
           </View>
         </View>
-        <View style={styles.headerRight}>
-          <Pressable onPress={() => navigation.navigate('Notifications')} hitSlop={8}>
-            <Ionicons name="notifications-outline" size={26} color={colors.charcoal} />
-          </Pressable>
-          <Pressable
-            onPress={() => navigation.navigate('EditProfile')}
-            style={styles.prof}
-            hitSlop={8}
-          >
-            <Text style={styles.profLetter}>{(user?.firstName?.[0] ?? 'N').toUpperCase()}</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={() => navigation.navigate('Notifications')}
+          style={styles.headerAction}
+          hitSlop={8}
+        >
+          <Ionicons name="notifications-outline" size={26} color={colors.charcoal} />
+        </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -250,16 +245,7 @@ const styles = StyleSheet.create({
   brand: { fontSize: 16, fontWeight: '900', color: colors.primary },
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, maxWidth: 220 },
   loc: { fontSize: 12, color: colors.grey },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  prof: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.orangeTint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profLetter: { fontWeight: '800', color: colors.primary },
+  headerAction: { paddingTop: 2 },
   scroll: { paddingBottom: spacing.xl },
   banner: {
     margin: spacing.md,

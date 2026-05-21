@@ -153,7 +153,7 @@ export function UserLoginScreen({ navigation }: Props) {
         </Pressable>
       ) : null}
       <Pressable onPress={() => navigation.navigate('Register')} style={styles.link}>
-        <Text style={styles.linkTxt}>New user? Register</Text>
+        <Text style={styles.linkTxt}>New User</Text>
       </Pressable>
       <Pressable onPress={() => navigation.navigate('PartnerLogin')} style={styles.link}>
         <Text style={styles.linkTxt}>Login as Service Partner</Text>
