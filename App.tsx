@@ -1,7 +1,10 @@
 import { NavigationContainer } from '@react-navigation/native';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
+
+ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 import { DevDebugPanel } from './src/components/DevDebugPanel';
 import { AuthProvider } from './src/context/AuthContext';
 import { CartProvider } from './src/context/CartContext';
