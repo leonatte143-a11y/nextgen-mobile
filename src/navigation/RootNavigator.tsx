@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { AllServicesScreen } from '../screens/AllServicesScreen';
+import { CategoryServicesScreen } from '../screens/CategoryServicesScreen';
 import { BookingSuccessScreen } from '../screens/BookingSuccessScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
 import { CartScreen } from '../screens/CartScreen';
@@ -18,6 +19,7 @@ import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
+import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
 import { RewardsScreen } from '../screens/RewardsScreen';
 import { ServiceDetailScreen } from '../screens/ServiceDetailScreen';
@@ -42,6 +44,7 @@ export function RootNavigator() {
         options={{ contentStyle: { backgroundColor: colors.primary } }}
       />
       <Stack.Screen name="Language" component={LanguageScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       <Stack.Screen name="UserLogin" component={UserLoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="PartnerLogin" component={PartnerLoginScreen} />
@@ -49,6 +52,7 @@ export function RootNavigator() {
       <Stack.Screen name="PartnerHome" component={PartnerHomeScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="AllServices" component={AllServicesScreen} />
+      <Stack.Screen name="CategoryServices" component={CategoryServicesScreen} />
       <Stack.Screen name="ServiceList" component={ServiceListScreen} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
       <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />

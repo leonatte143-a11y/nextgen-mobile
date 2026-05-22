@@ -19,7 +19,7 @@ type R = RouteProp<RootStackParamList, 'ServiceList'>;
 export function ServiceListScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
-  const { bucketId, title } = route.params ?? {};
+  const { bucketId, title, searchQuery } = route.params ?? {};
   const { isFavorite, favorites } = useFavorites();
   const [items, setItems] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,11 +27,30 @@ export function ServiceListScreen() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const data = await catalogService.getServicesByBucket(bucketId ?? null);
-      setItems(sortByFavoritePartner(data, isFavorite));
-      setLoading(false);
+      try {
+        let data;
+        if (searchQuery?.trim()) {
+          data = await catalogService.searchServices(searchQuery.trim());
+          if (bucketId) {
+            data = data.filter((s) => s.bucketId === bucketId);
+          }
+          if (data.length === 0) {
+            const bucketData = await catalogService.getServicesByBucket(bucketId ?? null);
+            const q = searchQuery.trim().toLowerCase();
+            data = bucketData.filter((s) => {
+              const hay = `${s.name} ${s.subtext} ${s.categoryLabel}`.toLowerCase();
+              return hay.includes(q);
+            });
+          }
+        } else {
+          data = await catalogService.getServicesByBucket(bucketId ?? null);
+        }
+        setItems(sortByFavoritePartner(data, isFavorite));
+      } finally {
+        setLoading(false);
+      }
     })();
-  }, [bucketId, isFavorite, favorites]);
+  }, [bucketId, searchQuery, isFavorite, favorites]);
 
   return (
     <View style={styles.root}>
