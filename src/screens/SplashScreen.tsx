@@ -45,7 +45,7 @@ export function SplashScreen({ navigation }: Props) {
         navigation.replace('MainTabs');
         return;
       }
-      navigation.replace('UserLogin');
+      navigation.replace('RoleSelection');
     }, waitMs);
 
     return () => clearTimeout(timer);

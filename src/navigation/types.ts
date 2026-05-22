@@ -2,10 +2,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BucketId } from '../mock/types';
+import type { MainCategoryId } from '../data/serviceCatalog';
 
 export type RootStackParamList = {
   Splash: undefined;
   Language: undefined;
+  RoleSelection: undefined;
   UserLogin: undefined;
   Register: undefined;
   PartnerLogin: undefined;
@@ -13,7 +15,8 @@ export type RootStackParamList = {
   PartnerHome: undefined;
   MainTabs: undefined;
   AllServices: undefined;
-  ServiceList: { bucketId?: BucketId | null; title?: string };
+  CategoryServices: { categoryId: MainCategoryId };
+  ServiceList: { bucketId?: BucketId | null; title?: string; searchQuery?: string };
   ServiceDetail: { serviceId: string };
   ConfirmBooking: { serviceId: string; fromCart?: boolean };
   BookingSuccess: { bookingId: string };

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -12,10 +12,14 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CategoryGrid } from '../components/home/CategoryGrid';
+import { HomeBannerCarousel } from '../components/home/HomeBannerCarousel';
+import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import type { BucketId, CatalogService } from '../mock/types';
+import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
+import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { t } from '../i18n/strings';
 import type { RootStackParamList } from '../navigation/types';
@@ -27,25 +31,21 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { language } = useAuth();
-  const [location, setLocation] = useState('Danavaipeta, Rajahmundry');
+  const [location] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
-  const [buckets, setBuckets] = useState<Array<{ id: string; nameEn: string; nameTe: string; emoji: string }>>([]);
-  const [popular, setPopular] = useState<CatalogService[]>([]);
+  const [catalog, setCatalog] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bucket, setBucket] = useState<BucketId | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [tr, b, pop] = await Promise.all([
+      const [tr, all] = await Promise.all([
         catalogService.getTopRated(8),
-        catalogService.getBuckets(),
-        catalogService.getTopRated(9),
+        catalogService.getCatalog(),
       ]);
       setTopRated(tr);
-      setBuckets(b as any);
-      setPopular(pop);
+      setCatalog(all);
     } finally {
       setLoading(false);
     }
@@ -55,9 +55,37 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     load();
   }, [load]);
 
-  const onSearch = async () => {
-    navigation.navigate('ServiceList', { bucketId: null, title: search || 'Search results' });
-  };
+  const onSearch = useCallback(() => {
+    navigation.navigate('ServiceList', {
+      bucketId: null,
+      title: search.trim() || 'Search results',
+      searchQuery: search.trim() || undefined,
+    });
+  }, [navigation, search]);
+
+  const onCategoryPress = useCallback(
+    (category: MainCategory) => {
+      navigation.navigate('CategoryServices', { categoryId: category.id });
+    },
+    [navigation],
+  );
+
+  const onPopularPress = useCallback(
+    (item: { service?: CatalogService; searchTerms: string[]; name: string }) => {
+      if (item.service) {
+        navigation.navigate('ServiceDetail', { serviceId: item.service.id });
+        return;
+      }
+      navigation.navigate('ServiceList', {
+        bucketId: null,
+        title: item.name,
+        searchQuery: item.searchTerms[0],
+      });
+    },
+    [navigation],
+  );
+
+  const categories = useMemo(() => MAIN_CATEGORIES, []);
 
   if (loading && topRated.length === 0) {
     return <ScreenLoader />;
@@ -91,6 +119,8 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </Pressable>
       </View>
 
+      <HomeBannerCarousel locationLabel={location} />
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <View style={styles.banner}>
           <Text style={styles.bannerTxt}>NEXGEN — Rajahmundry & Guntur</Text>
@@ -122,48 +152,14 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           </Pressable>
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
+        <CategoryGrid
+          categories={categories}
+          language={language}
+          onCategoryPress={onCategoryPress}
+        />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buckets}>
-          {buckets.map((b) => (
-            <Pressable
-              key={b.id}
-              onPress={() => {
-                setBucket(b.id as BucketId);
-                navigation.navigate('ServiceList', { bucketId: b.id as BucketId, title: b.nameEn });
-              }}
-              style={[styles.bucket, bucket === b.id && styles.bucketOn]}
-            >
-              <Text style={styles.bucketEmoji}>{b.emoji}</Text>
-              <Text style={styles.bucketTxt} numberOfLines={2}>
-                {language === 'te' ? b.nameTe : b.nameEn}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <Text style={styles.gridTitle}>Popular services</Text>
-        <View style={styles.grid}>
-          {popular.map((svc) => (
-            <Pressable
-              key={svc.id}
-              style={styles.gridItem}
-              onPress={() => navigation.navigate('ServiceDetail', { serviceId: svc.id })}
-            >
-              <Text style={styles.gridEmoji}>🔧</Text>
-              <Text style={styles.gridLabel} numberOfLines={2}>
-                {svc.name}
-              </Text>
-              <Text style={styles.gridSub} numberOfLines={1}>
-                {svc.subtext}
-              </Text>
-            </Pressable>
-          ))}
-          <Pressable style={styles.gridItem} onPress={() => navigation.navigate('AllServices')}>
-            <Text style={styles.gridEmoji}>➕</Text>
-            <Text style={styles.gridLabel}>More</Text>
-            <Text style={styles.gridSub}>All services</Text>
-          </Pressable>
-        </View>
+        <Text style={styles.sectionTitle}>Popular services</Text>
+        <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
 
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'topRated')}</Text>
@@ -174,6 +170,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           data={topRated}
           keyExtractor={(item) => item.id}
           showsHorizontalScrollIndicator={false}
+          nestedScrollEnabled
           contentContainerStyle={styles.carousel}
           renderItem={({ item }) => (
             <Pressable
@@ -275,31 +272,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
   },
-  h2: { fontSize: 18, fontWeight: '800', color: colors.charcoal },
+  h2: { fontSize: 18, fontWeight: '800', color: colors.charcoal, paddingHorizontal: spacing.md, marginTop: spacing.md },
   seeAll: { color: colors.primary, fontWeight: '700' },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
-  buckets: { paddingLeft: spacing.md, marginBottom: spacing.md },
-  bucket: {
-    width: 96,
-    padding: spacing.sm,
-    marginRight: spacing.sm,
-    backgroundColor: colors.greyLight,
-    borderRadius: radius.md,
-    alignItems: 'center',
+  sectionTitle: {
+    paddingHorizontal: spacing.md,
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.charcoal,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  bucketOn: { borderWidth: 2, borderColor: colors.primary, backgroundColor: colors.orangeTint },
-  bucketEmoji: { fontSize: 22 },
-  bucketTxt: { fontSize: 11, fontWeight: '700', textAlign: 'center', marginTop: 4, color: colors.charcoal },
-  gridTitle: { paddingHorizontal: spacing.md, fontWeight: '800', marginBottom: spacing.sm },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
-  gridItem: {
-    width: '33.33%',
-    padding: spacing.sm,
-    alignItems: 'center',
-  },
-  gridEmoji: { fontSize: 28, color: colors.primary },
-  gridLabel: { fontSize: 12, fontWeight: '700', textAlign: 'center', color: colors.charcoal, marginTop: 4 },
-  gridSub: { fontSize: 10, color: colors.grey, textAlign: 'center' },
   sort: { color: colors.primary, fontWeight: '600' },
   carousel: { paddingHorizontal: spacing.md, gap: spacing.md, paddingBottom: spacing.md },
   topCard: {
