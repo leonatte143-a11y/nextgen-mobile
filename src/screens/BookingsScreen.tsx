@@ -28,9 +28,14 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
 
   const load = useCallback(async () => {
     setLoading(true);
-    const all = await bookingService.getBookings();
-    setItems(all);
-    setLoading(false);
+    try {
+      const all = await bookingService.getBookings();
+      setItems(all);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

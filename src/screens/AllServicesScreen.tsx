@@ -76,7 +76,7 @@ export function AllServicesScreen() {
           renderItem={({ item }) => (
             <Pressable
               style={styles.card}
-              onPress={() => navigation.navigate('ServiceDetail', { serviceId: item.id })}
+              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
             >
               <Text style={styles.emoji}>🔧</Text>
               <Text style={styles.name} numberOfLines={2}>

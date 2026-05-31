@@ -24,6 +24,7 @@ import { ReviewScreen } from '../screens/ReviewScreen';
 import { RewardsScreen } from '../screens/RewardsScreen';
 import { ServiceDetailScreen } from '../screens/ServiceDetailScreen';
 import { ServiceListScreen } from '../screens/ServiceListScreen';
+import { ServiceProvidersScreen } from '../screens/ServiceProvidersScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { SupportScreen } from '../screens/SupportScreen';
@@ -54,6 +55,7 @@ export function RootNavigator() {
       <Stack.Screen name="AllServices" component={AllServicesScreen} />
       <Stack.Screen name="CategoryServices" component={CategoryServicesScreen} />
       <Stack.Screen name="ServiceList" component={ServiceListScreen} />
+      <Stack.Screen name="ServiceProviders" component={ServiceProvidersScreen} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
       <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
       <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} />

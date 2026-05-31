@@ -73,7 +73,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const onPopularPress = useCallback(
     (item: { service?: CatalogService; searchTerms: string[]; name: string }) => {
       if (item.service) {
-        navigation.navigate('ServiceDetail', { serviceId: item.service.id });
+        navigation.navigate('ServiceProviders', { serviceId: item.service.id });
         return;
       }
       navigation.navigate('ServiceList', {
@@ -175,7 +175,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           renderItem={({ item }) => (
             <Pressable
               style={styles.topCard}
-              onPress={() => navigation.navigate('ServiceDetail', { serviceId: item.id })}
+              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
             >
               <View style={styles.topPhoto}>
                 <Text style={styles.topPhotoTxt}>{item.partner.name[0]}</Text>

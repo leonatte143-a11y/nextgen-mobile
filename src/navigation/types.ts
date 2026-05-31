@@ -17,7 +17,8 @@ export type RootStackParamList = {
   AllServices: undefined;
   CategoryServices: { categoryId: MainCategoryId };
   ServiceList: { bucketId?: BucketId | null; title?: string; searchQuery?: string };
-  ServiceDetail: { serviceId: string };
+  ServiceProviders: { serviceId: string };
+  ServiceDetail: { serviceId: string; selectedPartnerId?: string };
   ConfirmBooking: { serviceId: string; fromCart?: boolean };
   BookingSuccess: { bookingId: string };
   LiveBooking: { bookingId: string };

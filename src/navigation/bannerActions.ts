@@ -58,7 +58,7 @@ export function handleBannerPress(
       navigation.navigate('CategoryServices', { categoryId: 'events' });
       return;
     case 'service':
-      if (value) navigation.navigate('ServiceDetail', { serviceId: value });
+      if (value) navigation.navigate('ServiceProviders', { serviceId: value });
       return;
     case 'partner':
       navigation.navigate('ServiceList', {

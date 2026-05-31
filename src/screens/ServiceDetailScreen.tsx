@@ -10,7 +10,7 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
-import type { CatalogService } from '../mock/types';
+import type { CatalogService, PartnerSummary } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -24,13 +24,30 @@ export function ServiceDetailScreen() {
   const { addService } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [svc, setSvc] = useState<CatalogService | null>(null);
+  const [servicePartners, setServicePartners] = useState<PartnerSummary[]>([]);
+  const [selectedPartner, setSelectedPartner] = useState<PartnerSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [partnerLoading, setPartnerLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const s = await catalogService.getServiceById(route.params.serviceId);
+      setPartnerLoading(true);
+
+      const [s, partners] = await Promise.all([
+        catalogService.getServiceById(route.params.serviceId),
+        catalogService.getServicePartners(route.params.serviceId),
+      ]);
+
       setSvc(s);
+      const partnerList = partners ?? [];
+      setServicePartners(partnerList);
+      const selected =
+        route.params.selectedPartnerId && partnerList.length
+          ? partnerList.find((p) => p.id === route.params.selectedPartnerId) ?? partnerList[0]
+          : partnerList[0] ?? null;
+      setSelectedPartner(selected);
+      setPartnerLoading(false);
       setLoading(false);
     })();
   }, [route.params.serviceId]);
@@ -40,7 +57,7 @@ export function ServiceDetailScreen() {
   }
 
   const isRemote = svc.bucketId === 'tech_supply';
-  const favorited = isFavorite(svc.partner.id);
+  const favorited = selectedPartner ? isFavorite(selectedPartner.id) : false;
 
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
@@ -70,65 +87,98 @@ export function ServiceDetailScreen() {
           </View>
         )}
         <Text style={styles.price}>₹{svc.basePrice}</Text>
-        <View style={styles.partner}>
-          <Pressable
-            style={styles.heartFab}
-            hitSlop={12}
-            onPress={() =>
-              void toggleFavorite({
-                partnerId: svc.partner.id,
-                name: svc.partner.name,
-                rating: svc.partner.rating,
-                jobsCompleted: svc.partner.jobsCompleted,
-                serviceId: svc.id,
-              })
-            }
-          >
-            <Ionicons
-              name={favorited ? 'heart' : 'heart-outline'}
-              size={22}
-              color={favorited ? colors.error : colors.primary}
-            />
-          </Pressable>
-          <View style={styles.pRow}>
-            <View style={styles.pPhoto}>
-              <Text style={styles.pPhotoTxt}>{svc.partner.name[0]}</Text>
-            </View>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.pTitle}>Service Provider</Text>
-              <Text style={styles.pName}>{svc.partner.name}</Text>
-              <Text style={styles.pSub}>
-                ★ {svc.partner.rating.toFixed(1)} · {svc.partner.jobsCompleted} jobs
-              </Text>
+        {partnerLoading ? (
+          <Text style={styles.partnerLoading}>Loading available providers...</Text>
+        ) : selectedPartner ? (
+          <View style={styles.partner}>
+            <Pressable
+              style={styles.heartFab}
+              hitSlop={12}
+              onPress={() =>
+                void toggleFavorite({
+                  partnerId: selectedPartner.id,
+                  name: selectedPartner.name,
+                  rating: selectedPartner.rating,
+                  jobsCompleted: selectedPartner.jobsCompleted,
+                  serviceId: svc.id,
+                })
+              }
+            >
+              <Ionicons
+                name={favorited ? 'heart' : 'heart-outline'}
+                size={22}
+                color={favorited ? colors.error : colors.primary}
+              />
+            </Pressable>
+            <View style={styles.pRow}>
+              <View style={styles.pPhoto}>
+                <Text style={styles.pPhotoTxt}>{selectedPartner.name[0]}</Text>
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.pTitle}>Selected Provider</Text>
+                <Text style={styles.pName}>{selectedPartner.name}</Text>
+                <Text style={styles.pSub}>
+                  ★ {selectedPartner.rating.toFixed(1)} · {selectedPartner.jobsCompleted} jobs
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.actions}>
-          <Pressable
-            style={styles.secondary}
-            onPress={() => Linking.openURL('tel:9876543210')}
-          >
-            <Ionicons name="call-outline" size={20} color={colors.primary} />
-            <Text style={styles.secTxt}>Call</Text>
-          </Pressable>
-          <Pressable style={styles.secondary} onPress={() => Alert.alert('Chat', 'In-app chat (mock).')}>
-            <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-            <Text style={styles.secTxt}>Chat</Text>
-          </Pressable>
-        </View>
+        ) : (
+          <View style={styles.partnerEmpty}>
+            <Text style={styles.partnerEmptyTitle}>No available partners yet</Text>
+            <Text style={styles.partnerEmptyText}>
+              We couldn't find a verified online provider for this service right now. Please check back later.
+            </Text>
+          </View>
+        )}
+
+        {!selectedPartner && !partnerLoading && (
+          <View style={styles.emptyActionsNotice}>
+            <Text style={styles.emptyActionsText}>Booking and cart actions are disabled until a provider is available.</Text>
+          </View>
+        )}
+
+        {!partnerLoading && servicePartners.length > 1 ? (
+          <View style={styles.partnerListSection}>
+            <Text style={styles.partnerListTitle}>Available providers</Text>
+            {servicePartners.map((partner) => {
+              const active = selectedPartner?.id === partner.id;
+              return (
+                <Pressable
+                  key={partner.id}
+                  style={[styles.providerRow, active && styles.providerRowSelected]}
+                  onPress={() => setSelectedPartner(partner)}
+                >
+                  <View style={styles.providerPhoto}>
+                    <Text style={styles.providerPhotoTxt}>{partner.name[0]}</Text>
+                  </View>
+                  <View style={styles.providerInfo}>
+                    <Text style={styles.providerName}>{partner.name}</Text>
+                    <Text style={styles.providerMeta}>
+                      ★ {partner.rating.toFixed(1)} · {partner.jobsCompleted} jobs
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
       </ScrollView>
       <View style={styles.footer}>
         <PrimaryButton
           title="Add to cart"
           variant="outline"
+          disabled={!selectedPartner}
           onPress={async () => {
-            await addService(svc);
+            if (!selectedPartner) return;
+            await addService({ ...svc, partner: selectedPartner });
             Alert.alert('Cart', `${svc.name} added to cart.`);
           }}
         />
         <View style={{ height: spacing.sm }} />
         <PrimaryButton
           title="Book service"
+          disabled={!selectedPartner}
           onPress={() => navigation.navigate('ConfirmBooking', { serviceId: svc.id })}
         />
       </View>
@@ -198,5 +248,60 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   secTxt: { fontWeight: '700', color: colors.primary },
+  partnerLoading: { marginTop: spacing.lg, color: colors.grey, fontStyle: 'italic' },
+  partnerEmpty: {
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.md,
+  },
+  partnerEmptyTitle: { fontSize: 16, fontWeight: '700', marginBottom: spacing.xs },
+  partnerEmptyText: { color: colors.grey, lineHeight: 20 },
+  emptyActionsNotice: {
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.warning,
+  },
+  emptyActionsText: { color: colors.charcoal, textAlign: 'center' },
+  partnerListSection: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  partnerListTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+  },
+  providerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.white,
+  },
+  providerRowSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryTint,
+  },
+  providerPhoto: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  providerPhotoTxt: { color: colors.white, fontWeight: '800' },
+  providerInfo: { flex: 1, minWidth: 0 },
+  providerName: { fontSize: 15, fontWeight: '700' },
+  providerMeta: { color: colors.grey, marginTop: spacing.xs },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
 });

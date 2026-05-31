@@ -19,6 +19,10 @@ export interface PartnerSummary {
   rating: number;
   jobsCompleted: number;
   photoUrl?: string;
+  reviewsCount?: number;
+  categories?: string[];
+  isOnline?: boolean;
+  distanceKm?: number;
 }
 
 export type PartnerRequestStatus =

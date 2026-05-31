@@ -22,9 +22,14 @@ export function NotificationsScreen() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await notificationService.list();
-    setItems(data);
-    setLoading(false);
+    try {
+      const data = await notificationService.list();
+      setItems(data);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

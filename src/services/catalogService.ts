@@ -19,6 +19,10 @@ export const catalogService = {
     return apiService.get(`/api/v1/catalog/services/${id}`);
   },
 
+  async getServicePartners(id: string): Promise<PartnerSummary[]> {
+    return apiService.get(`/api/v1/catalog/services/${id}/partners`);
+  },
+
   async searchServices(query: string): Promise<CatalogService[]> {
     const q = encodeURIComponent(query.trim());
     return apiService.get(`/api/v1/catalog/search?q=${q}`);

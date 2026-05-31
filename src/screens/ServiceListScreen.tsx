@@ -79,7 +79,7 @@ export function ServiceListScreen() {
           renderItem={({ item }) => (
             <ServiceCard
               service={item}
-              onPress={() => navigation.navigate('ServiceDetail', { serviceId: item.id })}
+              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
             />
           )}
         />

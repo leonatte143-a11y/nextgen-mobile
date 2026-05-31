@@ -20,10 +20,12 @@ import { IS_DEV } from './src/lib/devLog';
 export default function App() {
   useEffect(() => {
     if (!SHOULD_USE_API) return;
-    apiService
-      .health()
-      .then((x) => console.log('[API health]', apiService.baseUrl, x))
-      .catch((e) => console.log('[API health failed]', apiService.baseUrl, String(e?.message ?? e)));
+    if (IS_DEV) {
+      apiService
+        .health()
+        .then((x) => console.log('[API health]', apiService.baseUrl, x))
+        .catch((e) => console.log('[API health failed]', apiService.baseUrl, String(e?.message ?? e)));
+    }
   }, []);
   return (
     <SafeAreaProvider>
