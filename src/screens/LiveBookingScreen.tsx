@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -17,35 +17,58 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'LiveBooking'>;
 
 const STEPS = [
-  'Booking Confirmed',
-  'Partner Assigned',
-  'Partner En Route',
-  'Work Started (OTP)',
-  'Service Completed',
+  'Booking confirmed',
+  'Partner assigned',
+  'Partner en route',
+  'Service started',
+  'Service completed',
 ] as const;
+
+const STATUS_STEP_INDEX: Record<string, number> = {
+  partner_assigned: 1,
+  en_route: 2,
+  in_progress: 3,
+  completed: 4,
+  cancelled: 0,
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  partner_assigned: 'Partner assigned',
+  en_route: 'Partner en route',
+  in_progress: 'Service in progress',
+  completed: 'Service completed',
+  cancelled: 'Cancelled',
+};
 
 export function LiveBookingScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
-  const [b, setB] = useState<Booking | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const x = await bookingService.getBooking(route.params.bookingId);
-      setB(x);
+      const b = await bookingService.getBooking(route.params.bookingId);
+      setBooking(b);
       setLoading(false);
     })();
   }, [route.params.bookingId]);
 
-  if (loading || !b) {
+  const activeStep = useMemo(() => {
+    return booking ? STATUS_STEP_INDEX[booking.status] ?? 0 : 0;
+  }, [booking]);
+
+  if (loading || !booking) {
     return <ScreenLoader />;
   }
 
+  const statusLabel = STATUS_LABEL[booking.status] || 'Booking status';
+
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: insets.top }]}> 
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
@@ -56,63 +79,101 @@ export function LiveBookingScreen() {
       <LiveTrackingAdBanner />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.map}>
-          <Text style={styles.mapLabel}>Map view (mock)</Text>
-          <Text style={styles.mapSub}>Orange pin → Partner · Blue dot → You</Text>
+          <Text style={styles.mapLabel}>Tracking overview</Text>
+          <Text style={styles.mapSub}>
+            {booking.etaMins ? `Estimated arrival in ${booking.etaMins} mins` : 'ETA unavailable'}
+          </Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeTxt}>Arriving in {b.etaMins ?? 8} mins</Text>
+            <Text style={styles.badgeTxt}>{statusLabel}</Text>
           </View>
         </View>
 
         <View style={styles.partner}>
           <View style={styles.avatar}>
-            <Text style={styles.avTxt}>{b.partnerName[0]}</Text>
+            <Text style={styles.avTxt}>{booking.partnerName[0]}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.pName}>{b.partnerName}</Text>
-            <Text style={styles.pRate}>★ {b.partnerRating.toFixed(1)}</Text>
+            <Text style={styles.pName}>{booking.partnerName}</Text>
+            <Text style={styles.pRate}>★ {booking.partnerRating.toFixed(1)}</Text>
           </View>
         </View>
 
+        {booking.lineItems && booking.lineItems.length > 0 ? (
+          <View style={styles.servicesBox}>
+            <Text style={styles.h2}>Booked services</Text>
+            {booking.lineItems.map((li) => (
+              <View key={li.id || li.title} style={styles.serviceRow}>
+                <Text style={styles.serviceTitle}>
+                  {li.title} × {li.quantity}
+                </Text>
+                <Text style={styles.servicePrice}>₹{li.lineTotal}</Text>
+              </View>
+            ))}
+            {booking.visitingFee != null ? (
+              <Text style={styles.serviceMeta}>Visiting charges: ₹{booking.visitingFee}</Text>
+            ) : null}
+            {booking.promoDiscount != null && booking.promoDiscount > 0 ? (
+              <Text style={styles.serviceMeta}>Promo: −₹{booking.promoDiscount}</Text>
+            ) : null}
+            <Text style={styles.serviceTotal}>Total: ₹{booking.totalAmount}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.otpBox}>
           <Text style={styles.otpLab}>Start OTP</Text>
-          <Text style={styles.otpVal}>{b.startOtp.split('').join(' ')}</Text>
+          <Text style={styles.otpVal}>{booking.startOtp.split('').join(' ')}</Text>
           <Text style={styles.otpHint}>Share only when the partner arrives.</Text>
         </View>
 
         <View style={styles.actions}>
           <Pressable style={styles.act} onPress={() => Linking.openURL('tel:9876543210')}>
             <Ionicons name="call-outline" size={20} color={colors.primary} />
-            <Text style={styles.actTxt}>Call partner</Text>
+            <Text style={styles.actTxt}>Contact support</Text>
           </Pressable>
-          <Pressable style={styles.act} onPress={() => Alert.alert('Chat', 'In-app chat (mock).')}>
+          <Pressable
+            style={styles.act}
+            onPress={() => Linking.openURL('mailto:support@nexgen.com?subject=Live%20booking%20help')}
+          >
             <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-            <Text style={styles.actTxt}>Chat</Text>
+            <Text style={styles.actTxt}>Chat support</Text>
           </Pressable>
         </View>
 
         <Text style={styles.h2}>Status</Text>
         {STEPS.map((label, i) => (
           <View key={label} style={styles.step}>
-            <Text style={styles.stepIcon}>{i < 3 ? '✅' : '⚪'}</Text>
+            <Text style={styles.stepIcon}>{i <= activeStep ? '✅' : '⚪'}</Text>
             <Text style={styles.stepTxt}>{label}</Text>
           </View>
         ))}
 
-        <PrimaryButton
-          title="Rate service (mock)"
-          variant="outline"
-          onPress={() =>
-            navigation.navigate('Review', { bookingId: b.id, partnerName: b.partnerName })
-          }
-        />
+        {booking.status === 'completed' ? (
+          <PrimaryButton
+            title="Rate service"
+            variant="outline"
+            onPress={() =>
+              navigation.navigate('Review', { bookingId: booking.id, partnerName: booking.partnerName })
+            }
+          />
+        ) : (
+          <Text style={styles.statusNote}>A review is available after the service is completed.</Text>
+        )}
         <View style={{ height: spacing.md }} />
         <PrimaryButton
           title="Cancel booking"
           variant="danger"
+          loading={cancelling}
           onPress={async () => {
-            const r = await bookingService.cancelBooking(b.id);
-            Alert.alert('Cancelled', `Refund ₹${r.refund} (after ₹${r.fee} fee — mock).`);
-            navigation.goBack();
+            try {
+              setCancelling(true);
+              const r = await bookingService.cancelBooking(booking.id);
+              Alert.alert('Booking cancelled', `Refund ₹${r.refund} processed with a fee of ₹${r.fee}.`);
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Unable to cancel', String(error));
+            } finally {
+              setCancelling(false);
+            }
           }}
         />
       </ScrollView>
@@ -164,6 +225,18 @@ const styles = StyleSheet.create({
   avTxt: { fontSize: 22, fontWeight: '800', color: colors.primary },
   pName: { fontSize: 18, fontWeight: '800' },
   pRate: { color: colors.grey, marginTop: 2 },
+  servicesBox: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  serviceRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  serviceTitle: { flex: 1, fontWeight: '600', color: colors.charcoal },
+  servicePrice: { fontWeight: '700', color: colors.primary },
+  serviceMeta: { color: colors.grey, marginTop: 4, fontSize: 13 },
+  serviceTotal: { fontWeight: '800', marginTop: spacing.sm, color: colors.charcoal },
   otpBox: {
     backgroundColor: colors.orangeTint,
     borderRadius: radius.md,
@@ -191,4 +264,5 @@ const styles = StyleSheet.create({
   step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
   stepIcon: { fontSize: 16 },
   stepTxt: { color: colors.charcoal },
+  statusNote: { color: colors.grey, fontSize: 13, marginTop: spacing.sm },
 });

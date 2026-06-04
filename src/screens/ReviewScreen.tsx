@@ -2,7 +2,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { bookingService } from '../services/bookingService';
@@ -11,7 +11,7 @@ import type { RootStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'Review'>;
 
-const TAGS = ['Punctual', 'Professional', 'Clean Work', 'Fair Price'];
+const TAGS = ['Punctual', 'Professional', 'Clean work', 'Fair price'];
 
 export function ReviewScreen() {
   const navigation = useNavigation<Nav>();
@@ -20,28 +20,24 @@ export function ReviewScreen() {
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recSim, setRecSim] = useState(false);
-  const [videoMockUri, setVideoMockUri] = useState<string | null>(null);
 
   const toggle = (t: string) => {
     setPicked((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
   };
 
-  const recordVideoMock = () => {
-    if (recSim) return;
-    setRecSim(true);
-    // Simulates 15s capped capture; real app would use expo-camera / file output.
-    setTimeout(() => {
-      setRecSim(false);
-      setVideoMockUri('file:///mock/nexgen_feedback_15s.mp4');
-    }, 1600);
-  };
-
   const submit = async () => {
+    if (stars < 1) {
+      Alert.alert('Rating required', 'Please choose 1 to 5 stars before submitting.');
+      return;
+    }
+
     setLoading(true);
     try {
       await bookingService.submitReview(route.params.bookingId, stars, picked, note);
+      Alert.alert('Thank you', 'Your feedback has been submitted.');
       navigation.goBack();
+    } catch (error) {
+      Alert.alert('Unable to submit', String(error));
     } finally {
       setLoading(false);
     }
@@ -59,28 +55,6 @@ export function ReviewScreen() {
         ))}
       </View>
       {stars === 5 ? <Text style={styles.exc}>Excellent!</Text> : null}
-      <Text style={styles.vidLab}>Video feedback (max 15s, mock)</Text>
-      <PrimaryButton
-        title="Record video feedback"
-        variant="outline"
-        onPress={recordVideoMock}
-        loading={recSim}
-        disabled={recSim}
-      />
-      {recSim ? (
-        <Text style={styles.recHint}>Camera (mock) · auto-stop at 15s…</Text>
-      ) : null}
-      {videoMockUri ? (
-        <View style={styles.vidPreview} accessibilityLabel="Video preview mock">
-          <View style={styles.vidThumb}>
-            <Text style={styles.vidPlay}>▶</Text>
-            <Text style={styles.vidMeta}>15s · saved locally (mock)</Text>
-          </View>
-          <Text style={styles.vidUri} numberOfLines={1}>
-            {videoMockUri}
-          </Text>
-        </View>
-      ) : null}
       <View style={styles.tags}>
         {TAGS.map((t) => (
           <Pressable

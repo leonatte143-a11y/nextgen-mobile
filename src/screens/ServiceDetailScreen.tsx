@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -10,7 +10,7 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
-import type { CatalogService, PartnerSummary } from '../mock/types';
+import type { CatalogService, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -28,6 +28,8 @@ export function ServiceDetailScreen() {
   const [selectedPartner, setSelectedPartner] = useState<PartnerSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [partnerLoading, setPartnerLoading] = useState(true);
+  const [menuItems, setMenuItems] = useState<ServiceMenuItem[]>([]);
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -47,17 +49,70 @@ export function ServiceDetailScreen() {
           ? partnerList.find((p) => p.id === route.params.selectedPartnerId) ?? partnerList[0]
           : partnerList[0] ?? null;
       setSelectedPartner(selected);
+      if (selected) {
+        const menu = await catalogService.getPartnerServiceMenu(route.params.serviceId, selected.id);
+        setMenuItems(menu);
+        setSelectedItemIds(menu.length ? [menu[0].id] : []);
+      } else {
+        setMenuItems([]);
+        setSelectedItemIds([]);
+      }
       setPartnerLoading(false);
       setLoading(false);
     })();
-  }, [route.params.serviceId]);
+  }, [route.params.serviceId, route.params.selectedPartnerId]);
+
+  useEffect(() => {
+    if (!selectedPartner || !svc) return;
+    (async () => {
+      const menu = await catalogService.getPartnerServiceMenu(svc.id, selectedPartner.id);
+      setMenuItems(menu);
+      setSelectedItemIds((prev) => {
+        if (prev.length && menu.some((m) => m.id === prev[0])) return prev;
+        return menu.length ? [menu[0].id] : [];
+      });
+    })();
+  }, [selectedPartner?.id, svc?.id]);
+
+  // Derived values and hooks must run on every render (before any early return)
+  const isRemote = svc?.bucketId === 'tech_supply';
+  const favorited = selectedPartner ? isFavorite(selectedPartner.id) : false;
+
+  const serviceItems = useMemo(() => menuItems ?? [], [menuItems]);
+
+  const selectedAmount = useMemo(
+    () => (serviceItems ?? []).reduce((sum, item) => (selectedItemIds.includes(item.id) ? sum + item.price : sum), 0),
+    [serviceItems, selectedItemIds],
+  );
+
+  const partnerDistance = selectedPartner?.distanceKm ?? svc?.distanceKm ?? 0;
 
   if (loading || !svc) {
     return <ScreenLoader />;
   }
 
-  const isRemote = svc.bucketId === 'tech_supply';
-  const favorited = selectedPartner ? isFavorite(selectedPartner.id) : false;
+  const callPartner = () => {
+    const phone = selectedPartner?.phone?.replace(/\D/g, '');
+    if (!phone || phone.length < 10) {
+      Alert.alert('Unavailable', 'Partner phone number is not available.');
+      return;
+    }
+    Linking.openURL(`tel:${phone}`);
+  };
+
+  const chatPartner = () => {
+    Alert.alert('Chat', `Start a chat with ${selectedPartner?.name ?? 'your provider'} (coming soon).`);
+  };
+
+  const toggleItem = (id: string) => {
+    setSelectedItemIds((prev) => {
+      if (prev.includes(id)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((itemId) => itemId !== id);
+      }
+      return [...prev, id];
+    });
+  };
 
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
@@ -86,7 +141,36 @@ export function ServiceDetailScreen() {
             <Text style={styles.near}>Nearby · {svc.distanceKm.toFixed(1)} km</Text>
           </View>
         )}
-        <Text style={styles.price}>₹{svc.basePrice}</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Service menu</Text>
+          {serviceItems.map((item) => {
+            const active = selectedItemIds.includes(item.id);
+            return (
+              <Pressable
+                key={item.id}
+                style={[styles.itemBox, active && styles.itemBoxOn]}
+                onPress={() => toggleItem(item.id)}
+              >
+                <View style={styles.itemBoxRow}>
+                  <Ionicons
+                    name={active ? 'checkbox' : 'square-outline'}
+                    size={22}
+                    color={active ? colors.primary : colors.grey}
+                  />
+                  <View style={styles.itemTextCol}>
+                    <Text style={styles.itemBoxTitle}>{item.title}</Text>
+                    {item.subtitle ? (
+                      <Text style={styles.itemBoxSubtitle}>{item.subtitle}</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.itemBoxPrice}>₹{item.price}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
         {partnerLoading ? (
           <Text style={styles.partnerLoading}>Loading available providers...</Text>
         ) : selectedPartner ? (
@@ -118,9 +202,25 @@ export function ServiceDetailScreen() {
                 <Text style={styles.pTitle}>Selected Provider</Text>
                 <Text style={styles.pName}>{selectedPartner.name}</Text>
                 <Text style={styles.pSub}>
-                  ★ {selectedPartner.rating.toFixed(1)} · {selectedPartner.jobsCompleted} jobs
+                  ★ {selectedPartner.rating.toFixed(1)} · {selectedPartner.jobsCompleted} jobs ·{' '}
+                  {svc.distanceKm != null ? `Nearby ${svc.distanceKm.toFixed(1)} km` : 'Location available'}
                 </Text>
               </View>
+            </View>
+            <View style={[styles.partnerStatus, selectedPartner.isOnline ? styles.online : styles.offline]}>
+              <Text style={styles.statusTextLight}>
+                {selectedPartner.isOnline ? 'Online' : 'Offline'}
+              </Text>
+            </View>
+            <View style={styles.actions}>
+              <Pressable style={styles.secondary} onPress={callPartner}>
+                <Ionicons name="call-outline" size={20} color={colors.primary} />
+                <Text style={styles.secTxt}>Call</Text>
+              </Pressable>
+              <Pressable style={styles.secondary} onPress={chatPartner}>
+                <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
+                <Text style={styles.secTxt}>Chat</Text>
+              </Pressable>
             </View>
           </View>
         ) : (
@@ -164,6 +264,10 @@ export function ServiceDetailScreen() {
           </View>
         ) : null}
       </ScrollView>
+      <View style={styles.totalBar}>
+        <Text style={styles.totalLabel}>Total amount</Text>
+        <Text style={styles.totalValue}>₹{selectedAmount}</Text>
+      </View>
       <View style={styles.footer}>
         <PrimaryButton
           title="Add to cart"
@@ -179,7 +283,32 @@ export function ServiceDetailScreen() {
         <PrimaryButton
           title="Book service"
           disabled={!selectedPartner}
-          onPress={() => navigation.navigate('ConfirmBooking', { serviceId: svc.id })}
+          onPress={() => {
+            const selectedItems = serviceItems
+              .filter((item) => selectedItemIds.includes(item.id))
+              .map((item) => ({
+                serviceItemId: item.id,
+                title: item.title,
+                price: item.price,
+                quantity: 1,
+              }));
+            navigation.navigate('ConfirmBooking', {
+              serviceId: svc.id,
+              partnerId: selectedPartner?.id,
+              partnerName: selectedPartner?.name,
+              partnerPhone: selectedPartner?.phone,
+              partnerRating: selectedPartner?.rating,
+              distanceKm: partnerDistance,
+              amountOverride: selectedAmount > 0 ? selectedAmount : undefined,
+              serviceNameOverride:
+                selectedItemIds.length > 1
+                  ? `${svc.name} (${selectedItemIds.length} items)`
+                  : selectedItemIds.length === 1
+                    ? selectedItems[0]?.title
+                    : undefined,
+              selectedItems: selectedItems.length ? selectedItems : undefined,
+            });
+          }}
         />
       </View>
     </View>
@@ -211,6 +340,47 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   heartFab: { position: 'absolute', top: spacing.sm, right: spacing.sm, zIndex: 2, padding: spacing.xs },
+  section: { marginTop: spacing.lg },
+  sectionTitle: { fontSize: 16, fontWeight: '800', marginBottom: spacing.sm },
+  itemBox: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.white,
+  },
+  itemBoxOn: {
+    borderColor: colors.primary,
+    backgroundColor: colors.orangeTint,
+  },
+  itemBoxRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  itemTextCol: { flex: 1, minWidth: 0 },
+  itemBoxTitle: { fontSize: 15, fontWeight: '700', color: colors.charcoal },
+  itemBoxPrice: { fontSize: 15, fontWeight: '700', color: colors.primary },
+  itemBoxSubtitle: { marginTop: spacing.xs, color: colors.grey },
+  totalBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.orangeTint,
+    borderTopWidth: 1,
+    borderTopColor: colors.primary,
+  },
+  totalLabel: { fontSize: 15, fontWeight: '700', color: colors.charcoal },
+  totalValue: { fontSize: 22, fontWeight: '900', color: colors.primary },
+  partnerStatus: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+  },
+  online: { backgroundColor: colors.online },
+  offline: { backgroundColor: colors.offline },
+  statusTextLight: { fontSize: 11, fontWeight: '800', color: colors.white },
   pRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingRight: 36 },
   pPhoto: {
     width: 48,
@@ -288,7 +458,7 @@ const styles = StyleSheet.create({
   },
   providerRowSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.primaryTint,
+    backgroundColor: colors.orangeTint,
   },
   providerPhoto: {
     width: 44,

@@ -1,5 +1,12 @@
 import { apiService } from './apiService';
-import type { PartnerEarningsSummary, PartnerPricingRow, PartnerProfile, PartnerRequest } from '../mock/types';
+import type {
+  PartnerEarningsSummary,
+  PartnerPriceLimits,
+  PartnerPricingListResponse,
+  PartnerPricingRow,
+  PartnerProfile,
+  PartnerRequest,
+} from '../mock/types';
 
 export type PartnerOnboardingPayload = {
   phone: string;
@@ -14,13 +21,21 @@ export type PartnerOnboardingPayload = {
   trainingProgress?: number;
 };
 
+function unwrapPricingList(data: PartnerPricingListResponse | PartnerPricingRow[]): PartnerPricingListResponse {
+  if (Array.isArray(data)) {
+    return { limits: { min: 100, max: 1000 }, items: data };
+  }
+  return {
+    limits: data.limits ?? { min: 100, max: 1000 },
+    items: data.items ?? [],
+  };
+}
+
 export const partnerService = {
-  /** Public — creates or updates partner before first login */
   async applyOnboarding(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
     return apiService.post('/api/v1/partners/onboarding', payload);
   },
 
-  /** Public — new partner only; 409 if phone already registered */
   async registerPartner(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
     const data = await apiService.post<{ partner: PartnerProfile; created: boolean }>(
       '/api/v1/auth/partner/register',
@@ -28,6 +43,7 @@ export const partnerService = {
     );
     return data.partner;
   },
+
   async getProfile(): Promise<PartnerProfile> {
     return apiService.get('/api/v1/partners/profile', 'partner');
   },
@@ -87,15 +103,54 @@ export const partnerService = {
     return apiService.put('/api/v1/partners/profile', payload, 'partner');
   },
 
-  async getPricingRows(): Promise<PartnerPricingRow[]> {
-    return apiService.get('/api/v1/partners/pricing', 'partner');
+  async getPriceLimits(): Promise<PartnerPriceLimits> {
+    return apiService.get('/api/v1/partners/pricing/limits', 'partner');
   },
 
+  async getPricingRows(): Promise<PartnerPricingListResponse> {
+    const data = await apiService.get<PartnerPricingListResponse | PartnerPricingRow[]>(
+      '/api/v1/partners/pricing',
+      'partner',
+    );
+    return unwrapPricingList(data);
+  },
+
+  async updatePricingRow(
+    id: string,
+    patch: Partial<Pick<PartnerPricingRow, 'serviceName' | 'category' | 'baseCost' | 'isActive'>>,
+  ): Promise<PartnerPricingListResponse> {
+    await apiService.put(`/api/v1/partners/pricing/${id}`, patch, 'partner');
+    return this.getPricingRows();
+  },
+
+  async addPricingRow(
+    serviceName: string,
+    category: string,
+    baseCost: number,
+  ): Promise<{ message?: string; list: PartnerPricingListResponse }> {
+    const data = await apiService.post<{ items: PartnerPricingRow[]; item?: PartnerPricingRow }>(
+      '/api/v1/partners/pricing',
+      { serviceName, category, baseCost },
+      'partner',
+    );
+    const limits = await this.getPriceLimits();
+    return {
+      list: { limits, items: data.items ?? [] },
+    };
+  },
+
+  async deletePricingRow(id: string): Promise<PartnerPricingListResponse> {
+    const data = await apiService.delete<{ items: PartnerPricingRow[] }>(
+      `/api/v1/partners/pricing/${id}`,
+      'partner',
+    );
+    const limits = await this.getPriceLimits();
+    return { limits, items: data.items ?? [] };
+  },
+
+  /** @deprecated use updatePricingRow */
   async updatePricingBase(id: string, baseCost: number): Promise<PartnerPricingRow[]> {
-    return apiService.put(`/api/v1/partners/pricing/${id}`, { baseCost }, 'partner');
-  },
-
-  async addPricingRow(serviceName: string, category: string, baseCost: number): Promise<PartnerPricingRow[]> {
-    return apiService.post('/api/v1/partners/pricing', { serviceName, category, baseCost }, 'partner');
+    const res = await this.updatePricingRow(id, { baseCost });
+    return res.items;
   },
 };

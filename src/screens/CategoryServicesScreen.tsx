@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubCategoryGrid } from '../components/home/SubCategoryGrid';
 import { colors, radius, spacing } from '../constants/theme';
 import { filterSubServices, getMainCategory, type SubServiceItem } from '../data/serviceCatalog';
+import { catalogService } from '../services/catalogService';
+import { ScreenLoader } from '../components/ScreenLoader';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -18,6 +20,7 @@ export function CategoryServicesScreen() {
   const route = useRoute<R>();
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
+  const [navigating, setNavigating] = useState(false);
 
   const category = getMainCategory(route.params.categoryId);
   const filtered = useMemo(
@@ -25,13 +28,25 @@ export function CategoryServicesScreen() {
     [category, search],
   );
 
-  const onSubPress = (item: SubServiceItem) => {
-    if (!category) return;
-    navigation.navigate('ServiceList', {
-      bucketId: category.bucketId,
-      title: item.title,
-      searchQuery: item.searchQuery,
-    });
+  const onSubPress = async (item: SubServiceItem) => {
+    if (!category || navigating) return;
+    setNavigating(true);
+    try {
+      const results = await catalogService.searchServices(item.searchQuery);
+      const inBucket = results.filter((s) => s.bucketId === category.bucketId);
+      const match = inBucket[0] ?? results[0];
+      if (match) {
+        navigation.navigate('ServiceProviders', { serviceId: match.id });
+        return;
+      }
+      navigation.navigate('ServiceList', {
+        bucketId: category.bucketId,
+        title: item.title,
+        searchQuery: item.searchQuery,
+      });
+    } finally {
+      setNavigating(false);
+    }
   };
 
   if (!category) {
@@ -71,10 +86,11 @@ export function CategoryServicesScreen() {
         ) : null}
       </View>
 
+      {navigating ? <ScreenLoader /> : null}
       {filtered.length === 0 ? (
         <Text style={styles.empty}>No services match your search.</Text>
       ) : (
-        <SubCategoryGrid items={filtered} onItemPress={onSubPress} />
+        <SubCategoryGrid items={filtered} onItemPress={(item) => void onSubPress(item)} />
       )}
     </View>
   );

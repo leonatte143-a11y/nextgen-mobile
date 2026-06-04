@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryGrid } from '../components/home/CategoryGrid';
+import { HomeAdBanner } from '../components/home/HomeAdBanner';
 import { HomeBannerCarousel } from '../components/home/HomeBannerCarousel';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -119,29 +120,29 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </Pressable>
       </View>
 
-      <HomeBannerCarousel locationLabel={location} />
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <View style={styles.banner}>
-          <Text style={styles.bannerTxt}>NEXGEN — Rajahmundry & Guntur</Text>
-          <Text style={styles.bannerSub}>Verified professionals at your doorstep</Text>
-        </View>
+        <HomeAdBanner locationLabel={location} />
+        <HomeBannerCarousel locationLabel={location} />
 
-        <View style={styles.searchRow}>
-          <Pressable style={styles.mic}>
-            <Ionicons name="mic-outline" size={22} color={colors.primary} />
-          </Pressable>
-          <TextInput
-            style={styles.searchIn}
-            placeholder={t(language, 'searchPlaceholder')}
-            placeholderTextColor={colors.grey}
-            value={search}
-            onChangeText={setSearch}
-            onSubmitEditing={onSearch}
-            returnKeyType="search"
-          />
-          <Pressable onPress={() => navigation.navigate('ServiceList', { bucketId: null })}>
-            <Ionicons name="options-outline" size={22} color={colors.charcoal} />
+        <View style={styles.searchBlock}>
+          <View style={styles.searchBarOnly}>
+            <Ionicons name="search-outline" size={20} color={colors.grey} />
+            <TextInput
+              style={styles.searchIn}
+              placeholder={t(language, 'searchPlaceholder')}
+              placeholderTextColor={colors.grey}
+              value={search}
+              onChangeText={setSearch}
+              onSubmitEditing={onSearch}
+              returnKeyType="search"
+            />
+          </View>
+          <Pressable
+            style={styles.filterBtn}
+            onPress={() => navigation.navigate('ServiceList', { bucketId: null, title: 'All services' })}
+          >
+            <Ionicons name="options-outline" size={22} color={colors.white} />
+            <Text style={styles.filterTxt}>Filter</Text>
           </Pressable>
         </View>
 
@@ -243,28 +244,34 @@ const styles = StyleSheet.create({
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, maxWidth: 220 },
   loc: { fontSize: 12, color: colors.grey },
   headerAction: { paddingTop: 2 },
-  scroll: { paddingBottom: spacing.xl },
-  banner: {
-    margin: spacing.md,
-    backgroundColor: colors.orangeTint,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
+  scroll: { paddingBottom: spacing.xl, paddingTop: spacing.xs },
+  searchBlock: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
-  bannerTxt: { fontWeight: '800', color: colors.charcoal, fontSize: 16 },
-  bannerSub: { color: colors.grey, marginTop: 4 },
-  searchRow: {
+  searchBarOnly: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.md,
     backgroundColor: colors.greyLight,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
   },
-  mic: { padding: spacing.sm },
   searchIn: { flex: 1, paddingVertical: spacing.md, fontSize: 15, color: colors.charcoal },
+  filterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.charcoal,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  filterTxt: { color: colors.white, fontWeight: '800', fontSize: 14 },
   rowTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',

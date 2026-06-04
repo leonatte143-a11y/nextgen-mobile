@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -13,6 +14,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
   const { logoutUser } = useAuth();
+  const { isDark, setDarkMode } = useTheme();
   const [a, setA] = useState(true);
   const [b, setB] = useState(true);
   const [c, setC] = useState(false);
@@ -26,11 +28,12 @@ export function SettingsScreen() {
         <Text style={styles.title}>Settings</Text>
         <View style={{ width: 24 }} />
       </View>
+      <Text style={styles.section}>Appearance</Text>
+      <Row label="Dark mode" value={isDark} onChange={(v) => void setDarkMode(v)} />
       <Text style={styles.section}>Notifications</Text>
       <Row label="Booking updates" value={a} onChange={setA} />
       <Row label="Special offers" value={b} onChange={setB} />
       <Row label="App updates" value={c} onChange={setC} />
-      <PrimaryButton title="Manage payment methods" variant="outline" onPress={() => {}} />
       <View style={{ height: spacing.lg }} />
       <PrimaryButton
         title="Logout"

@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
-import type { BucketId } from '../mock/types';
+import type { BucketId, SelectedBookingItem } from '../mock/types';
 import type { MainCategoryId } from '../data/serviceCatalog';
 
 export type RootStackParamList = {
@@ -19,7 +19,18 @@ export type RootStackParamList = {
   ServiceList: { bucketId?: BucketId | null; title?: string; searchQuery?: string };
   ServiceProviders: { serviceId: string };
   ServiceDetail: { serviceId: string; selectedPartnerId?: string };
-  ConfirmBooking: { serviceId: string; fromCart?: boolean };
+  ConfirmBooking: {
+    serviceId: string;
+    fromCart?: boolean;
+    partnerId?: string;
+    partnerName?: string;
+    partnerPhone?: string;
+    partnerRating?: number;
+    distanceKm?: number;
+    amountOverride?: number;
+    serviceNameOverride?: string;
+    selectedItems?: SelectedBookingItem[];
+  };
   BookingSuccess: { bookingId: string };
   LiveBooking: { bookingId: string };
   Notifications: undefined;

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../../constants/theme';
 import { PrimaryButton } from '../PrimaryButton';
 
-const CITIES = ['Rajahmundry', 'Guntur', 'Vijayawada (mock)'] as const;
+const CITIES = ['Rajahmundry', 'Guntur', 'Vijayawada'] as const;
 
 type Props = {
   initialCity: string;
@@ -44,11 +44,10 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
       <Modal visible={locOpen} animationType="slide" transparent>
         <View style={styles.modalRoot}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalH}>Service territory (mock)</Text>
-            <Text style={styles.gpsPill}>GPS: Active — location lock (mock, not real-time)</Text>
+            <Text style={styles.modalH}>Service territory</Text>
+            <Text style={styles.gpsPill}>GPS: Active — location lock enabled</Text>
             <Text style={styles.modalSub}>
-              Primary zone: Rajahmundry / Guntur. Set center by city or type an area (e.g. Danavaipeta) — no Google
-              Maps in this build.
+              Primary zone: Rajahmundry / Guntur. Set center by city or type an area (e.g. Danavaipeta).
             </Text>
             {CITIES.map((c) => (
               <Pressable
@@ -61,7 +60,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
             ))}
             <TextInput
               style={styles.inp}
-              placeholder="e.g. Danavaipeta, or drag-pin mock"
+              placeholder="e.g. Danavaipeta or service area"
               value={mapHint}
               onChangeText={setMapHint}
             />
@@ -87,7 +86,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
                 const n = Math.max(1, Math.min(50, parseInt(rInput, 10) || 10));
                 setRadius(n);
                 setRInput(String(n));
-                Alert.alert('Radius updated', `Mock: partners see jobs within ${n} km.`);
+                Alert.alert('Radius updated', `Partners see jobs within ${n} km.`);
                 setRadOpen(false);
               }}
             />

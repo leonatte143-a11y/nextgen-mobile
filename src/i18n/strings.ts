@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'te';
+export type Lang = 'en' | 'te' | 'hi';
 
 type Dict = Record<string, { en: string; te: string }>;
 
@@ -26,5 +26,6 @@ const dict: Dict = {
 export function t(lang: Lang, key: keyof typeof dict): string {
   const row = dict[key];
   if (!row) return key;
+  if (lang === 'hi') return row.en;
   return row[lang] ?? row.en;
 }

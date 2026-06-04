@@ -11,6 +11,7 @@ import {
   PartnerProfileScreen,
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
+  PartnerMyServicesScreen,
   PartnerServicePricingScreen,
 } from '../screens';
 import type { PartnerStackParamList, PartnerTabParamList } from './PartnerStackTypes';
@@ -29,6 +30,7 @@ function PartnerTabNavigator() {
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, string> = {
             Dashboard: 'speedometer-outline',
+            MyServices: 'construct-outline',
             Requests: 'notifications-outline',
             Earnings: 'wallet-outline',
             Profile: 'person-outline',
@@ -39,6 +41,7 @@ function PartnerTabNavigator() {
       })}
     >
       <Tab.Screen name="Dashboard" component={PartnerDashboardScreen} options={{ title: 'Dashboard' }} />
+      <Tab.Screen name="MyServices" component={PartnerMyServicesScreen} options={{ title: 'My Services' }} />
       <Tab.Screen name="Requests" component={PartnerRequestsScreen} options={{ title: 'Requests' }} />
       <Tab.Screen name="Earnings" component={PartnerEarningsScreen} options={{ title: 'Wallet' }} />
       <Tab.Screen name="Profile" component={PartnerProfileScreen} options={{ title: 'Profile' }} />

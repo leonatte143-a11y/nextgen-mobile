@@ -46,7 +46,7 @@ export function ServiceProvidersScreen() {
   const title = service?.name || 'Service Providers';
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}> 
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
@@ -65,8 +65,8 @@ export function ServiceProvidersScreen() {
       {providers.length === 0 ? (
         <EmptyState
           icon="📵"
-          title="No providers available currently"
-          subtitle="We couldn't find an approved online provider for this service right now. Please check again later."
+          title="No partners available for this service right now."
+          subtitle="We couldn't find an approved provider for this service right now. Please check again later."
           actionLabel="Back to services"
           onAction={() => navigation.goBack()}
         />
@@ -78,18 +78,22 @@ export function ServiceProvidersScreen() {
           renderItem={({ item }) => (
             <Pressable
               style={styles.card}
-              onPress={() => navigation.navigate('ServiceDetail', {
-                serviceId: route.params.serviceId,
-                selectedPartnerId: item.id,
-              })}
+              onPress={() =>
+                navigation.navigate('ServiceDetail', {
+                  serviceId: route.params.serviceId,
+                  selectedPartnerId: item.id,
+                })
+              }
             >
               <View style={styles.row}>
-                <View style={styles.photo}>
-                  {item.photoUrl ? (
-                    <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
-                  ) : (
-                    <Text style={styles.photoTxt}>{item.name[0]}</Text>
-                  )}
+                <View style={styles.photoFrame}>
+                  <View style={styles.photo}>
+                    {item.photoUrl ? (
+                      <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
+                    ) : (
+                      <Text style={styles.photoTxt}>{item.name[0]}</Text>
+                    )}
+                  </View>
                 </View>
                 <View style={styles.info}>
                   <View style={styles.titleRow}>
@@ -99,19 +103,17 @@ export function ServiceProvidersScreen() {
                     </View>
                   </View>
                   <Text style={styles.rating} numberOfLines={1}>
-                    ★ {item.rating.toFixed(1)} • {item.reviewsCount ?? 0} reviews
+                    ★ {item.rating.toFixed(1)} · {item.reviewsCount ?? 0} reviews
                   </Text>
                   <Text style={styles.meta} numberOfLines={1}>
                     Jobs completed: {item.jobsCompleted}
                   </Text>
-                  <Text style={styles.meta} numberOfLines={1}>
-                    Distance: {item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : 'N/A'}
-                  </Text>
-                  {item.categories?.length ? (
-                    <Text style={styles.categories} numberOfLines={1}>
-                      {item.categories.join(', ')}
+                  <View style={styles.distanceRow}>
+                    <Ionicons name="location" size={14} color={colors.primary} />
+                    <Text style={styles.distance}>
+                      {item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : '—'}
                     </Text>
-                  ) : null}
+                  </View>
                 </View>
               </View>
             </Pressable>
@@ -147,29 +149,33 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   row: { flexDirection: 'row', gap: spacing.md },
+  photoFrame: {
+    padding: 3,
+    borderRadius: 32,
+    borderWidth: 3,
+    borderColor: colors.primary,
+    backgroundColor: colors.orangeTint,
+  },
   photo: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  photoImage: {
-    width: 56,
-    height: 56,
-    resizeMode: 'cover',
-  },
-  photoTxt: { color: colors.white, fontSize: 20, fontWeight: '800' },
+  photoImage: { width: 52, height: 52, resizeMode: 'cover' },
+  photoTxt: { color: colors.primary, fontSize: 20, fontWeight: '800' },
   info: { flex: 1 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
   name: { fontSize: 16, fontWeight: '700', color: colors.charcoal, flex: 1 },
   statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.full },
-  online: { backgroundColor: '#E6F9EF' },
-  offline: { backgroundColor: '#F6F6F6' },
-  statusText: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  online: { backgroundColor: colors.online },
+  offline: { backgroundColor: colors.offline },
+  statusText: { fontSize: 11, fontWeight: '800', color: colors.white },
   rating: { fontSize: 13, color: colors.charcoal, marginTop: spacing.xs },
   meta: { fontSize: 12, color: colors.grey, marginTop: spacing.xs },
-  categories: { marginTop: spacing.xs, fontSize: 12, color: colors.primary },
+  distanceRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.xs },
+  distance: { fontSize: 13, fontWeight: '700', color: colors.charcoal },
 });

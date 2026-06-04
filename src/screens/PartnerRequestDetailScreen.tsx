@@ -170,6 +170,16 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         <Text style={styles.sectionTitle}>Job OTP</Text>
         <Text style={styles.sectionText}>{request.startOtp}</Text>
       </View>
+      {request.lineItems?.length ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Booked services</Text>
+          {request.lineItems.map((li) => (
+            <Text key={li.id || li.title} style={styles.sectionText}>
+              {li.title} × {li.quantity} — ₹{li.lineTotal}
+            </Text>
+          ))}
+        </View>
+      ) : null}
       {request.extraServices?.length ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Extra Service</Text>
