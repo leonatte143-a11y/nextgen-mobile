@@ -13,6 +13,7 @@ export type PartnerStackParamList = {
 
 export type PartnerTabParamList = {
   Dashboard: undefined;
+  MyServices: undefined;
   Requests: undefined;
   Earnings: undefined;
   Profile: undefined;
