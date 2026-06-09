@@ -11,7 +11,8 @@ const dict: Dict = {
   continue: { en: 'Continue', te: 'కొనసాగించు' },
   chooseLanguage: { en: 'Choose Language', te: 'భాష ఎంచుకోండి' },
   home: { en: 'Home', te: 'హోమ్' },
-  bookings: { en: 'Bookings', te: 'బుకింగ్‌లు' },
+  bookings: { en: 'Booking', te: 'బుకింగ్' },
+  shop: { en: 'Shop', te: 'షాప్' },
   cart: { en: 'Cart', te: 'కార్ట్' },
   profile: { en: 'Profile', te: 'ప్రొఫైల్' },
   searchPlaceholder: {

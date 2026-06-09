@@ -43,13 +43,18 @@ export type RootStackParamList = {
   Terms: undefined;
   Privacy: undefined;
   MyFavorites: undefined;
+  Profile: undefined;
+  SavedAddresses: undefined;
+  HealthcareEmergencies: undefined;
+  AmbulanceSos: undefined;
+  ClinicBooking: undefined;
 };
 
 export type MainTabParamList = {
   Home: undefined;
   Bookings: undefined;
+  Shop: undefined;
   Cart: undefined;
-  Profile: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<

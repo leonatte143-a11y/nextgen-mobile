@@ -7,6 +7,7 @@ import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
 import type { AdvertisementBanner } from '../../types/banner';
 import type { RootStackParamList } from '../../navigation/types';
+import { BannerSkeleton } from './BannerSkeleton';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -14,19 +15,28 @@ type Props = {
   locationLabel: string;
 };
 
+const AD_HEIGHT = 168;
+
 function HomeAdBannerComponent({ locationLabel }: Props) {
   const navigation = useNavigation<Nav>();
   const [ad, setAd] = useState<AdvertisementBanner | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const city = parseCityFromLocation(locationLabel);
     const list = await bannerService.getHomeBanners(city);
     setAd(list[0] ?? null);
+    setLoading(false);
   }, [locationLabel]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  if (loading) {
+    return <BannerSkeleton height={AD_HEIGHT} />;
+  }
 
   if (!ad) {
     return (
@@ -49,12 +59,12 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
       )}
       <View style={styles.overlay} />
       <View style={styles.textBlock}>
-        <Text style={styles.sponsored}>Ad</Text>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={styles.sponsored}>Sponsored</Text>
+        <Text style={styles.title} numberOfLines={2}>
           {ad.title}
         </Text>
         {ad.subtitle ? (
-          <Text style={styles.subtitle} numberOfLines={1}>
+          <Text style={styles.subtitle} numberOfLines={2}>
             {ad.subtitle}
           </Text>
         ) : null}
@@ -69,16 +79,21 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
-    height: 88,
-    borderRadius: radius.md,
+    height: AD_HEIGHT,
+    borderRadius: radius.lg,
     overflow: 'hidden',
-    backgroundColor: colors.charcoal,
+    backgroundColor: colors.navy,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   pressed: { opacity: 0.92 },
   image: { ...StyleSheet.absoluteFillObject },
   imageFallback: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.primaryDark },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
-  textBlock: { flex: 1, justifyContent: 'center', padding: spacing.md },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.28)' },
+  textBlock: { flex: 1, justifyContent: 'flex-end', padding: spacing.md },
   sponsored: {
     fontSize: 10,
     fontWeight: '800',
@@ -86,14 +101,14 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 4,
   },
-  title: { color: colors.white, fontSize: 16, fontWeight: '800' },
-  subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 12, marginTop: 2 },
+  title: { color: colors.white, fontSize: 18, fontWeight: '800' },
+  subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 13, marginTop: 4 },
   placeholder: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
-    height: 88,
-    borderRadius: radius.md,
-    backgroundColor: colors.greyLight,
+    height: AD_HEIGHT,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderStyle: 'dashed',
@@ -101,6 +116,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.md,
   },
-  placeholderTitle: { fontWeight: '800', color: colors.charcoal, fontSize: 14 },
+  placeholderTitle: { fontWeight: '800', color: colors.navy, fontSize: 15 },
   placeholderSub: { color: colors.grey, fontSize: 12, marginTop: 4, textAlign: 'center' },
 });

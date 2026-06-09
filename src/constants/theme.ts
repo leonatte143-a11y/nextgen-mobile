@@ -4,9 +4,14 @@
 export const colors = {
   primary: '#FF8C00',
   primaryDark: '#E67E00',
+  navy: '#1A237E',
+  slate: '#5C6B7A',
+  trustTeal: '#00897B',
+  premiumGold: '#D4A017',
   white: '#FFFFFF',
   background: '#FFFFFF',
-  charcoal: '#2D2D2D',
+  surface: '#F8F9FA',
+  charcoal: '#2C3E50',
   grey: '#757575',
   greyLight: '#F5F5F5',
   border: '#E8E8E8',
@@ -15,9 +20,11 @@ export const colors = {
   offline: '#C62828',
   error: '#C62828',
   warning: '#F9A825',
+  emergency: '#D32F2F',
   overlay: 'rgba(0,0,0,0.45)',
   orangeTint: '#FFF5E6',
   black: '#1A1A1A',
+  cardShadow: 'rgba(0,0,0,0.04)',
 } as const;
 
 export const darkColors = {

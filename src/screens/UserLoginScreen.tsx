@@ -10,6 +10,8 @@ import { apiService } from '../services/apiService';
 import { BASE_URL } from '../config/api';
 import { SHOW_DEBUG_OTP, logOtpEvent } from '../config/debug';
 import type { RootStackParamList } from '../navigation/types';
+import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
+import { userService } from '../services/userService';
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'UserLogin'> };
 
@@ -92,6 +94,20 @@ export function UserLoginScreen({ navigation }: Props) {
       if (!r.ok) {
         setErr(r.message ?? 'Could not verify OTP.');
       } else {
+        const locOk = await requestLocationPermission();
+        if (locOk) {
+          const coords = await getCurrentCoords();
+          if (coords) {
+            try {
+              await userService.updateProfile({
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+              });
+            } catch {
+              /* non-blocking */
+            }
+          }
+        }
         navigation.replace('MainTabs');
       }
     } finally {

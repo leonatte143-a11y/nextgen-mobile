@@ -22,7 +22,7 @@ import { BannerSkeleton } from './BannerSkeleton';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BANNER_WIDTH = SCREEN_WIDTH - spacing.md * 2;
-const BANNER_HEIGHT = 100;
+const BANNER_HEIGHT = 68;
 const AUTO_MS = 4000;
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;

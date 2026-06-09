@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,27 +16,39 @@ import { CategoryGrid } from '../components/home/CategoryGrid';
 import { HomeAdBanner } from '../components/home/HomeAdBanner';
 import { HomeBannerCarousel } from '../components/home/HomeBannerCarousel';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
+import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
+import { notificationService } from '../services/notificationService';
 import { t } from '../i18n/strings';
 import type { RootStackParamList } from '../navigation/types';
 import type { MainTabScreenProps } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
+const DEFAULT_FILTERS: SearchFilters = {
+  radiusKm: 5,
+  minRating: 0,
+  categoryId: null,
+  onlineOnly: false,
+};
+
 export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { language } = useAuth();
+  const { language, user } = useAuth();
   const [location] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
   const [catalog, setCatalog] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<SearchFilters>(DEFAULT_FILTERS);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,20 +64,39 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     }
   }, []);
 
+  const loadUnread = useCallback(async () => {
+    try {
+      const notes = await notificationService.list();
+      setUnreadCount(notes.filter((n) => !n.read).length);
+    } catch {
+      setUnreadCount(0);
+    }
+  }, []);
+
   useEffect(() => {
     load();
   }, [load]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void loadUnread();
+    }, [loadUnread]),
+  );
+
   const onSearch = useCallback(() => {
     navigation.navigate('ServiceList', {
-      bucketId: null,
+      bucketId: filters.categoryId as CatalogService['bucketId'] | null,
       title: search.trim() || 'Search results',
       searchQuery: search.trim() || undefined,
     });
-  }, [navigation, search]);
+  }, [navigation, search, filters.categoryId]);
 
   const onCategoryPress = useCallback(
     (category: MainCategory) => {
+      if (category.id === 'life_health') {
+        navigation.navigate('HealthcareEmergencies');
+        return;
+      }
       navigation.navigate('CategoryServices', { categoryId: category.id });
     },
     [navigation],
@@ -86,7 +117,30 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     [navigation],
   );
 
+  const applyFilters = (next: SearchFilters) => {
+    setFilters(next);
+    setFilterOpen(false);
+    navigation.navigate('ServiceList', {
+      bucketId: next.categoryId as CatalogService['bucketId'] | null,
+      title: 'Filtered services',
+      searchQuery: search.trim() || undefined,
+    });
+  };
+
+  const initials = user
+    ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || 'N'
+    : 'N';
+
   const categories = useMemo(() => MAIN_CATEGORIES, []);
+
+  const filteredTopRated = useMemo(() => {
+    return topRated.filter((item) => {
+      if (filters.minRating > 0 && item.rating < filters.minRating) return false;
+      if (filters.categoryId && item.bucketId !== filters.categoryId) return false;
+      if (filters.onlineOnly && !item.partner?.isOnline) return false;
+      return true;
+    });
+  }, [topRated, filters]);
 
   if (loading && topRated.length === 0) {
     return <ScreenLoader />;
@@ -95,37 +149,31 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <View>
-          <View style={styles.brandRow}>
-            <View style={styles.miniLogo}>
-              <Text style={styles.miniN}>N</Text>
-            </View>
-            <View>
-              <Text style={styles.brand}>NEXGEN</Text>
-              <Pressable onPress={() => {}} style={styles.locRow}>
-                <Ionicons name="location-outline" size={16} color={colors.primary} />
-                <Text style={styles.loc} numberOfLines={1}>
-                  {location}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+        <View style={styles.brandBlock}>
+          <Ionicons name="location" size={16} color={colors.primary} />
+          <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
+            <Text style={styles.loc} numberOfLines={1}>{location}</Text>
+          </Pressable>
         </View>
-        <Pressable
-          onPress={() => navigation.navigate('Notifications')}
-          style={styles.headerAction}
-          hitSlop={8}
-        >
-          <Ionicons name="notifications-outline" size={26} color={colors.charcoal} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable onPress={() => navigation.navigate('Notifications')} style={styles.bellWrap} hitSlop={8}>
+            <Ionicons name="notifications-outline" size={24} color={colors.white} />
+            {unreadCount > 0 ? <View style={styles.badge} /> : null}
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('Profile')} style={styles.profileRing} hitSlop={8}>
+            <View style={styles.profileInner}>
+              <Text style={styles.profileInitials}>{initials}</Text>
+            </View>
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <HomeAdBanner locationLabel={location} />
         <HomeBannerCarousel locationLabel={location} />
 
-        <View style={styles.searchBlock}>
-          <View style={styles.searchBarOnly}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={20} color={colors.grey} />
             <TextInput
               style={styles.searchIn}
@@ -136,13 +184,12 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
               onSubmitEditing={onSearch}
               returnKeyType="search"
             />
+            <Pressable onPress={() => Alert.alert('Voice search', 'Voice search will be available in a future update.')} hitSlop={8}>
+              <Ionicons name="mic-outline" size={20} color={colors.navy} />
+            </Pressable>
           </View>
-          <Pressable
-            style={styles.filterBtn}
-            onPress={() => navigation.navigate('ServiceList', { bucketId: null, title: 'All services' })}
-          >
-            <Ionicons name="options-outline" size={22} color={colors.white} />
-            <Text style={styles.filterTxt}>Filter</Text>
+          <Pressable style={styles.filterBtn} onPress={() => setFilterOpen(true)}>
+            <Ionicons name="options-outline" size={22} color={colors.navy} />
           </Pressable>
         </View>
 
@@ -153,42 +200,30 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           </Pressable>
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
-        <CategoryGrid
-          categories={categories}
-          language={language}
-          onCategoryPress={onCategoryPress}
-        />
+        <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
 
         <Text style={styles.sectionTitle}>Popular services</Text>
         <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
 
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'topRated')}</Text>
-          <Text style={styles.sort}>Sort</Text>
         </View>
-        <FlatList
-          horizontal
-          data={topRated}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-          nestedScrollEnabled
-          contentContainerStyle={styles.carousel}
-          renderItem={({ item }) => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
+          {filteredTopRated.map((item) => (
             <Pressable
+              key={item.id}
               style={styles.topCard}
               onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
             >
               <View style={styles.topPhoto}>
                 <Text style={styles.topPhotoTxt}>{item.partner.name[0]}</Text>
               </View>
-              <Text style={styles.topName} numberOfLines={1}>
-                {item.name}
-              </Text>
+              <Text style={styles.topName} numberOfLines={1}>{item.name}</Text>
               <Text style={styles.topRate}>★ {item.rating.toFixed(1)}</Text>
               <Text style={styles.topPrice}>from ₹{item.basePrice}</Text>
             </Pressable>
-          )}
-        />
+          ))}
+        </ScrollView>
 
         <Text style={styles.h2}>Why choose NEXGEN?</Text>
         <View style={styles.why}>
@@ -214,6 +249,13 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           <Text style={styles.footerLink}>support@nexgen.com · +91 98765 43210</Text>
         </View>
       </ScrollView>
+
+      <SearchFilterModal
+        visible={filterOpen}
+        initial={filters}
+        onClose={() => setFilterOpen(false)}
+        onApply={applyFilters}
+      />
     </View>
   );
 }
@@ -223,55 +265,75 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.white,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.navy,
   },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  miniLogo: {
+  brandBlock: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 },
+  loc: { fontSize: 13, color: colors.white, fontWeight: '600', maxWidth: 200 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  bellWrap: { padding: 4, position: 'relative' },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+    borderWidth: 1.5,
+    borderColor: colors.navy,
+  },
+  profileRing: {
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInner: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  miniN: { color: colors.white, fontWeight: '900', fontSize: 20 },
-  brand: { fontSize: 16, fontWeight: '900', color: colors.primary },
-  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, maxWidth: 220 },
-  loc: { fontSize: 12, color: colors.grey },
-  headerAction: { paddingTop: 2 },
+  profileInitials: { color: colors.white, fontWeight: '800', fontSize: 13 },
   scroll: { paddingBottom: spacing.xl, paddingTop: spacing.xs },
-  searchBlock: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  searchBarOnly: {
+  searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.greyLight,
-    borderRadius: radius.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    gap: 10,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
     gap: spacing.sm,
+    minHeight: 48,
   },
-  searchIn: { flex: 1, paddingVertical: spacing.md, fontSize: 15, color: colors.charcoal },
+  searchIn: { flex: 1, paddingVertical: spacing.sm, fontSize: 15, color: colors.charcoal },
   filterBtn: {
-    flexDirection: 'row',
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.charcoal,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
   },
-  filterTxt: { color: colors.white, fontWeight: '800', fontSize: 14 },
   rowTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -279,30 +341,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
   },
-  h2: { fontSize: 18, fontWeight: '800', color: colors.charcoal, paddingHorizontal: spacing.md, marginTop: spacing.md },
+  h2: { fontSize: 18, fontWeight: '800', color: colors.navy, paddingHorizontal: spacing.md, marginTop: spacing.md },
   seeAll: { color: colors.primary, fontWeight: '700' },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
   sectionTitle: {
     paddingHorizontal: spacing.md,
     fontSize: 18,
     fontWeight: '800',
-    color: colors.charcoal,
+    color: colors.navy,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
-  sort: { color: colors.primary, fontWeight: '600' },
   carousel: { paddingHorizontal: spacing.md, gap: spacing.md, paddingBottom: spacing.md },
   topCard: {
     width: 140,
     backgroundColor: colors.white,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     padding: spacing.md,
     marginRight: spacing.md,
-    elevation: 2,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   topPhoto: {
     width: 48,
@@ -312,9 +372,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
   topPhotoTxt: { fontWeight: '800', color: colors.primary },
-  topName: { fontWeight: '700', fontSize: 14 },
+  topName: { fontWeight: '700', fontSize: 14, color: colors.charcoal },
   topRate: { fontSize: 13, color: colors.grey, marginTop: 2 },
   topPrice: { fontSize: 15, fontWeight: '800', color: colors.primary, marginTop: 4 },
   why: { padding: spacing.md },

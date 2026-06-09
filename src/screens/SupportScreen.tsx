@@ -36,6 +36,7 @@ export function SupportScreen() {
   const [subject, setSubject] = useState('Report an issue with my booking');
   const [description, setDescription] = useState('');
   const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
+  const [completedOrders, setCompletedOrders] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [ticketLoading, setTicketLoading] = useState(false);
 
@@ -46,9 +47,13 @@ export function SupportScreen() {
       try {
         setLoadingBookings(true);
         const bookings = await bookingService.getBookings();
-        if (mounted && bookings.length > 0) {
-          setLatestBooking(bookings[0]);
-          setSubject(`Issue with ${bookings[0].serviceName}`);
+        const completed = bookings.filter((b) => b.status === 'completed').slice(0, 5);
+        if (mounted) {
+          setCompletedOrders(completed);
+          if (bookings.length > 0) {
+            setLatestBooking(bookings[0]);
+            setSubject(`Issue with ${bookings[0].serviceName}`);
+          }
         }
       } catch {
         // ignore, keep support screen available
@@ -120,6 +125,33 @@ export function SupportScreen() {
           <Text style={styles.faqA}>{f.a}</Text>
         </View>
       ))}
+      <Text style={styles.section}>Issues with previous orders</Text>
+      {completedOrders.length === 0 ? (
+        <Text style={styles.noBooking}>No completed orders yet.</Text>
+      ) : (
+        completedOrders.map((b) => (
+          <Pressable
+            key={b.id}
+            style={styles.issue}
+            onPress={() => setSubject(`Issue with ${b.serviceName} (${b.id})`)}
+          >
+            <View>
+              <Text style={styles.issueTxt}>{b.serviceName}</Text>
+              <Text style={styles.issueSub}>Completed · {b.id}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.grey} />
+          </Pressable>
+        ))
+      )}
+      <View style={styles.legalRow}>
+        <Pressable onPress={() => navigation.navigate('Terms')}>
+          <Text style={styles.legalLink}>Terms & Conditions</Text>
+        </Pressable>
+        <Text style={styles.legalDot}>·</Text>
+        <Pressable onPress={() => navigation.navigate('Privacy')}>
+          <Text style={styles.legalLink}>Privacy Policy</Text>
+        </Pressable>
+      </View>
       <Text style={styles.section}>Report an issue</Text>
       {loadingBookings ? (
         <Text style={styles.loading}>Checking your latest bookings…</Text>
@@ -242,5 +274,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
   },
-  sosTxt: { color: colors.white, fontWeight: '800' },
+  sosTxt: { color: colors.white, fontWeight: '800', padding: spacing.md },
+  legalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  legalLink: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  legalDot: { color: colors.grey },
 });

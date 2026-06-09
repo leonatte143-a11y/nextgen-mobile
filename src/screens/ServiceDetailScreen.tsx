@@ -205,6 +205,9 @@ export function ServiceDetailScreen() {
                   ★ {selectedPartner.rating.toFixed(1)} · {selectedPartner.jobsCompleted} jobs ·{' '}
                   {svc.distanceKm != null ? `Nearby ${svc.distanceKm.toFixed(1)} km` : 'Location available'}
                 </Text>
+                {selectedPartner.phone ? (
+                  <Text style={styles.pPhone}>📞 {selectedPartner.phone}</Text>
+                ) : null}
               </View>
             </View>
             <View style={[styles.partnerStatus, selectedPartner.isOnline ? styles.online : styles.offline]}>
@@ -394,6 +397,7 @@ const styles = StyleSheet.create({
   pTitle: { fontSize: 12, color: colors.grey },
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },
   pSub: { color: colors.grey, marginTop: 4 },
+  pPhone: { color: colors.navy, fontWeight: '700', marginTop: 6, fontSize: 14 },
   remoteBox: {
     marginTop: spacing.md,
     padding: spacing.md,

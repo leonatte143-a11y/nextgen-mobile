@@ -23,6 +23,12 @@ export function CategoryServicesScreen() {
   const [navigating, setNavigating] = useState(false);
 
   const category = getMainCategory(route.params.categoryId);
+
+  React.useEffect(() => {
+    if (route.params.categoryId === 'life_health') {
+      navigation.replace('HealthcareEmergencies');
+    }
+  }, [navigation, route.params.categoryId]);
   const filtered = useMemo(
     () => (category ? filterSubServices(category.subServices, search) : []),
     [category, search],

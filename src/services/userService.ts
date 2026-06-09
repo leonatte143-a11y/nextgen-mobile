@@ -12,4 +12,8 @@ export const userService = {
     const data = await apiService.put<unknown>('/api/v1/users/me', partial, 'user');
     return coerceUser(data);
   },
+
+  async deleteAccount(): Promise<void> {
+    await apiService.delete('/api/v1/users/me', 'user');
+  },
 };
