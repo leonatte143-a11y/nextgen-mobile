@@ -8,13 +8,16 @@ import { getGridCardWidth } from '../../utils/gridLayout';
 type Props = {
   title: string;
   icon: IconName;
+  accentColor?: string;
   onPress: () => void;
   selected?: boolean;
 };
 
 const CARD_WIDTH = getGridCardWidth();
 
-function CategoryGridCardComponent({ title, icon, onPress, selected }: Props) {
+function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, onPress, selected }: Props) {
+  const iconBg = selected ? accentColor : `${accentColor}18`;
+  const iconColor = selected ? colors.white : accentColor;
   return (
     <Pressable
       onPress={onPress}
@@ -25,8 +28,8 @@ function CategoryGridCardComponent({ title, icon, onPress, selected }: Props) {
         pressed && styles.cardPressed,
       ]}
     >
-      <View style={[styles.iconWrap, selected && styles.iconWrapSelected]}>
-        <Ionicons name={icon} size={26} color={selected ? colors.white : colors.primary} />
+      <View style={[styles.iconWrap, { backgroundColor: iconBg }, selected && styles.iconWrapSelected]}>
+        <Ionicons name={icon} size={26} color={iconColor} />
       </View>
       <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={2}>
         {title}

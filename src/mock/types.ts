@@ -16,9 +16,21 @@ export interface ServiceBucket {
 export interface PartnerSummary {
   id: string;
   name: string;
+  phone?: string;
   rating: number;
   jobsCompleted: number;
   photoUrl?: string;
+  reviewsCount?: number;
+  categories?: string[];
+  isOnline?: boolean;
+  distanceKm?: number;
+}
+
+export interface ServiceMenuItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  price: number;
 }
 
 export type PartnerRequestStatus =
@@ -52,10 +64,12 @@ export interface PartnerRequest {
   amount: number;
   commission: number;
   partnerShare: number;
-  startOtp: string;
+  customerPhone?: string;
   notes: string;
   requestedAt: string;
   extraServices?: Array<{ id: string; name: string; price: number }>;
+  lineItems?: BookingLineItem[];
+  itemsSubtotal?: number;
   /** Mock: updated amount waiting for user approval */
   pendingEstimateAmount?: number;
   heavyWorkEstimate?: HeavyWorkEstimate;
@@ -89,12 +103,25 @@ export interface PartnerProfile {
   allowOutOfStation: boolean;
 }
 
-/** Partner-editable service line for pricing / commission screen */
+/** Partner-editable service line (My Services / pricing management) */
 export interface PartnerPricingRow {
   id: string;
   serviceName: string;
   category: string;
   baseCost: number;
+  isActive: boolean;
+  approvalStatus: 'approved' | 'pending_review';
+  withinLimits?: boolean;
+}
+
+export interface PartnerPriceLimits {
+  min: number;
+  max: number;
+}
+
+export interface PartnerPricingListResponse {
+  limits: PartnerPriceLimits;
+  items: PartnerPricingRow[];
 }
 
 export interface PartnerCustomerReview {
@@ -140,6 +167,22 @@ export type BookingStatus =
   | 'completed'
   | 'cancelled';
 
+export interface BookingLineItem {
+  id?: string;
+  serviceItemId?: string | null;
+  title: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+export interface SelectedBookingItem {
+  serviceItemId: string;
+  title: string;
+  price: number;
+  quantity: number;
+}
+
 export interface Booking {
   id: string;
   serviceId: string;
@@ -147,17 +190,30 @@ export interface Booking {
   categoryLabel: string;
   partnerName: string;
   partnerRating: number;
+  partnerPhone?: string;
   status: BookingStatus;
   totalAmount: number;
   startOtp: string;
+  endOtp?: string;
   scheduledAt: string;
   createdAt: string;
   address: string;
   /** Minutes until arrival when en_route */
   etaMins?: number;
   visitingFee?: number;
+  itemsSubtotal?: number;
+  promoDiscount?: number;
+  distanceKm?: number;
+  lineItems?: BookingLineItem[];
   isPartnerArrived?: boolean;
   heavyWorkEstimateRequested?: boolean;
+}
+
+export interface VisitingChargeQuote {
+  distanceKm: number;
+  visitingCharges: number;
+  usedFallback?: boolean;
+  warning?: string | null;
 }
 
 export interface AppNotification {

@@ -17,6 +17,12 @@ import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
 import { PartnerRegisterScreen } from '../screens/PartnerRegisterScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { HealthcareEmergenciesScreen } from '../screens/HealthcareEmergenciesScreen';
+import { AmbulanceSosScreen } from '../screens/AmbulanceSosScreen';
+import { ClinicBookingScreen } from '../screens/ClinicBookingScreen';
+import { ShopDetailScreen } from '../screens/ShopDetailScreen';
+import { ShopJoinScreen } from '../screens/ShopJoinScreen';
+import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
 import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
@@ -24,6 +30,7 @@ import { ReviewScreen } from '../screens/ReviewScreen';
 import { RewardsScreen } from '../screens/RewardsScreen';
 import { ServiceDetailScreen } from '../screens/ServiceDetailScreen';
 import { ServiceListScreen } from '../screens/ServiceListScreen';
+import { ServiceProvidersScreen } from '../screens/ServiceProvidersScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { SupportScreen } from '../screens/SupportScreen';
@@ -54,6 +61,7 @@ export function RootNavigator() {
       <Stack.Screen name="AllServices" component={AllServicesScreen} />
       <Stack.Screen name="CategoryServices" component={CategoryServicesScreen} />
       <Stack.Screen name="ServiceList" component={ServiceListScreen} />
+      <Stack.Screen name="ServiceProviders" component={ServiceProvidersScreen} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
       <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
       <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} />
@@ -68,6 +76,13 @@ export function RootNavigator() {
       <Stack.Screen name="Terms" component={TermsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="MyFavorites" component={MyFavoritesScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="SavedAddresses" component={SavedAddressesScreen} />
+      <Stack.Screen name="HealthcareEmergencies" component={HealthcareEmergenciesScreen} />
+      <Stack.Screen name="AmbulanceSos" component={AmbulanceSosScreen} />
+      <Stack.Screen name="ClinicBooking" component={ClinicBookingScreen} />
+      <Stack.Screen name="ShopDetail" component={ShopDetailScreen} />
+      <Stack.Screen name="ShopJoin" component={ShopJoinScreen} />
     </Stack.Navigator>
   );
 }

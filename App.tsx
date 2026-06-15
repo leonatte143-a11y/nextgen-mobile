@@ -7,6 +7,7 @@ import { View } from 'react-native';
 ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 import { DevDebugPanel } from './src/components/DevDebugPanel';
 import { AuthProvider } from './src/context/AuthContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { CartProvider } from './src/context/CartContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
 import { PartnerProvider } from './src/context/PartnerContext';
@@ -17,31 +18,42 @@ import { SHOULD_USE_API } from './src/services/api';
 import { apiService } from './src/services/apiService';
 import { IS_DEV } from './src/lib/devLog';
 
-export default function App() {
+function AppShell() {
+  const { isDark } = useTheme();
   useEffect(() => {
     if (!SHOULD_USE_API) return;
-    apiService
-      .health()
-      .then((x) => console.log('[API health]', apiService.baseUrl, x))
-      .catch((e) => console.log('[API health failed]', apiService.baseUrl, String(e?.message ?? e)));
+    if (IS_DEV) {
+      apiService
+        .health()
+        .then((x) => console.log('[API health]', apiService.baseUrl, x))
+        .catch((e) => console.log('[API health failed]', apiService.baseUrl, String(e?.message ?? e)));
+    }
   }, []);
   return (
+    <View style={{ flex: 1 }}>
+      <NavigationContainer onStateChange={onNavigationStateChange}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <RootNavigator />
+      </NavigationContainer>
+      {IS_DEV ? <DevDebugPanel /> : null}
+    </View>
+  );
+}
+
+export default function App() {
+  return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <PartnerProvider>
-          <FavoritesProvider>
-            <CartProvider>
-            <View style={{ flex: 1 }}>
-              <NavigationContainer onStateChange={onNavigationStateChange}>
-                <StatusBar style="dark" />
-                <RootNavigator />
-              </NavigationContainer>
-              {IS_DEV ? <DevDebugPanel /> : null}
-            </View>
-            </CartProvider>
-          </FavoritesProvider>
-        </PartnerProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <PartnerProvider>
+            <FavoritesProvider>
+              <CartProvider>
+                <AppShell />
+              </CartProvider>
+            </FavoritesProvider>
+          </PartnerProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

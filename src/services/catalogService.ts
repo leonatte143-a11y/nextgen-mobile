@@ -1,4 +1,4 @@
-import type { BucketId, CatalogService } from '../mock/types';
+import type { BucketId, CatalogService, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import { apiService } from './apiService';
 
 export const catalogService = {
@@ -19,6 +19,10 @@ export const catalogService = {
     return apiService.get(`/api/v1/catalog/services/${id}`);
   },
 
+  async getServicePartners(id: string): Promise<PartnerSummary[]> {
+    return apiService.get(`/api/v1/catalog/services/${id}/partners`);
+  },
+
   async searchServices(query: string): Promise<CatalogService[]> {
     const q = encodeURIComponent(query.trim());
     return apiService.get(`/api/v1/catalog/search?q=${q}`);
@@ -26,5 +30,17 @@ export const catalogService = {
 
   async getTopRated(limit = 6): Promise<CatalogService[]> {
     return apiService.get(`/api/v1/catalog/top-rated?limit=${limit}`);
+  },
+
+  async getPartnerServiceMenu(serviceId: string, partnerId: string): Promise<ServiceMenuItem[]> {
+    const res = await apiService.get<{ items?: ServiceMenuItem[] }>(
+      `/api/v1/catalog/services/${serviceId}/partners/${partnerId}/menu`,
+    );
+    return Array.isArray(res) ? res : (res?.items ?? []);
+  },
+
+  async getVisitingCharge(distanceKm: number): Promise<{ distanceKm: number; amount: number }> {
+    const q = encodeURIComponent(String(distanceKm));
+    return apiService.get(`/api/v1/catalog/visiting-charge?distanceKm=${q}`);
   },
 };

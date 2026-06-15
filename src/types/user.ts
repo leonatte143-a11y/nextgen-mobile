@@ -16,7 +16,10 @@ export interface User {
 /** Fields accepted by PUT `/api/v1/users/me` (subset of columns). */
 export type UserProfileUpdate = Partial<
   Pick<User, 'firstName' | 'lastName' | 'email' | 'address' | 'phone' | 'rewardPoints' | 'referralCode'>
->;
+> & {
+  latitude?: number;
+  longitude?: number;
+};
 
 /** POST `/api/v1/auth/register` body (phone required). */
 export type UserRegistrationInput = UserProfileUpdate & {

@@ -9,4 +9,8 @@ export const notificationService = {
   async markAllRead(): Promise<void> {
     await apiService.post('/api/v1/notifications/read-all', {}, 'user');
   },
+
+  async markRead(id: string): Promise<AppNotification> {
+    return apiService.post(`/api/v1/notifications/${id}/read`, {}, 'user');
+  },
 };

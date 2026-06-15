@@ -76,10 +76,10 @@ export function PartnerCommandGrid({
       <View style={styles.row2}>
         <Pressable
           style={styles.card}
-          onPress={() => navigation.navigate('PartnerServicePricing')}
+          onPress={() => (navigation as any).navigate('MyServices')}
         >
           <Ionicons name="pricetag-outline" size={22} color={ORANGE} />
-          <Text style={styles.labSm}>Pricing and Commission</Text>
+          <Text style={styles.labSm}>My Services</Text>
         </Pressable>
         <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
           <Ionicons name="checkmark-done-outline" size={22} color={ORANGE} />

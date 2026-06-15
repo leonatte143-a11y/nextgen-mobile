@@ -1,0 +1,1879 @@
+user
+               NEXGEN Customer Interface
+1 app profile photo > capital (N)
+2 app name > Nexgen
+3 location ( current location)
+4 profile information> name
+
+                          >mail
+                          >edit profile
+                          >Bookings
+                          >Reward points
+                          > Referrals
+               1 profile>First name
+                          >last name
+                          >Email
+                          >phone number
+                          >address > save changes
+                          >
+
+5Notifications
+6 Advertising banner space
+7 search bar
+8 Fillter
+9 Special offers
+10 Service Categories
+11 all service icons with names and small emojis and add more services option
+as icon , all services in grid model , show at least 9 icons to users ,
+12 show Top service based on their location
+
+                       13 WHY TO CHOOSE NEXGE ?
+
+ We connect you with verified professionals who deliver quality service at your doorstep
+
+                                        Verified Partners
+
+                                     All service providers are background verified
+                       
+
+                                Quality Service
+
+                   Top-rated professionals with proven track record
+
+                            Quick Response
+
+                    Get service within 30 minutes of booking
+
+                                 Best Prices
+
+                   Transparent pricing with no hidden charges
+
+                             NEXGEN
+
+  Your trusted home services platform serving Andhra Pradesh
+                                  Quick Links
+
+ About Us
+ Services
+ Become a Partner
+ Contact
+
+                       Popular Services
+
+ AC Repair
+ House Cleaning
+ Plumbing
+ Electrical Work
+
+                       Contact Us
+
+   support@nexgen.com
+   +91 98765 43210
+   Vijayawada, AP
+© 2026 NEXGEN Home Services. All rights reserved.
+
+EXAMPLE of BOOKING a service
+
+Electrical
+
+3 services available
+
+Fan Repair
+
+Electrical 4.6(187) location symbol with arrow (near by)
+
+Complete fan repairing and maintenance 200
+     Call button and chat button
+             Book service
+
+1 Call button >number should be telecom only.
+2 chat button >intraction with user and service partner only with app.
+3 booking button > Booking Details
+
+                       > Fill in your information to book Fan Repair
+
+                     > Personal Information>name > number> email
+
+                     > Service Location > current location and preferred location
+
+                     > Preferred Schedule > time> date> schedule
+
+                      >Proceed to Payment > cash > upi> wallet
+
+                     >Booking Summary
+
+                      Fan Repair
+
+                               Electrical
+                           Base Price250
+                            Tax & Fees0
+
+                      Total Amount250
+
+Service Provider
+
+Ramesh Kumar
+
+ 4.5· 152 jobs
+Review photos
+Login Page
+Add these specific details to your document to ensure the Orange & White theme is applied
+correctly.
+
+1. Header (Branding)
+Profile Logo: Centered at the top.
+App Name: "NEXGEN" in Bold
+Heading: "Login"
+Sub-text: "Enter your mobile number to get started."
+
+2. Input Fields (The Form)
+Number Field: * Prefix: Fixed +91 (since you are in AP/Godavari region).
+Placeholder: "Enter 10-digit mobile number."
+Style: White background with an Orange border when clicked.
+OTP Verification: * Constraint: Hidden by default. It should only appear after the user enters a
+valid 10-digit number.
+Format: 4 separate boxes for the digits.
+3. Actions (Button)
+>Submit Button: * Text: "Get OTP" (changes to "Verify & Login" once OTP is sent).
+Color: Solid Orange with White text.
+Service Partner Link: * Text: Login as Service Partner."
+Action: Redirects to the provider_login_page.
+4. Logic & UX (For the Developer)
+Validation: The "Submit" button should be greyed out (disabled) until 10 digits are typed.
+Auto-focus: When the OTP is sent, the cursor should automatically move to the first OTP box.
+Resend Timer: Add a "Resend OTP in 0:30" link in case the SMS is slow.
+User Dashboard
+ NEXGEN User Dashboard Specification
+
+1. The Header (Sticky Top Bar)
+
+     Top Left: NEXGEN Logo (Icon) with the App Name (Heading) directly underneath it in
+         Bold Orange.
+
+     Top Right: Notification (Bell Icon) positioned to the left of a circular Profile (User
+         Icon).
+
+     Location Section (Below NEXGEN Logo Icon): A clickable row showing a "Map Pin"
+         icon + "Select Your Location."
+               Action: Clicking opens a full-screen overlay with a "Use Current Location
+                   (GPS)" button and a "Manual Search" input field.
+
+2. Advertising & Search Zone
+
+     Video Ad Banner: A 16:9 aspect ratio space for auto-playing promotional videos
+         (Orange/White theme).
+
+     Smart Search Bar: * Left Side: Microphone (Voice Search) icon.
+               Placeholder: "Search for 'Fan Repair' or 'Plumber'..."
+               Right Side: Filter (Icon) to sort by price, distance, or partner rating.
+
+ NEXGEN: Moderated service Category Script
+
+1. The Dynamic Header
+
+     Title: "Choose a Service" (Bold Charcoal).
+     Search Zone: Smart Search Bar: * Left Side: Microphone (Voice Search) icon.
+
+               Placeholder: "Search for 'Fan Repair' or 'Plumber'..."
+               Right Side: Filter (Icon) to sort by price, distance, or partner rating.
+     Sub-title: "Showing 25+ Experts in Rajahmundry."
+
+2. The 6 Main "Buckets" (Horizontal Scroll) in small size
+
+Before the grid, show 6Square Cards. Clicking one filters the grid below.
+
+     Home Services | Home Repair | Tech & Supply | Life & Health | Professional &
+         Education | Events
+
+3. The Moderated Grid (The Script)
+
+In Figma, design these as Square Cards (4 *4 per row) with multicolor icons with small
+images.
+A. Home Repairs
+
+     Electrician: (Sub-text: "Fan Repair
+     Plumber: (Sub-text: "Leakage/Taps").
+     AC Service: (Sub-text: "Filter/Gas").
+     Cleaning: (Sub-text: "Full House").
+     Kitchen appliance
+     Water purifier
+     Washing machine
+     Fridge repair
+     Tv repair
+     System repair
+
+B. Home services
+     House cleaning
+     painters
+     Tank cleaning
+     Gardenning
+     Pest control
+     Wood works
+     Tiles
+     welders
+     Ceiling
+     Interior designing
+
+C. Professional & Education (New Categories)
+
+     Drivers: (Sub-text: "Hourly/Daily").
+     Car travels
+     Car mechanic
+     Auto drivers
+     Bike mechanic
+     Teachers: (Sub-text: "Tutors/Home Study").
+     Supervisors
+     Engineers
+    
+
+D. Health & Medicine (Life & Health)
+
+     RMP Doctors: (Sub-text: "Quick Consult").
+     Diagnostic center (Sub-text: "Blood Test/Home").
+     Medicine Delivery: (Sub-text: "Fast 30 Mins") minimum 1000 purchase
+     Ambulance
+
+E. Events ( give icon and orange color)
+
+     Purohith
+     Photographer
+     Shamiyana
+     Catering
+     Beauty service
+     bride& groom makeup
+     Mehandi Artist
+     Wedding Halls
+     Other events
+
+ Figma Component Design (The "Card")
+
+To keep it user-friendly, every icon card must follow this Exact Order:
+
+    1. Icon: Top-centered (Size: 32x32px, Color: #FF8C00).
+    2. Heading: Middle-centered (Size: 14px, Bold, Color: #2D2D2D).
+    3. Sub-Category: Bottom-centered (Size: 10px, Regular, Color: #757575).
+    
+
+4. Top Rated Services (The Selection)
+
+     Heading: "Top Rated Near You."
+     Sub-Heading/Filter: A "Sort By" link on the right: Economy (Low to High) or Distance.
+
+         Popup button.
+     Display: Horizontal Sliding Model (Carousel).
+     Card Content: Partner Photo, Service Name, Star Rating, and "Starting From" price.
+
+5. Social Proof (Video Reviews)
+
+     Heading: "Customer Stories & Partner Work."
+     Display: Horizontal Slider showing exactly 3 vertical video thumbnails (TikTok/Reels
+
+         style).
+     Content: Short clips of Service Partners finishing jobs like "Fan Repair" or "AC
+
+         Cleaning."
+
+ Design Theme & Colors (Instruction for Designer)
+"Mix of Orange (#FF8C00) and White (#FFFFFF)." > * Use Orange for primary
+buttons, active icons, and the "Book Now" triggers.
+
+     Use White for the main background to keep the app looking clean and fast.
+ Use Soft Shadows on cards to make the "Top Rated" section pop.
+User Profile
+  NEXGEN: User Profile & Account Specifications
+
+    1. Header (Account Summary)
+
+     Background: Solid NEXGEN Orange (#FF8C00).
+     Title: "My Profile" (Large White Bold).
+     Subtitle: "Manage your account" (Small White).
+     Back Arrow: On the top left to return to the Home Dashboard.
+
+    2. Profile Card (The Info Box)
+
+A white card that floats slightly over the orange header.
+     Profile Image: Circular avatar with initials (e.g., "DS" for Dwaraka Sai) or a uploaded
+         photo.
+
+     User Details:
+               Full Name: (e.g., Dwaraka Sai) in Bold Deep Charcoal.
+               Email: small grey text.
+
+     Action: "Edit Profile" button (White background, Grey border). It should under the Email.
+     Add join NEXGEN PRO TAG for (for special benefit updates! 18 rupes for month join
+
+         pro (button )add have a question? And CHECK FAQS and terms
+
+    3. Engagement Stats (The "Three-Column" Row)
+
+As seen in your image, this shows the user's history with NEXGEN:
+
+    1. Recent Bookings: Count of total services completed (e.g., "12").
+    2. Queries: recently most searched services
+    3. Reward Points: Total loyalty points earned (e.g., "850").
+
+    4. Navigation Tab Bar
+
+A horizontal scrolling bar to switch between sub-pages:
+
+     Profile (Active - Orange Underline)
+     Settings
+     Rewards
+     Referrals
+
+   Terms & Conditions
+   Privacy Policy
+
+    
+
+    5. Profile Information (Edit Mode)
+
+The list of input fields for the user to update their data:
+
+     First Name: Text field with light grey background.
+     Last Name: Text field.
+     Email Address: Text field with a small "Mail" icon inside.
+     Phone Number: Non-editable field (linked to OTP login).
+     Address:Text field with light grey background.
+     Save changes :button with orange background color with white name
+
+  Module 1: Settings
+
+This section allows users to control how the app interacts with them.
+    1. Notification Controls
+
+    Booking Updates: A toggle switch to alert users when a Partner
+       accepts a job or arrives at the location.
+
+    Special Offers: A toggle for promotional push notifications.
+    App Updates: A toggle to notify users about new features in
+
+       NEXGEN.
+    Style: Orange toggles for "On" and Grey for "Off."
+
+    2. Payment Management
+
+    Action: A large button titled "Manage Payment Methods."
+    Logic: Leads to a secure page to add/delete UPI IDs, Credit/Debit
+
+       cards, or link Wallets.
+
+    3. Account Security
+
+    Action: A full-width button with a red icon and text for "Logout."
+
+  Module 2: Rewards & Wallet
+
+This page turns user loyalty into a currency (Points to Cash).
+
+    1. Points Display
+
+    Main Banner: A large NEXGEN Orange card.
+    Balance: Display "850" (or current points) in large white font.
+    Conversion: Show the actual value (e.g., 850 points = 85.00
+
+       wallet balance).
+
+    2. "How Rewards Work" Section
+
+A 3-step numbered guide with clean icons:
+
+   1. Book Services: Earn 10 points for every 100 spent.
+   2. Collect Points: Points are credited automatically after service
+       completion.
+
+   3. Redeem Rewards: Use points as a discount on the next booking.
+
+  Module 3: Refer & Earn
+
+This is your primary tool for growing NEXGEN through word-of-mouth.
+
+    1. Referral Code Section
+
+    Code Display: A light green box showing a unique code (e.g.,
+       NEXGEN2026).i need separate codes for all users
+
+    Action: A "Copy" button immediately next to the code.
+
+    2. Stats & Benefits
+
+    Two-Column Summary: Show "Friends Invited" (e.g., 5) and
+       "Rewards Earned" (e.g., 2,500).
+
+    Rules List:
+            Friends get 30% OFF their first booking.
+            You earn 500 per successful referral completion.
+            No limit on invites.
+
+  Module 4: Legal & Privacy (The "Fine Print")
+
+Crucial for building trust with your users in Andhra Pradesh.
+
+    1. Terms & Conditions
+
+    Update Tracking: Show "Last updated: March 10, 2026."
+    Key Clauses: Acceptance of Terms, Service Booking availability,
+
+       Cancellation Policy (full refund if 2+ hours before), and Partner
+       Conduct (Independent Contractors).
+2. Privacy Policy
+
+ Data Collection: Name, email, phone, and Current Location
+   (Address).
+
+ Usage: Used only for fulfilling bookings and improving user
+   experience.
+
+ Contact: Direct email link to privacy@nexgen.com for data
+   deletion requests.
+Booking Flow
+1. The Header (Context)
+
+     Background: White with a thin Orange bottom border.
+     Left: Back Arrow + Title "Confirm Booking".
+     Right: Help icon (?) for customer support.
+
+2. Service Summary Card (Top)
+
+     Style: White card with an Orange left-border accent.
+     Content:
+
+               Icon: The Electrician icon (from your category page).
+               Text: "Fan Repair Service" (Bold).
+               Sub-text: "Partner: Ravi Kumar (4.8 )".
+               Location :add location symbol and show near by location name
+     Price: 250 displayed prominently in the top right of the card.
+
+3. Location & Timing (Middle)
+
+     Location Box: * Small Map snippet showing the Rajahmundry pin.
+               Text: "Work Location: [User's Auto-Detected Address or manually ]".
+               Action: "Change" (Orange text link).
+
+     Schedule: * "Arrival Time: Within 45 Mins" (and a date/time picker for later)
+ Description : work explain give optional option
+4. Price Breakdown (The "Bill")
+
+A clean list at the bottom to avoid confusion:
+
+     Service Total: 250
+     Visiting Fee: 30
+     Taxes/GST: 15
+     Amount Payable: 295 (Bold Deep Charcoal).
+     Promo: "Applied: NEXGEN2026 (-50)" if they used a referral.
+
+5. Payment Selection
+
+     Horizontal icons for: PhonePe, Google Pay, Paytm, and Cash.
+     Selected method gets an Orange checkmark.
+
+6. The Action Button (Bottom)
+
+     Style: Fixed full-width button at the very bottom. (name on this box is book service
+     On full width button split one more button on bottom divide that box into 2 boxes one
+
+         name is calling and another is chat
+     Color: Solid NEXGEN Orange (#FF8C00).
+     Text: "Book Now & Pay 295".
+The "Dynamic Surge Pricing
+The "Dynamic Surge Pricing" Script (Rain/Busy Hours)
+
+In Andhra Pradesh, when it rains heavily or during festival seasons (like
+Sankranti), demand for Drivers or Plumbers will explode.
+
+     The Script: An "Extra Demand" toggle in your Admin Panel.
+     Logic: When turned on, the app adds a small "Surge Fee" (e.g., +50) to
+
+        every booking.
+     Benefit: This encourages more partners like Phani to go "Online" because
+
+        they earn more during busy times.
+Live Tracking & Job Verification Script
+ NEXGEN: Booking History & Live Tracking
+
+Script
+
+1. The Header (Navigation)
+
+      Background: Pure White (#FFFFFF).
+      Title: "My Bookings" (Bold, 20px).
+      Tabs (The Toggle): * Active (Orange Underline) -- For live tracking.
+
+                 History (Grey text) -- For past records.
+
+2. Tab 1: Active Bookings (Live Tracking View)
+
+If a user has a booking currently in progress (e.g., Phani is coming for a Fan Repair):
+
+A. The Mini-Map (Live Movement)
+    Style: A 1:1 square map card with rounded corners (16px).
+
+      Markers: Orange Pin (Partner) moving towards Blue Dot (User).
+      Status Overlay: A small floating badge on the map: "Arriving in 8 mins".
+
+B. Partner & OTP Card
+    Profile: Phani's Passport Photo + Name + Rating (4.8 ).
+
+      The Security Gate: A bright Orange Box with the text:
+          Start OTP: 5 8 2 1
+
+      Share this only when the partner arrives.
+
+      Quick Actions: Two rounded buttons: [ Call Partner] and [ Chat].
+
+3. Tab 2: Booking History (The Records)
+
+A vertical list of all previous services.
+
+      Card Style: White card with a light grey border.
+      Content:
+
+                 Top Row: Service Name (e.g., "RMP Consultation") + Date.
+                 Middle Row: Partner Name + Price (300).
+
+        Status Badge: * Completed (Green)
+            Cancelled (Red)
+
+      Actions: * "Re-book" (Orange Text) -- To quickly book the same service again.
+                 "Download Invoice" (Small Icon).
+
+4. Job Progress Timeline (The "Stepper")
+Inside the Active tab, below the map, show the real-time status:
+
+        Booking Confirmed (10:00 AM)
+        Partner Assigned (Phani - 10:05 AM)
+        Partner En Route (Live Tracking)
+        Work Started (Waiting for OTP)
+        Service Completed
+
+ Figma Design Instructions
+
+      Map Design: Use "Soft Map" colors (Greys and Whites) so the NEXGEN Orange route line and
+          icons pop out.
+
+      OTP Visuals: Make the OTP numbers very large (24px+) so they are easy to read in bright
+          sunlight.
+
+      Empty State: If no active bookings, show an illustration of a calendar and a button: "Book a
+          Service Now."
+
+ Developer Logic (Post-Booking Sync)
+
+Event            Logic / Action
+
+GPS Refresh      Update Partner latitude/longitude every 5 seconds to ensure smooth tracking.
+
+OTP Handshake    When Phani enters 5821 in his app, change the status to In_Progress and start
+                 the billing timer.
+
+Re-book Feature  Clicking "Re-book" pre-fills the Category and Sub-category (Fan Repair) into a
+                 new booking flow.
+
+Cancellation Link If the status is "Active" and time is > 2hrs, show the "Cancel Booking" button
+                              prominently.
+cancel booking
+ NEXGEN: Official Cancellation Policy
+
+1. The "Golden Window" (Full Refund)
+
+     Rule: Users can cancel any booking up to 2 hours before the scheduled service time for
+         a 100% refund to their NEXGEN Wallet or original payment method.
+
+     Logic: This gives the partner enough time to find another booking.
+
+2. The "Short-Notice" Penalty
+
+     Rule: Cancellations made within 2 hours of the scheduled time will incur a
+         Cancellation Fee of 50.
+
+     Logic: This fee is credited to the Service Partner (Phani) to compensate for their travel
+         time or missed opportunity.
+
+3. "Partner at Doorstep" Policy
+
+     Rule: If the partner has already arrived at the location (verified via GPS), and the user
+         cancels, a Visiting Fee of 100 is mandatory.
+
+     Exception: If the partner is more than 20 minutes late beyond the scheduled time, the
+         user can cancel for free.
+
+ User App: Cancellation Script (Figma Design)
+
+Screen 1: The "Are you sure?" Popup
+
+     Heading: "Cancel Booking?"
+     Warning Text: "Cancellations within 2 hours incur a 50 fee. Our partners rely on your
+
+         bookings."
+     Reason Picker (Select one):
+
+               Changed my mind
+               Booked by mistake
+               Partner is late
+               Found another provider
+               Other
+
+Screen 2: Cancellation Success
+
+     Icon: A small grey "X" mark.
+     Message: "Booking Cancelled successfully."
+     Refund Info: "245 will be credited back to your wallet (after 50 fee)."
+
+ Partner App: Cancellation Alert
+
+When a user cancels, Phani needs to know immediately so he doesn't waste petrol.
+     Notification: "Booking for [Service] at [Location] has been cancelled."
+     Compensation: "50 has been added to your wallet as a cancellation fee."
+
+ Figma Design Instructions
+
+     Color Palette: Use a Soft Grey for the "Cancel" buttons on the main screen to make
+         them less prominent than the "Confirm" buttons.
+
+     The "Reason" List: Use a simple vertical list with radio buttons.
+     Final Action: The "Confirm Cancellation" button should be Solid Red or Dark Grey to
+
+         show it is a negative action.
+
+ Developer Logic (Automation)
+
+Trigger      Logic                                Action
+
+User clicks  Check Current_Time vs Booking_Time.  If difference < 2hrs, deduct
+Cancel                                            50.
+
+Partner is Late Check Current_Time vs             If > 20 mins late, bypass
+                         Expected_Arrival.        cancellation fee.
+
+Refund       API call to Payment Gateway          Issue partial/full refund based
+Process      (Razorpay/PhonePe).                  on rules.
+smart operational notifications
+ NEXGEN: Smart Operational Notifications
+
+1. The Notification Layout (In-App Popup)
+
+When an operational alert happens, show a Slide-down Banner at the top of the screen:
+
+     Background: White with a thick Orange left-border.
+     Icon: Small circular icon representing the status (e.g., a "Clock" for delays).
+     Action: Clicking the notification deep-links the user directly to the Live Tracking or
+
+         Payment page.
+
+2. Operational Trigger Categories (The Script)
+
+A. Booking & Arrival (The "Trust" Alerts)
+     Trigger: Partner accepts the job.
+               Message: "Phani has accepted your Fan Repair! View his profile now."
+     Trigger: Partner is within 500 meters (Geo-fence).
+               Message: "Phani is right outside! Please have your Start OTP (5821) ready."
+     Trigger: Partner is 10 mins late.
+               Message: "We apologize, Phani is running 10 mins late due to traffic. Track his
+                   live location."
+
+B. Security & Verification (The "Safety" Alerts)
+     Trigger: Job Start.
+               Message: "Work Started! Your 10% discount has been applied."
+
+   Trigger: Safety Reminder.
+               Message: " Safety Tip: Never pay more than the amount shown in the app to
+                   avoid overcharging."
+
+C. Payment & Completion (The "Closing" Alerts)
+     Trigger: Work Finished by Partner.
+               Message: "Job Done! Please verify the work and Proceed to Pay 295."
+     Trigger: Payment Success.
+               Message: "Payment Received! Don't forget to rate Phani to earn 10 Reward
+                   Points."
+
+3. The Notification Settings Page (User Control)
+
+In the Profile > Settings section, allow users to toggle these specific categories:
+
+     Order Tracking: (Mandatory On) -- Real-time updates on Phani's location.
+     Promotions: (Toggle) -- New offers for Rajahmundry/Guntur.
+     Safety Alerts: (Toggle) -- Security tips and verification reminders.
+ Figma Design Instructions
+
+     Visual Distinction: Use Bold Orange text for "Action Items" (like the OTP or Amount)
+         so the user sees the important data without reading the whole sentence.
+
+     Sound Logic: (For the Developer) Assign a "Unique NEXGEN Ping" sound for arrival
+         alerts so the user knows it's the partner and not just a WhatsApp message.
+
+     Buttons inside Notifications: For urgent alerts (like Partner Arrival), add a small "Call
+         Partner" button directly inside the notification card.
+
+ Developer Logic (Smart Triggers)
+
+Event         Logic / API                 Notification Type
+
+Geo-fence     IF partner_distance < 500m  High Priority Push (Sound +
+Entry                                     Vibration)
+
+Abandon Cart  IF cart_items > 0 AND idle_time > Reminder (Silent)
+              1hr
+
+RMP Consult IF doctor_assigned            Immediate Alert (High Priority)
+
+Low Wallet    IF balance < service_price  Action Alert (Top Banner)
+Service "Cart" or "Multi-Selection"
+ NEXGEN: Service Cart & Multi-Selection Script
+
+1. The Header (Cart Status)
+
+     Background: Pure White (#FFFFFF) with an Orange bottom border.
+     Title: "My Service Cart" (Bold, 18px).
+     Counter: A small orange badge showing the number of items (e.g., "3 Items").
+
+2. The Selection List (The Items)
+
+Each selected service is a white card with a "Delete" (Trash icon) on the right.
+
+Item Card Design:
+     Icon: Small Orange icon of the category (e.g., Wrench for Repair).
+     Service Name: "Fan Repair" (Bold).
+     Sub-text: "Base Price: 250".
+     Quantity/Units: A - 1 + stepper.
+               Logic: If they have 3 fans to repair, they can increase the count here.
+
+3. "Add More" & Recommendations
+
+     Action Button: A dashed-line box with the text "+ Add another service".
+               Logic: Clicking this takes them back to the Moderated Grid to pick more.
+
+     Smart Suggestion: A small horizontal row at the bottom: "People also booked:
+         Switchboard Fix (150)" with a Quick "Add" button.
+
+4. Custom Instructions (Voice & Text)
+
+Since every house has different problems, provide a space for details:
+
+     Text Box: "Describe your problem (Optional)."
+     Voice Note: A small Microphone icon to record a 10-second audio clip for Phani (e.g.,
+
+         "The fan in the hall is making a loud noise").
+     Photo Upload: A "Camera" icon to attach a photo of the broken item.
+
+5. Final Summary & "Checkout"
+
+     Bill Summary:
+               Services Total: 650 (e.g., 2 Fans + 1 Tap)
+               Visiting Fee: 30
+               Estimated Total: 680
+
+     The Action Button: Fixed full-width at the bottom.
+     Color: Solid NEXGEN Orange.
+     Text: "Proceed to Booking (3 Services)".
+ Figma Design Instructions
+
+     Empty Cart State: If no items, show a "Empty Cart" illustration and a big Orange button:
+         "Browse Services."
+
+     Visual Cue: Use a light orange background (#FFF5E6) for the "Recommended" section
+         to separate it from the main cart.
+
+     Animations: When an item is deleted, show a "Slide Out" animation in the prototype.
+
+ Developer Logic (Multi-Service Sync)
+
+Feature      Technical Requirement
+
+Cart Persistence Store cart items in local_storage so if the app closes, the items remain.
+
+Partner      Crucial: If a user picks a "Fan Repair" and a "Plumber," the system
+Matching     must alert the user: "You will be assigned 2 different partners for these
+             tasks."
+
+Group Discount (Optional) Logic to reduce the "Visiting Fee" if multiple services are
+                           booked at the same house at once.
+
+Media        Upload voice/photos to a temporary S3 bucket linked to the Booking_ID.
+Attachments
+Payments
+ NEXGEN: Payment & Secure Checkout Script
+
+1. The Header (Trust & Safety)
+     Background: Pure White (#FFFFFF).
+     Title: "Select Payment Method" (Centered, Bold).
+     Security Badge: A small "SSL Secured" or "PCI-DSS Certified" icon in
+        the top right to build trust.
+
+2. Final Amount Display (The Sticky Bar)
+     Placement: Just below the header.
+     Style: A thin Orange horizontal bar.
+     Content: "Total Amount to Pay: 295" (Large White Bold text).
+     Detail Link: A small "View Bill" dropdown to see the breakdown again
+        (Service + Taxes).
+
+3. Payment Categories (The Options)
+Organize these into clean white cards with 12px rounded corners.
+
+A. Digital India (UPI) - Primary
+
+     Icons: Google Pay, PhonePe, Paytm, and "Other UPI."
+     Style: Large circular icons with the name underneath.
+     Action: Clicking one should trigger the "App-to-App" intent (opening
+
+        the UPI app on the phone).
+
+B. Cards & Netbanking
+
+     List Item 1: "Credit / Debit Card" (Icons: Visa, Mastercard, RuPay).
+     List Item 2: "Netbanking" (Searchable list of banks).
+     Style: Simple rows with an Orange arrow > on the right.
+
+C. Post-Service Payment
+
+     Option: Cash on Delivery (COD).
+     Logic: For services like RMP Doctors or Plumber, this is very popular
+
+        in the Godavari region.
+     Note: "Pay the partner directly after the job is done."
+4. The "Pay Now" Action
+
+     Button Style: Fixed at the bottom of the screen.
+     Color: Solid NEXGEN Orange (#FF8C00).
+     Text: "Confirm & Pay 295".
+     Success Animation: Once clicked, show a full-screen Orange Tick
+
+        Mark with the message: "Booking Confirmed! Partner is on the way."
+
+ Figma Design Instructions
+
+     Visual Cues: When a payment method is selected, give the card a 2px
+        Orange border to show it is "Active."
+
+     Footer: Add a small text at the very bottom: "Your payment is 100%
+        safe with NEXGEN Secure."
+
+     Micro-interactions: If the user selects "Cash," the "Pay Now" button
+        should change text to "Confirm Booking."
+
+ Developer Logic (Backend Integration)
+
+Feature      Technical Requirement
+
+Gateway      Use Razorpay or PhonePe SDK for the UPI intent flow.
+Integration
+
+Status       The app must wait for a "Success" signal from the bank
+Webhook      before moving to the confirmation screen.
+
+Split Payment (Super Admin Logic) Automatically calculate the 10%
+                       Commission and the 90% Partner Share after the
+                       transaction.
+Reviews & Ratings
+ NEXGEN: Review & Rating Screen Script
+
+1. The Header (Gratitude)
+
+     Background: Pure White (#FFFFFF).
+     Title: "Service Completed!" (Bold, 20px).
+     Subtitle: "How was your experience with Phani?" (Small grey text).
+     Profile Image: A small circular Passport Size Photo of the partner (Phani) in the center
+
+         to remind the user who they are rating.
+
+2. The Star Rating (Interactive)
+
+     Design: 5 Large hollow stars in the center of the screen.
+     Logic: As the user taps, the stars fill with NEXGEN Orange (#FF8C00).
+     Micro-interaction: When 5 stars are selected, show a small "Excellent!" text
+
+         underneath.
+
+3. Quick Tags (The "Moderated" Feedback)
+
+Instead of making the user type a long paragraph, give them 4-6 "Quick Tags" to tap:
+
+     Punctual | Professional | Clean Work | Fair Price
+     Style: White pills with an Orange border. When tapped, they turn solid Orange.
+
+4. Detailed Feedback (Text Area)
+
+     Placeholder: "Write a short note about the service... (Optional)"
+     Style: A light grey box (#F5F5F5) with rounded corners.
+     Icon: A small pencil icon in the corner.
+
+5. Media Upload (Video/Photo Proof)
+
+     Action: "Add a photo or video of the work."
+     Style: A dashed-line box with a Camera icon.
+     Logic: This feeds directly into the "Horizontal Video Reviews" section on the Home
+
+         Dashboard we designed earlier.
+
+6. The "Submit" Action
+
+     Button Style: Full-width at the bottom.
+     Color: Solid NEXGEN Orange.
+     Text: "Submit Review".
+ Skip Link: A small grey "Skip for now" link at the very bottom.
+
+ Figma Design Instructions
+
+     Visual Hierarchy: The 5 stars should be the largest element on the page.
+     Success State: After clicking "Submit," show a pop-up: "Thank you! You've earned 10
+
+         Reward Points for this review." (Linking back to your Rewards logic).
+
+ Developer Logic (Trust & Analytics)
+
+Data Point   Backend Action
+
+Star Rating  Update Phani's average_rating in the Service_Partners table.
+
+Quick Tags   Add to the "Partner Highlights" (e.g., "90% of users say Phani is
+             Punctual").
+
+Video Review If a video is uploaded, flag it for Admin Review before it goes live on the
+                        Dashboard.
+
+Rewards      Trigger a +10 points entry in the User_Rewards table.
+Logic
+Notifications
+  NEXGEN: Notification Center Script
+
+    1. The Header
+
+     Background: Pure White (#FFFFFF).
+     Title: "Notifications" (Bold, 20px).
+     Action: A "Mark all as read" text link in Orange on the top right.
+
+    2. The Filter Tabs (The "Moderated" View)
+
+Just like your Category page, use three small pill-shaped buttons to filter the list:
+
+     All (Default)
+     Orders (Updates on Plumbers, RMP Doctors, etc.)
+     Offers (Promotions and Rewards)
+
+    3. The Notification List (The Logic)
+
+Each notification is a wide white card with a 1px light grey bottom border.
+
+    Type A: Service Update (High Priority)
+     Icon: A small circular icon of the service (e.g., an Orange Car for a Driver).
+     Heading: "Driver is arriving!" (Bold).
+     Body: "Your professional driver is 2 minutes away from your location in Rajahmundry."
+     Time: "2 mins ago" (Small grey text).
+     Status Dot: A small Orange dot if the message is unread.
+
+    Type B: Promotional (Reward/Offer)
+     Icon: A small Orange Gift box or Percentage % icon.
+     Heading: "Special Offer for You!"
+     Body: "Get 20% off on your next AC Service. Use code: NEX20."
+     Action: Clicking this opens the AC Service category page directly.
+
+    Type C: Health/Urgent (RMP/Medicine)
+     Icon: A Red/Orange medical plus + sign.
+     Heading: "Prescription Ready."
+     Body: "Your medicine delivery is confirmed and packed. Track now."
+
+    4. Empty State Design
+
+If there are no notifications:
+ Illustration: A clean line-art drawing of a bell in light grey.
+ Text: "No new updates."
+ Button: "Explore Services" (Solid Orange).
+
+ Figma Design Instructions
+
+ Unread State: Give the background of unread notifications a very faint orange tint
+    (#FFF5E6) to make them stand out from read ones.
+
+ Icons: All icons should be inside a 40x40px circle. Use NEXGEN Orange for the icon
+    color.
+
+ Swipe Actions: In your Figma prototype, show a "Swipe Left to Delete" interaction for
+    each notification card.
+
+ Developer Logic (Push Notification Script)
+
+Trigger Event  Notification Content                               Target Page (Deep
+                                                                      Link)
+
+Partner        "Expert [Name] has accepted your                   Booking Detail Page
+    Accepted       request!"
+
+Payment        "Payment of 295 successful. View                   Transaction History
+    Success        Receipt."
+
+Reward         "You just earned 50 points! Check your             Rewards Page
+    Earned         wallet."
+
+Proximity      "Partner is within 500m of your house."            Live Tracking Map
+    Alert
+
+
+
+Support
+   NEXGEN: Help & Support Center Script
+
+        1. The Header (Search First)
+
+     Background: Solid NEXGEN Orange (#FF8C00).
+     Title: "How can we help you?" (White, Bold).
+     Search Bar: A prominent white bar with the placeholder: "Search for a problem (e.g.,
+
+         'refund', 'partner late')."
+
+        2. Quick Action Buttons (The "Big 3")
+
+Three circular icons with text underneath for the fastest resolution:
+
+    1. Chat with Us: Opens a live WhatsApp or In-App chat.
+    2. Call Support: Direct "Click-to-Call" to your Rajahmundry office.
+    3. Email Us: Opens the mail app to support@nexgen.com.
+
+        3. FAQ Categories (The "Moderated" List)
+
+Group common issues into clean white cards with Orange icons:
+
+     Booking Issues: "My partner hasn't arrived," "Change service time."
+     Payments & Refunds: "Transaction failed," "When will I get my refund?"
+     NEXGEN Wallet: "How to use reward points," "Balance check."
+     Safety & Quality: "Reporting a partner," "Insurance details."
+
+        4. Recent Bookings (Contextual Support)
+
+     Heading: "Issues with a recent service?"
+     Design: Show the last completed booking (e.g., Fan Repair 250).
+     Action: A button saying "Report an Issue" next to it.
+
+               Logic: This saves the user from typing order details; the system already knows
+                   which booking they are talking about.
+
+   Figma Design Instructions
+
+     Visual Style: Use a "Card-Based" layout. Each FAQ category should be a card with a
+         chevron (>) icon on the right.
+
+     Typography: Keep the answers in the FAQs in a slightly smaller, grey font (#757575) to
+         make the headings pop.
+
+     Emergency Contact: For RMP Doctors or Drivers, add a "SOS/Emergency" button in
+         Red at the very bottom for urgent safety issues.
+ Developer Logic (Support Automation)
+
+  Feature     Technical Requirement
+
+  Live Chat   Use a WhatsApp Business API link: https://wa.me/yournumber.
+  Integratio
+  n
+
+  Search      The search bar should use Keywords (e.g., searching "Money"
+  Logic       should show "Refunds").
+
+  Ticket      Every "Report an Issue" click must create a Support_Ticket in
+  System      your Admin Panel with the User ID and Booking ID attached.
+
+  Respons     Show a "Live Status" -- e.g., "We usually reply in 5 minutes."
+  e Time
+
+
+Language selection
+ NEXGEN: Language Selection (Localization) Script
+
+1. The Entry Point (Placement)
+
+     First Time User: This page should appear immediately after the Splash/Loader Screen
+         but before the Login Page.
+
+     Existing User: Accessible via Profile > Settings > Change Language.
+
+2. The Header (Simple & Clear)
+
+   Background: Pure White (#FFFFFF).
+
+     Icon: A small Orange globe icon ( ).
+     Heading: "Choose Language" (Bold).
+     Sub-heading: "  " (Choose your language in Telugu).
+
+3. Language Selection Cards (The Options)
+
+Design these as large, easy-to-tap horizontal cards (1 per row).
+
+Option A: English
+     Text: "English" (Primary)
+     Sub-text: "Default Language"
+     Selection: An Orange Checkmark appears when selected.
+
+Option B: Telugu (Regional Focus)
+     Text: " " (Primary - Bold Orange)
+     Sub-text: " &    "
+     Selection: The card border turns Solid Orange when tapped.
+
+4. The "Action" Button
+
+     Style: Fixed full-width button at the bottom.
+     Color: Solid NEXGEN Orange (#FF8C00).
+     Text: "Continue / " (Dual-language text on the button).
+
+ Figma Design Instructions
+
+     Visual Cue: Use the NEXGEN Orange for the selected state. The unselected cards
+         should have a very light grey border.
+
+     Typography: Ensure the Telugu font (like Gidugu or NTR) is clear and high-contrast.
+     Imagery: You can add a small silhouette of the Godavari Arch Bridge or a local
+
+         landmark at the bottom of this page to give it a "Local Pride" feel.
+ Developer Logic (Localization Mapping)
+
+Element      Logic / Technical Requirement
+
+Persistence  Save the selected lang_code (en/te) in Local Storage.
+
+Dynamic Update When changed, the app must refresh the strings in the Moderated Grid
+                           immediately.
+
+API Support  Ensure the search_logs table in your Admin Panel can read Telugu
+             keywords.
+
+Currency     Keep the symbol  (Rupees) consistent across both languages.
+Loader
+ NEXGEN: Splash & Loader Screen Script
+
+1. The Visual Layout (Static)
+
+     Background: Pure White (#FFFFFF) for a clean, modern feel.
+     Center Element: The NEXGEN Logo (The stylized 'N' icon you've established).
+     Logo Style: Solid NEXGEN Orange (#FF8C00).
+     Brand Name: "NEXGEN" in Bold Charcoal text directly under the icon.
+     Tagline: "Your Local Service Expert" (Small grey text at the bottom).
+
+2. The Animation (The "Loader")
+
+Instead of a boring spinning circle, we will use a Brand-Specific Loader:
+
+     Type: A horizontal "Progress Line" or a "Pulse" effect.
+     Color: NEXGEN Orange.
+     Motion: A smooth line that fills from left to right at the bottom of the logo, or the Logo
+
+         itself "pulses" (scales up and down by 5%) every 1 second.
+
+3. The "Service Pulse" (Unique Detail)
+
+To remind the user what the app does while it loads, you can add small, light grey icons that
+fade in and out around the logo:
+
+      (Wrench ) -> (Stethoscope ) -> (Car ) -> (Graduation Cap ).
+
+     This visually tells the user: "We are loading your Doctors, Drivers, and Repairs."
+
+ Figma Design Instructions
+
+     Canvas: Use your standard Mobile Frame (iPhone 14/15 or Android Large).
+     Logo Size: The logo should take up exactly 30% of the screen height to feel balanced.
+     Transitions: In Figma Prototype mode, set the transition from this page to the Login
+
+         Page as:
+               Trigger: After Delay (800ms - 1200ms).
+               Action: Navigate to Login.
+               Animation: Smart Animate (Dissolve or Slide Left).
+
+ Developer Logic (Initialization Script)
+
+The developer needs to know what happens "under the hood" while this screen is visible:
+
+ Backend Task Action
+Check Auth  Does the user have a saved Token? (Yes -> Go to Dashboard / No -> Go
+State       to Login).
+
+Sync Location Ping the GPS to get the "Current Location" (Rajahmundry/Guntur).
+
+Update Config Fetch the 10% Commission rate and current Orange/White theme
+                        settings from the Super Admin.
+
+Check Version Is there a mandatory app update? (If yes, show "Update App" popup).
+service partner
+LoginPage
+ Authentication
+
+     Profile logo (icon)
+     Login( heading)
+     Number ((text field)
+     OTP Verification (text field)
+     Submit (button )
+
+         
+onboarding
+ NEXGEN: Service Partner App Roadmap
+
+1. Partner Onboarding & KYC (The Entry)
+
+Before Phani can see bookings, he must be verified by the Admin.
+
+     Splash Screen: Same as User App (NEXGEN Pulse).
+     Login: Mobile OTP based.
+     KYC Upload Page: * Passport Size Photo (Direct Camera capture).
+
+               Aadhar/Voter ID (Front & Back).
+               Professional Certificate (RMP License, Driving License, or Electrician ID).
+               Bank Details: For weekly payouts.
+home screen
+ Service Partner Dashboard Script
+
+1. The Header (Profile & Status)
+
+     Service Partner Panel (Main Heading: Bold, White text on Orange background).
+     Welcome, Phani (Subheading: White, 16px).
+     Passport Size Photo: Circular frame in the top right with a 2px white border.
+     Online/Offline Toggle: A prominent switch.
+
+               Logic: If "Offline," Phani won't receive New Bookings.
+
+2. Performance Overview (The "Trust" Stats)
+
+A row of two white cards with subtle shadows:
+
+     Review Rating: 4.8  (Orange Star). Undertext: "Top Rated Expert."
+     Today's Earnings: 1,250. Undertext: "5 Jobs Completed."
+
+3. Work Management (The 3 Pillars)
+
+Design these as large, clickable "Counter Cards" in a 1+2 grid layout:
+
+A. New Bookings (High Priority)
+     Style: Large Orange Card with White text.
+     Content: "03 New Requests".
+     Action: Pulsing effect to show urgency. Clicking this opens the "Accept/Reject" list.
+
+B. Pending Works (The Schedule)
+     Style: White Card with Orange border.
+     Content: "02 Pending".
+     Logic: Jobs accepted but not yet started or finished.
+
+C. Completed Works (The History)
+     Style: White Card with Grey border.
+     Content: "45 Total".
+     Logic: Opens the history of all finished jobs and earned commissions.
+
+4. Recent Activity List
+
+A simple vertical list at the bottom:
+
+     Item 1: "Fan Repair @ Main Road" -- Pending (Orange text).
+     Item 2: "Switchboard Fix @ Danavaipeta" -- Completed (Green text).
+
+ Figma Design Instructions
+     Color Balance: Use NEXGEN Orange (#FF8C00) for all active states and the "New
+         Bookings" card to create a sense of action.
+
+     Typography: Use Bold for the numbers (3, 2, 45) so Phani can see his workload at a
+         glance.
+
+     Icons: Use a "Wrench" icon for work and a "Wallet" icon for earnings.
+
+ Developer Logic (Partner State Script)
+
+Element        Backend Logic
+
+New Bookings   Triggered by a "Push Notification" when a User books a service in
+               Phani's category and radius.
+
+Pending Works Moves here once Phani clicks "Accept." It starts a timer for "Expected
+                           Arrival."
+
+Completed      Triggered when Phani clicks "Job Finished" and the User confirms via
+Works          OTP or Payment.
+
+Review Rating  A rolling average of the last 50 customer reviews from the Reviews
+               table.
+main dashbord
+2. The Main Dashboard (The Command Center)
+
+This is the page Phani sees all day.
+
+     Welcome Header: "Welcome, Phani" + Online/Offline Toggle.
+               Logic: If "Offline," he is invisible to users.
+
+     Quick Stats (Cards):
+               Today's Earnings: 1,250.
+               Total Jobs: 05.
+               Rating: 4.8 .
+
+     The 3 Work Buckets:
+               New Requests: (Pulsing Orange) -- Where incoming leads appear.
+               Pending Works: -- Jobs accepted but not started.
+               Completed: -- History of successful jobs.
+PATNER PROFILE AND EARNING
+6. Partner Profile & Training
+
+     My Profile: Manage categories (e.g., Phani can add "AC Repair" if he is trained).
+     Training Videos: Small 1-minute clips on "How to behave with customers" and
+
+         "NEXGEN Safety Rules."
+
+ Figma Design Instructions for Partner App
+
+     Buttons: Make "Accept" and "Finish Job" at least 60px height.
+     Night Mode: Add a "Dark Mode" option since many partners work late at night.
+     Status Colors: * New: Pulse Orange.
+
+               In-Progress: Solid Blue.
+               Completed: Solid Green.
+
+ Developer Logic (The Sync)
+
+Event  Action
+
+Offline/Online Updates the is_active status in the partners table.
+
+Accept Booking Sends a Push Notification to the User: "Phani is on the way!"
+
+Distance Check Use the "Haversine Formula" to only show bookings within a 10km
+                          radius of Phani.
+Commission  Logic: Partner_Wallet = (Service_Price * 0.90).
+
+ NEXGEN: Partner Profile & Training Script
+
+1. The Header (Identity)
+
+     Background: Solid NEXGEN Orange (#FF8C00).
+     Profile Image: Large circular photo with an "Edit" icon.
+     Badges: Display earned badges like "Top Rated," "500+ Jobs," or "Safety Certified."
+     Status: "Profile Verified" with a Green Shield icon.
+
+2. My Skills & Categories
+
+This is where Phani manages what services he can provide.
+
+     Current Skills: Electrician, Fan Repair.
+     Add New Skill: A button that leads to a list of available categories.
+
+               Logic: If Phani wants to add "AC Repair," the app will prompt: "Please watch the
+                   AC Repair Training Video and upload your certification to unlock this category."
+
+3. NEXGEN Academy (Training Videos)
+
+A "Netflix-style" horizontal slider for 1-minute training clips:
+
+     Video 1: Customer Greeting. (How to speak politely in Telugu/English).
+     Video 2: Cleanliness. (How to clean up the area after a repair).
+     Video 3: App Safety. (How to use the OTP system correctly).
+     Video 4: Tool Maintenance. (Keeping equipment ready).
+     Progress Bar: Show "80% Completed" for his current training path.
+
+4. Safety & Rules (The "Partner Contract")
+
+A simplified view of the Terms & Conditions:
+     No Offline Payments: "Always pay through the app to stay insured."
+     Behavior Policy: "Respect the customer's home and privacy."
+     Uniform Check: "Always wear your NEXGEN ID card during visits."
+
+5. Account Settings
+
+     Language: Switch app between English and Telugu.
+     Bank Details: View/Edit SBI bank account for Monday settlements.
+     Help & Support: Direct WhatsApp link to the NEXGEN Partner Support team.
+The "Partner Performance
+The "Partner Performance & Penalty" Script
+
+What happens if Phani accepts a job but never shows up? Or if he asks the user for "extra cash"
+outside the app?
+
+     The Script: A "Strike System."
+               1st Cancel (Partner's fault): Warning + 50 penalty from his wallet.
+               3rd Cancel: Temporary 24-hour block.
+               Bad Behavior: Permanent ban.
+
+     Logic: This ensures that only the best partners stay on NEXGEN, which protects your
+         brand.
+job navigation
+4. Job Navigation & Execution (The "Work" Mode)
+
+Once Phani accepts the job:
+
+     Navigation: A "Google Maps" button that opens the route to the user's house.
+     Arrived Button: Phani clicks this when he reaches the doorstep.
+     Start OTP Box: Phani must ask the user for the 4-digit code (from the User's app) to
+
+         start the job timer.
+     Job Complete: A large Orange button: "Finish Job & Request Payment."
+income booking alert
+3. Incoming Booking Alert (The "Bidding" Screen)
+
+When a user books a "Fan Repair" in Rajahmundry, Phani gets a high-priority alert.
+
+     Screen: Full-screen Orange overlay with a loud "Ping" sound.
+     Details: * Service: Fan Repair.
+
+               Distance: 2.4 KM.
+               Earning: 225 (After 10% NEXGEN Commission).
+     Action: Large [ACCEPT] (Green) and [REJECT] (Grey) buttons.
+               Timer: 60-second countdown to accept before it goes to another partner.
+extra work
+1. The "Extra Work" & Invoice Update Script
+
+Often, Phani goes to fix a Fan (250), but the customer asks him to also fix a
+Switchboard (+150).
+
+     The Feature: A "+ Add Extra Service" button during an active job.
+     The Script:
+
+              Partner selects the extra service from the grid.
+              User Side: Receives a "Request to Update Bill" popup.
+              Logic: The User must click "Accept New Price" before Phani can
+
+                  complete the job. This prevents arguments over the final bill.
+EARN & WALLET
+5. Earnings & Wallet (The Payout)
+
+     Current Balance: Total money earned but not yet sent to the bank.
+     Breakdown: * User Paid: 250.
+
+               NEXGEN Comm (10%): -25.
+               Your Share: 225.
+     Withdrawal: "Settle to Bank" button (Active every Monday).
+Admin
+ NEXGEN: Central Admin Control Panel
+
+1. The Sidebar Navigation (Fixed Left)
+
+     Background: Solid NEXGEN Orange (#FF8C00).
+     Icons & Text (White):
+
+       Dashboard Overview (Live Stats)
+       Partner Management (Verify Phani and others)
+       Category Manager (Manage the "Four Pillars")
+       Search Analytics (Keyword Demand Tracking)
+       Earnings & Commissions (The 10% Cut)
+       Push Notifications (Send Offers/Alerts)
+
+2. Live Stats Header (Top Row)
+
+Four "Summary Cards" in White with Orange borders:
+
+     Total Users: 5,420 (Rajahmundry & Guntur).
+     Active Partners: 450 (Electricians, Doctors, etc.).
+     Total Bookings: 12,800.
+     Revenue Today: 15,200 (Your 10% Share).
+
+3. The "Search Analytics" Module (Your Key Requirement)
+
+A detailed section to see what users in the Godavari region want.
+
+     Heading: "Most Searched Services (Unmet Demand)".
+     The List: 1. "Home Nursing" - 450 searches (0 Partners found).
+
+         2. "Tiffin Delivery" - 320 searches (2 Partners found).
+     Action: A "Recruit Now" button next to high-demand keywords.
+
+4. Partner Verification Table (Verification Hub)
+
+This is where you approve new partners like Phani.
+
+     Table Columns: Partner Name | Service (e.g., Driver) | Documents (Passport Photo,
+         Aadhar, License) | Status (Pending/Verified).
+
+     Action: A Green "Approve" button and a Red "Reject" button.
+
+5. Category & Pricing Control
+
+A "Moderated" list where you control the base prices for the region.
+
+     Service: Fan Repair | Base Price: 250 | Admin Comm: 10%.
+     Service: RMP Consult | Base Price: 300 | Admin Comm: 10%.
+     Action: An "Edit" icon to update prices across all user apps instantly.
+ Figma Design Instructions
+
+     Canvas Size: $1440 \times 1024$ (Desktop).
+     Color Balance: 10% Orange (Sidebar/Buttons), 90% White/Grey (Background/Data).
+     Typography: Use Inter or Poppins for clean, readable data tables.
+     Charts: Use a Bar Chart in Orange to show "Bookings vs. Completed" for the week.
+
+ Developer Logic (Admin Functionality)
+
+Module          Backend Logic
+
+Search Logger   Every time a user types in the app search bar, save the string to
+                search_logs table.
+
+Document Viewer Use a secure URL to display the Partner's Passport Photo and IDs for
+                            verification.
+
+Global Pricing  Changing the "Base Price" here updates the sub_services table in the
+                database.
+
+Mass Notification One-click trigger to send an Orange notification to all users in a
+                            specific city.
+The Dashboard (Command Center)
+This is the "At-a-Glance" view of your business health.
+
+     Total Revenue: (Your 10% Share) in large Orange text.
+     Active Partners: Number of people like Phani currently "Online."
+     Live Bookings: Number of fans being repaired right now.
+     Unmet Demand: (Crucial!) A list of "Search terms" where no partner was found (e.g.,
+
+         "10 people searched for 'Home Nursing' today--0 partners available").
+Settlement & Payouts (The Monday
+Logic)
+Settlement & Payouts (The Monday Logic)
+
+    List: All partners and their "Wallet Balance."
+    Action: A button called "Generate Payout File."
+
+              Logic: This creates a list of Bank Account numbers and amounts to send to your
+                  bank for the Monday transfer
+Service & Pricing Manager
+Service & Pricing Manager (Moderator)
+
+You control the "Base Price" for the whole city from here.
+
+     Category: Home Repair -> Electrician.
+     Base Price: Set to 250.
+     Commission: Set to 10%.
+     Action: Changing "250" to "300" here updates the price on every user's app in
+
+         Rajahmundry instantly.
+figma design
+Figma Design Instructions for Admin
+
+    Layout: Use a Sidebar Navigation on the left and Data Tables on the right.
+    Colors: 90% White/Grey background. Use NEXGEN Orange only for "Action" buttons
+
+        and "Revenue" numbers.
+    Graphs: A simple Bar Chart showing "Bookings per Day" to see which days (like
+
+        Sundays) are busiest.
+Dispute & Support Desk
+Dispute & Support Desk
+
+     Active Tickets: Issues reported via the "Report an Issue" button.
+     Chat: View the chat history between the User and the Partner if there is a fight over
+
+         pricing.
+     Refund Trigger: A button to send money back to the User's wallet if Phani didn't show
+
+         up.
+main service document
+ PROJECT: NEXGEN Partner App
+
+(Service Module)
+
+ Objective
+
+Build a mobile-first Partner App for micro-entrepreneurs (service workers) to:
+
+     Manage bookings
+     Track earnings
+     Execute jobs
+     Handle payouts
+     Maintain profile & skills
+
+ TECH STACK (Recommended)
+
+     Frontend: React Native (Expo) OR Flutter
+     Backend: Node.js + Express
+     Database: PostgreSQL
+     Realtime: Firebase / Socket.io
+     Maps: Google Maps API
+     Payments: Razorpay / PhonePe
+     Notifications: Firebase Cloud Messaging (FCM)
+
+ CORE MODULES
+
+1. AUTH & PARTNER STATE
+
+Features:
+
+     Login via Phone OTP
+     Maintain is_active (Online/Offline)
+DB: partners
+
+id
+name
+phone
+profile_image
+rating
+total_jobs
+is_active (boolean)
+wallet_balance
+skills (array)
+strike_count
+created_at
+
+2. DASHBOARD (MAIN SCREEN)
+
+UI Sections:
+
+Header:
+
+     Welcome, {Partner Name}
+     Profile Image
+     Online/Offline Toggle
+
+Stats Cards:
+
+     Today's Earnings
+     Total Jobs
+     Rating (last 50 reviews avg)
+
+Work Buckets:
+
+     New Requests (Pulsing Orange)
+     Pending Works
+     Completed Works
+
+Activity List:
+
+     Recent jobs with status
+
+3. BOOKINGS SYSTEM
+DB: bookings
+
+id
+user_id
+partner_id
+service_name
+price
+commission
+final_amount
+status (new, accepted, pending, completed, cancelled)
+distance
+otp
+created_at
+
+Booking Flow:
+
+New Booking:
+
+     Trigger: Push Notification
+     Show Full Screen Overlay:
+
+               Service Name
+               Distance
+               Earnings (after commission)
+
+Actions:
+
+     ACCEPT  status = accepted
+     REJECT  assign to another partner
+
+Timer:
+
+     60 seconds auto-expire
+
+4. JOB EXECUTION FLOW
+
+Steps:
+
+    1. Accept Job
+    2. Navigate (Google Maps)
+    3. Click "Arrived"
+    4. Enter OTP (from user)
+    5. Start Job Timer
+    6. Upload Job Proof (image)
+    7. Finish Job
+
+5. EXTRA SERVICE FEATURE
+
+Flow:
+
+     Button: "+ Add Extra Service"
+     Partner selects service
+     User receives approval request
+
+Logic:
+
+     Job cannot complete until user approves new price
+
+6. WALLET & PAYOUT
+
+DB: transactions
+
+id
+partner_id
+booking_id
+total_amount
+commission
+net_amount
+status
+created_at
+
+Formula:
+
+Partner Earnings = Service Price * 0.90
+
+Wallet UI:
+
+     Today Earnings
+     Lifetime Revenue
+     Current Balance
+Withdrawal:
+
+     Button: "Settle to Bank"
+     Weekly settlement (Monday)
+
+7. PROFILE & SKILLS
+
+Features:
+
+     Edit Profile
+     Add Skills
+     Upload Certifications
+
+Logic:
+
+     Locked categories require:
+               Training video completion
+               Certification upload
+
+8. TRAINING MODULE
+
+UI:
+
+     Horizontal video slider
+
+Content:
+
+     Customer Behavior
+     Cleanliness
+     Safety
+     Tool Maintenance
+
+Progress:
+
+     % completion tracking
+
+9. REVIEW SYSTEM
+DB: reviews
+
+id
+user_id
+partner_id
+rating
+comment
+created_at
+
+Logic:
+
+     Average of last 50 reviews
+
+10. STRIKE & PENALTY SYSTEM
+
+Rules:
+
+     1st Cancel  50 penalty
+     3rd Cancel  24h block
+     Misconduct  Permanent Ban
+
+DB:
+
+strike_count
+last_strike_date
+
+11. LOCATION FILTER
+
+Logic:
+
+     Use Haversine Formula
+     Show bookings within 10 KM radius only
+
+12. API ENDPOINTS
+
+Auth:
+     POST /login
+     POST /verify-otp
+
+Partner:
+
+     GET /partner/profile
+     PUT /partner/status
+
+Bookings:
+
+     GET /bookings/new
+     POST /bookings/accept
+     POST /bookings/reject
+
+Job:
+
+     POST /job/start
+     POST /job/complete
+     POST /job/upload-proof
+
+Wallet:
+
+     GET /wallet
+     POST /withdraw
+
+13. UI DESIGN SYSTEM
+
+Colors:
+
+     Primary: #FF8C00 (Orange)
+     Success: Green
+     Pending: Blue
+     Neutral: Grey
+
+Components:
+
+     Cards (Rounded, Shadow)
+     Buttons (Min height: 60px)
+     Toggle Switch
+     Bottom Navigation
+14. REALTIME EVENTS
+
+     New Booking  Push Notification
+     Booking Accepted  Notify User
+     Payment Completed  Update Wallet
+
+15. SECURITY
+
+     OTP verification required to start job
+     No offline payments allowed
+     Image proof mandatory
+
+16. OPTIONAL FEATURES
+
+     Dark Mode
+     Language Switch (English / Telugu)
+     WhatsApp Support Integration
+
+ FINAL INSTRUCTION FOR COPILOT
+
+Generate:
+
+    1. Full backend (Node.js + Express + PostgreSQL)
+    2. REST APIs with controllers & routes
+    3. React Native frontend screens:
+
+               Dashboard
+               Booking Overlay
+               Job Execution Screen
+               Wallet Screen
+               Profile Screen
+    4. State management (Redux or Context API)
+    5. Clean folder structure
+    6. Reusable UI components
+    7. Environment config (.env)
+
+Ensure:
+     Scalable architecture
+     Clean code practices
+     Modular design
+     Production-ready structure
+
+ OUTPUT FORMAT REQUIRED
+
+     Folder Structure
+     Backend Code
+     Frontend Code
+     API Integration
+     Setup Instructions
+artner Verification Hub (KYC
+. Partner Verification Hub (KYC)
+
+This is where you approve Phani before he can start earning.
+
+     List: Show "Pending Approvals."
+     Action: Click a partner to see their Aadhar Card, Passport Photo, and License.
+     Buttons: [APPROVE] (Green) or [REJECT] (Red).
+
+               Logic: Once you click Approve, Phani gets a notification: "Congratulations! You
+                   are now a NEXGEN Partner."
+

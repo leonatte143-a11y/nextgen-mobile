@@ -2,7 +2,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { bookingService } from '../services/bookingService';
@@ -11,7 +11,8 @@ import type { RootStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'Review'>;
 
-const TAGS = ['Punctual', 'Professional', 'Clean Work', 'Fair Price'];
+const TAGS = ['Punctual', 'Professional', 'Clean work', 'Fair price'];
+const TIP_OPTIONS = [0, 20, 50, 100];
 
 export function ReviewScreen() {
   const navigation = useNavigation<Nav>();
@@ -19,29 +20,29 @@ export function ReviewScreen() {
   const [stars, setStars] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const [tip, setTip] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [recSim, setRecSim] = useState(false);
-  const [videoMockUri, setVideoMockUri] = useState<string | null>(null);
+
+  const goHome = () => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
 
   const toggle = (t: string) => {
     setPicked((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
   };
 
-  const recordVideoMock = () => {
-    if (recSim) return;
-    setRecSim(true);
-    // Simulates 15s capped capture; real app would use expo-camera / file output.
-    setTimeout(() => {
-      setRecSim(false);
-      setVideoMockUri('file:///mock/nexgen_feedback_15s.mp4');
-    }, 1600);
-  };
-
   const submit = async () => {
+    if (stars < 1) {
+      Alert.alert('Rating required', 'Please choose 1 to 5 stars before submitting.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await bookingService.submitReview(route.params.bookingId, stars, picked, note);
-      navigation.goBack();
+      const reviewNote = tip > 0 ? `${note.trim()}${note.trim() ? ' · ' : ''}Tip: ₹${tip}` : note;
+      await bookingService.submitReview(route.params.bookingId, stars, picked, reviewNote);
+      Alert.alert('Thank you!', 'Your feedback helps us improve NEXGEN.');
+      goHome();
+    } catch (error) {
+      Alert.alert('Unable to submit', String(error));
     } finally {
       setLoading(false);
     }
@@ -59,28 +60,20 @@ export function ReviewScreen() {
         ))}
       </View>
       {stars === 5 ? <Text style={styles.exc}>Excellent!</Text> : null}
-      <Text style={styles.vidLab}>Video feedback (max 15s, mock)</Text>
-      <PrimaryButton
-        title="Record video feedback"
-        variant="outline"
-        onPress={recordVideoMock}
-        loading={recSim}
-        disabled={recSim}
-      />
-      {recSim ? (
-        <Text style={styles.recHint}>Camera (mock) · auto-stop at 15s…</Text>
-      ) : null}
-      {videoMockUri ? (
-        <View style={styles.vidPreview} accessibilityLabel="Video preview mock">
-          <View style={styles.vidThumb}>
-            <Text style={styles.vidPlay}>▶</Text>
-            <Text style={styles.vidMeta}>15s · saved locally (mock)</Text>
-          </View>
-          <Text style={styles.vidUri} numberOfLines={1}>
-            {videoMockUri}
-          </Text>
-        </View>
-      ) : null}
+      <Text style={styles.tipLab}>Add a tip (optional)</Text>
+      <View style={styles.tipRow}>
+        {TIP_OPTIONS.map((amount) => (
+          <Pressable
+            key={amount}
+            onPress={() => setTip(amount)}
+            style={[styles.tipChip, tip === amount && styles.tipChipOn]}
+          >
+            <Text style={[styles.tipChipTxt, tip === amount && styles.tipChipTxtOn]}>
+              {amount === 0 ? 'No tip' : `₹${amount}`}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={styles.tags}>
         {TAGS.map((t) => (
           <Pressable
@@ -99,9 +92,9 @@ export function ReviewScreen() {
         onChangeText={setNote}
         multiline
       />
-      <PrimaryButton title="Submit review" onPress={submit} disabled={stars < 1} loading={loading} />
-      <Pressable onPress={() => navigation.goBack()} style={styles.skip}>
-        <Text style={styles.skipTxt}>Skip for now</Text>
+      <PrimaryButton title="Done" onPress={submit} disabled={stars < 1} loading={loading} />
+      <Pressable onPress={goHome} style={styles.skip}>
+        <Text style={styles.skipTxt}>Skip</Text>
       </Pressable>
     </ScrollView>
   );
@@ -116,20 +109,19 @@ const styles = StyleSheet.create({
   starBtn: { padding: spacing.sm },
   star: { fontSize: 44, color: colors.primary },
   exc: { textAlign: 'center', color: colors.primary, fontWeight: '700', marginBottom: spacing.lg },
-  vidLab: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
-  recHint: { color: colors.grey, fontSize: 12, marginTop: spacing.sm, marginBottom: spacing.sm, textAlign: 'center' },
-  vidPreview: { marginBottom: spacing.lg },
-  vidThumb: {
-    minHeight: 120,
-    borderRadius: radius.md,
-    backgroundColor: colors.charcoal,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.md,
+  tipLab: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
+  tipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
+  tipChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
   },
-  vidPlay: { fontSize: 36, color: colors.white, marginBottom: spacing.xs },
-  vidMeta: { color: colors.white, fontSize: 12, fontWeight: '600' },
-  vidUri: { fontSize: 11, color: colors.grey, marginTop: spacing.xs },
+  tipChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tipChipTxt: { fontWeight: '600', color: colors.charcoal },
+  tipChipTxtOn: { color: colors.white },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg, marginTop: spacing.sm },
   tag: {
     paddingHorizontal: spacing.md,

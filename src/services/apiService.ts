@@ -20,7 +20,7 @@ async function getToken(kind: 'user' | 'partner' | 'admin'): Promise<string | nu
 }
 
 async function requestJson<T>(
-  method: 'GET' | 'POST' | 'PUT',
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   path: string,
   body?: unknown,
   auth?: 'user' | 'partner' | 'admin',
@@ -183,5 +183,9 @@ export const apiService = {
 
   put<T>(path: string, body?: unknown, auth?: 'user' | 'partner' | 'admin') {
     return requestJson<T>('PUT', path, body, auth);
+  },
+
+  delete<T>(path: string, auth?: 'user' | 'partner' | 'admin') {
+    return requestJson<T>('DELETE', path, undefined, auth);
   },
 };

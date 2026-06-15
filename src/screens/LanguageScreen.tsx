@@ -11,7 +11,7 @@ type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Langua
 
 export function LanguageScreen({ navigation }: Props) {
   const { setLanguage, completeLanguageOnboarding, userToken, partnerToken } = useAuth();
-  const [sel, setSel] = useState<'en' | 'te'>('en');
+  const [sel, setSel] = useState<'en' | 'te' | 'hi'>('en');
 
   const onContinue = async () => {
     await setLanguage(sel);
@@ -49,6 +49,14 @@ export function LanguageScreen({ navigation }: Props) {
         <Text style={[styles.cardTitle, sel === 'te' && styles.te]}>తెలుగు</Text>
         <Text style={styles.cardSub}>రాజమండ్రి & గుంటూరు ప్రాంతీయ భాష</Text>
         {sel === 'te' ? <Ionicons name="checkmark-circle" size={24} color={colors.primary} /> : null}
+      </Pressable>
+      <Pressable
+        onPress={() => setSel('hi')}
+        style={[styles.card, sel === 'hi' && styles.cardOn]}
+      >
+        <Text style={[styles.cardTitle, sel === 'hi' && styles.te]}>हिन्दी</Text>
+        <Text style={styles.cardSub}>Hindi (coming soon — UI stays English)</Text>
+        {sel === 'hi' ? <Ionicons name="checkmark-circle" size={24} color={colors.primary} /> : null}
       </Pressable>
       <View style={styles.footer}>
         <PrimaryButton title="Continue / కొనసాగించు" onPress={onContinue} />

@@ -56,6 +56,7 @@ export const MAIN_CATEGORIES: MainCategory[] = [
       { id: 'hs_tiles', title: 'Tiles & Marble', subtitle: 'Flooring workers', icon: 'grid-outline', searchQuery: 'tiles marble' },
       { id: 'hs_glass', title: 'Glass Works', subtitle: 'Panels & fittings', icon: 'albums-outline', searchQuery: 'glass works' },
       { id: 'hs_move', title: 'Packers & Movers', subtitle: 'Relocation', icon: 'car-outline', searchQuery: 'packers movers' },
+      { id: 'hs_driver', title: 'Driver', subtitle: 'Car & delivery', icon: 'car-outline', searchQuery: 'driver' },
       { id: 'hs_weld', title: 'Welders', subtitle: 'Metal fabrication', icon: 'flame-outline', searchQuery: 'welder' },
       { id: 'hs_int', title: 'Interior Designers', subtitle: 'Home makeover', icon: 'layers-outline', searchQuery: 'interior designer' },
       { id: 'hs_ceil', title: 'Ceiling Works', subtitle: 'False ceiling', icon: 'resize-outline', searchQuery: 'ceiling' },

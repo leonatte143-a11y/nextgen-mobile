@@ -22,7 +22,7 @@ import { BannerSkeleton } from './BannerSkeleton';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BANNER_WIDTH = SCREEN_WIDTH - spacing.md * 2;
-const BANNER_HEIGHT = 160;
+const BANNER_HEIGHT = 68;
 const AUTO_MS = 4000;
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: spacing.md,
   },
-  title: { color: colors.white, fontSize: 17, fontWeight: '800' },
-  subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 12, marginTop: 4 },
+  title: { color: colors.white, fontSize: 14, fontWeight: '800' },
+  subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 11, marginTop: 2 },
   cta: {
     alignSelf: 'flex-start',
     marginTop: spacing.sm,

@@ -14,15 +14,18 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { authService } from '../services/authService';
 import { partnerService } from '../services/partnerService';
+import { ENABLE_PARTNER_QUESTIONS } from '../config/featureFlags';
 import { logAuth } from '../lib/devLog';
+import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { RootStackParamList } from '../navigation/types';
 
-const CATS = [
-  'Electrician',
-  'Plumber',
-  'Drivers',
-  'Home Repair',
-] as const;
+const DEFAULT_PARTNER_OPTIONS = ['Electrician', 'Plumber', 'Driver', 'Home Repair'] as const;
+const ALL_PARTNER_SERVICES = Array.from(
+  new Set([
+    ...DEFAULT_PARTNER_OPTIONS,
+    ...MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title)),
+  ]),
+);
 const LOCATIONS = [
   'Rajahmundry',
   'Guntur',
@@ -52,7 +55,8 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [otpLength, setOtpLength] = useState(6);
   const [otpVisible, setOtpVisible] = useState(false);
   const [otpSending, setOtpSending] = useState(false);
-  const [category, setCategory] = useState<typeof CATS[number]>(CATS[0]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([DEFAULT_PARTNER_OPTIONS[0]]);
+  const [showMoreServices, setShowMoreServices] = useState(false);
   const [workLocation, setWorkLocation] = useState<typeof LOCATIONS[number]>(LOCATIONS[0]);
   const [idType, setIdType] = useState<'Aadhaar' | 'Voter ID'>('Aadhaar');
   const [idNo, setIdNo] = useState('');
@@ -78,7 +82,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [videoSeen, setVideoSeen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const needsDl = category === 'Drivers';
+  const needsDl = selectedCategories.some((item) => item.toLowerCase().includes('driver'));
   const quizPass = qIdx >= Q10.length ? qScore >= 8 : null;
 
   const sendOtp = async () => {
@@ -125,7 +129,8 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     idNo.length > 3 &&
     idFront &&
     idBack &&
-    selfie;
+    selfie &&
+    selectedCategories.length > 0;
 
   const canNext1 =
     addr.length > 4 && pin.length >= 6 && bName.length > 2 && bAcc.length > 4 && bIfsc.length > 8;
@@ -134,13 +139,16 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   }
   const canNext2 = certFile && certNo.length > 2;
   const canNext3 = videoSeen && qIdx >= Q10.length && quizPass === true;
+  const canComplete = ENABLE_PARTNER_QUESTIONS
+    ? canNext0 && canNext1 && canNext2 && canNext3
+    : canNext0 && canNext1 && canNext2;
 
   const finish = async () => {
-    if (!canNext0 || !canNext1 || !canNext2 || !canNext3) {
+    if (!canComplete) {
       Alert.alert('Incomplete', 'Check all required fields (mock).');
       return;
     }
-    if (quizPass !== true) {
+    if (ENABLE_PARTNER_QUESTIONS && quizPass !== true) {
       Alert.alert('Academy', 'You need 8/10. Retry quiz (mock).');
       setQIdx(0);
       setQScore(0);
@@ -153,11 +161,11 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       const profile = await partnerService.applyOnboarding({
         phone: digits,
         name: name.trim(),
-        serviceCategory: category,
-        categories: [category],
+        serviceCategory: selectedCategories[0],
+        categories: selectedCategories,
         primaryCity: workLocation,
         skills: [
-          category,
+          ...selectedCategories,
           certNo,
           `exp:${exp}`,
           `addr:${addr.slice(0, 80)}`,
@@ -208,14 +216,53 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
             onChangeText={(t) => setOtpCode(t.replace(/\D/g, '').slice(0, otpLength))}
           />
         ) : null}
-        <Text style={styles.lab}>Service category</Text>
+        <Text style={styles.lab}>Service categories</Text>
+        <Text style={styles.helper}>Pick all services you can provide. Tap again to deselect.</Text>
         <View style={styles.chips}>
-          {CATS.map((c) => (
-            <Pressable key={c} style={[styles.chip, category === c && styles.chipOn]} onPress={() => setCategory(c)}>
-              <Text style={[styles.chipTxt, category === c && styles.chipOnTxt]}>{c}</Text>
-            </Pressable>
-          ))}
+          {DEFAULT_PARTNER_OPTIONS.map((option) => {
+            const selected = selectedCategories.includes(option);
+            return (
+              <Pressable
+                key={option}
+                style={[styles.chip, selected && styles.chipOn]}
+                onPress={() => {
+                  setSelectedCategories((prev) =>
+                    prev.includes(option)
+                      ? prev.filter((item) => item !== option)
+                      : [...prev, option],
+                  );
+                }}
+              >
+                <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+              </Pressable>
+            );
+          })}
         </View>
+        <Pressable onPress={() => setShowMoreServices((prev) => !prev)} style={styles.moreBtn}>
+          <Text style={styles.moreBtnTxt}>{showMoreServices ? 'Hide all services' : 'Show more services'}</Text>
+        </Pressable>
+        {showMoreServices ? (
+          <View style={styles.chipsWide}>
+            {ALL_PARTNER_SERVICES.map((option) => {
+              const selected = selectedCategories.includes(option);
+              return (
+                <Pressable
+                  key={option}
+                  style={[styles.chip, selected && styles.chipOn]}
+                  onPress={() => {
+                    setSelectedCategories((prev) =>
+                      prev.includes(option)
+                        ? prev.filter((item) => item !== option)
+                        : [...prev, option],
+                    );
+                  }}
+                >
+                  <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
         <Text style={styles.lab}>Work location</Text>
         <View style={styles.chips}>
           {LOCATIONS.map((c) => (
@@ -332,8 +379,18 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         </Pressable>
         <NexgenTextInput label="Certificate number" value={certNo} onChangeText={setCertNo} />
         <PrimaryButton
-          title="Next — NEXGEN Academy"
-          onPress={() => (canNext2 ? setStep(3) : Alert.alert('Certificate', 'Upload + number (mock).'))}
+          title={ENABLE_PARTNER_QUESTIONS ? 'Next — NEXGEN Academy' : 'Complete registration'}
+          onPress={() => {
+            if (!canNext2) {
+              Alert.alert('Certificate', 'Upload + number (mock).');
+              return;
+            }
+            if (ENABLE_PARTNER_QUESTIONS) {
+              setStep(3);
+            } else {
+              finish();
+            }
+          }}
           disabled={!canNext2}
         />
         <Pressable onPress={() => setStep(1)} style={styles.back}>
@@ -427,6 +484,10 @@ const styles = StyleSheet.create({
   otpLinkTxt: { color: colors.primary, fontWeight: '700' },
   file: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.primary, borderRadius: radius.md, padding: spacing.md },
   fileTxt: { color: colors.charcoal, fontWeight: '600' },
+  helper: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm },
+  moreBtn: { marginBottom: spacing.md },
+  moreBtnTxt: { color: colors.primary, fontWeight: '700' },
+  chipsWide: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.md },
   noteRed: { color: colors.error, fontSize: 12, marginBottom: spacing.lg, fontStyle: 'italic' },
   back: { marginTop: spacing.lg, alignItems: 'center' },
   backTxt: { color: colors.primary, fontWeight: '700' },

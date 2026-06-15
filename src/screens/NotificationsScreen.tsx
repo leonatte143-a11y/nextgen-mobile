@@ -22,9 +22,14 @@ export function NotificationsScreen() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await notificationService.list();
-    setItems(data);
-    setLoading(false);
+    try {
+      const data = await notificationService.list();
+      setItems(data);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -40,6 +45,17 @@ export function NotificationsScreen() {
   const markAll = async () => {
     await notificationService.markAllRead();
     load();
+  };
+
+  const onTap = async (item: AppNotification) => {
+    if (!item.read) {
+      setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)));
+      try {
+        await notificationService.markRead(item.id);
+      } catch {
+        load();
+      }
+    }
   };
 
   return (
@@ -77,7 +93,7 @@ export function NotificationsScreen() {
           keyExtractor={(x) => x.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <View style={[styles.card, !item.read && styles.unread]}>
+            <Pressable onPress={() => onTap(item)} style={[styles.card, !item.read && styles.unread]}>
               <View style={styles.iconCircle}>
                 <Ionicons
                   name={item.type === 'offer' ? 'gift-outline' : 'notifications-outline'}
@@ -91,7 +107,7 @@ export function NotificationsScreen() {
                 <Text style={styles.time}>{item.timeLabel}</Text>
               </View>
               {!item.read ? <View style={styles.dot} /> : null}
-            </View>
+            </Pressable>
           )}
         />
       )}

@@ -1,5 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePartner } from '../context/PartnerContext';
@@ -10,7 +9,7 @@ import type { PartnerRequest } from '../mock/types';
 type Props = { navigation: any };
 
 export function PartnerRequestsScreen({ navigation }: Props) {
-  const { requests, acceptRequest, rejectRequest, startJob, completeJob, refreshPartner, isLoading } = usePartner();
+  const { requests, acceptRequest, rejectRequest, refreshPartner, isLoading } = usePartner();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const visibleRequests = useMemo(
@@ -66,11 +65,17 @@ export function PartnerRequestsScreen({ navigation }: Props) {
               </Pressable>
             </>
           ) : item.status === 'pending' ? (
-            <Pressable style={styles.actionButton} onPress={() => startJob(item.id)} disabled={actionLoading === item.id}>
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}
+            >
               <Text style={styles.actionLabel}>Start Job</Text>
             </Pressable>
           ) : item.status === 'in_progress' ? (
-            <Pressable style={styles.actionButton} onPress={() => completeJob(item.id)} disabled={actionLoading === item.id}>
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}
+            >
               <Text style={styles.actionLabel}>Complete Job</Text>
             </Pressable>
           ) : null}

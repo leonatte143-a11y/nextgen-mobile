@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus } from '../mock/types';
+import type { Booking, BookingStatus, SelectedBookingItem, VisitingChargeQuote } from '../mock/types';
 import { apiService } from './apiService';
 
 export const bookingService = {
@@ -10,15 +10,35 @@ export const bookingService = {
     return apiService.get(`/api/v1/bookings/${id}`, 'user');
   },
 
+  async quoteVisitingCharge(input: {
+    userLat?: number;
+    userLng?: number;
+    partnerLat?: number;
+    partnerLng?: number;
+    city?: string;
+    partnerId?: string;
+  }): Promise<VisitingChargeQuote> {
+    return apiService.post<VisitingChargeQuote>(
+      '/api/v1/bookings/visiting-charge/quote',
+      input,
+      'user',
+    );
+  },
+
   async createBooking(input: {
     serviceId: string;
+    partnerId?: string;
+    distanceKm?: number;
+    visitingCharges?: number;
+    userLat?: number;
+    userLng?: number;
     address: string;
     notes?: string;
     paymentMethod: string;
     promoCode?: string;
-    /** When booking from multi-item cart, pass precomputed payable total */
     amountOverride?: number;
     serviceNameOverride?: string;
+    selectedItems?: SelectedBookingItem[];
   }): Promise<Booking> {
     return apiService.post<Booking>('/api/v1/bookings', input, 'user');
   },
@@ -31,3 +51,5 @@ export const bookingService = {
     return apiService.post(`/api/v1/bookings/${bookingId}/review`, { stars, tags, note }, 'user');
   },
 };
+
+export type { BookingStatus };

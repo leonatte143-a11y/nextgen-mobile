@@ -12,7 +12,7 @@ const KEYS = {
   languageDone: 'nexgen_language_onboarding',
 };
 
-type LangCode = 'en' | 'te';
+type LangCode = 'en' | 'te' | 'hi';
 
 export type RefreshProfileResult = { ok: true } | { ok: false; message: string };
 
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ]);
         setUserToken(ut);
         setPartnerToken(pt);
-        if (lang === 'te' || lang === 'en') setLanguageState(lang);
+        if (lang === 'te' || lang === 'en' || lang === 'hi') setLanguageState(lang);
         setHasCompletedLanguageOnboarding(lo === '1');
         if (ut) {
           logAuth('hydrate_user_token', { present: true });

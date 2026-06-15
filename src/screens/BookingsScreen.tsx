@@ -28,9 +28,14 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
 
   const load = useCallback(async () => {
     setLoading(true);
-    const all = await bookingService.getBookings();
-    setItems(all);
-    setLoading(false);
+    try {
+      const all = await bookingService.getBookings();
+      setItems(all);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -81,6 +86,11 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
               <Text style={styles.partner}>
                 {item.partnerName} · ₹{item.totalAmount}
               </Text>
+              {item.lineItems && item.lineItems.length > 0 ? (
+                <Text style={styles.lineItems} numberOfLines={2}>
+                  {item.lineItems.map((li) => li.title).join(', ')}
+                </Text>
+              ) : null}
               <View style={styles.badgeRow}>
                 <Text
                   style={[
@@ -132,6 +142,7 @@ const styles = StyleSheet.create({
   name: { fontWeight: '800', fontSize: 16, flex: 1 },
   date: { color: colors.grey, fontSize: 12 },
   partner: { color: colors.grey, marginTop: 6 },
+  lineItems: { color: colors.charcoal, marginTop: 4, fontSize: 12 },
   badgeRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.md, alignItems: 'center' },
   badge: { fontWeight: '700', color: colors.warning },
   badgeOk: { color: colors.success },

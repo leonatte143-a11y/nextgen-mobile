@@ -12,8 +12,8 @@ type PartnerContextValue = {
   toggleOnline: (online: boolean) => Promise<void>;
   acceptRequest: (requestId: string) => Promise<void>;
   rejectRequest: (requestId: string) => Promise<void>;
-  startJob: (requestId: string) => Promise<void>;
-  completeJob: (requestId: string) => Promise<void>;
+  startJob: (requestId: string, otp: string) => Promise<boolean>;
+  completeJob: (requestId: string, otp: string) => Promise<boolean>;
   requestHeavyWorkEstimate: (requestId: string, payload: { extraLabor: number; materialCost: number; description: string }) => Promise<void>;
   declineHeavyWorkEstimate: (requestId: string) => Promise<void>;
   withdrawBalance: () => Promise<void>;
@@ -57,6 +57,10 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     refreshPartner().catch(() => setIsLoading(false));
+    const timer = setInterval(() => {
+      refreshPartner().catch(() => undefined);
+    }, 15000);
+    return () => clearInterval(timer);
   }, [partnerToken, refreshPartner]);
 
   const toggleOnline = useCallback(
@@ -87,19 +91,21 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const startJob = useCallback(async (requestId: string) => {
+  const startJob = useCallback(async (requestId: string, otp: string) => {
     try {
-      await partnerService.startJob(requestId);
+      await partnerService.startJob(requestId, otp);
       const requestsResult = await partnerService.getRequests();
       setRequests(requestsResult);
+      return true;
     } catch (error) {
       console.warn('Start job failed', error);
+      return false;
     }
   }, []);
 
-  const completeJob = useCallback(async (requestId: string) => {
+  const completeJob = useCallback(async (requestId: string, otp: string) => {
     try {
-      await partnerService.completeJob(requestId);
+      await partnerService.completeJob(requestId, otp);
       const [requestsResult, profileResult, earningsResult] = await Promise.all([
         partnerService.getRequests(),
         partnerService.getProfile(),
@@ -108,8 +114,10 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       setRequests(requestsResult);
       setProfile(profileResult);
       setEarnings(earningsResult);
+      return true;
     } catch (error) {
       console.warn('Complete job failed', error);
+      return false;
     }
   }, []);
 

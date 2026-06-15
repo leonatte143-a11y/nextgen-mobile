@@ -3,9 +3,9 @@ import { Animated, Dimensions, StyleSheet, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 
 const WIDTH = Dimensions.get('window').width - spacing.md * 2;
-const HEIGHT = 160;
+const DEFAULT_HEIGHT = 160;
 
-export function BannerSkeleton() {
+export function BannerSkeleton({ height = DEFAULT_HEIGHT }: { height?: number }) {
   const opacity = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function BannerSkeleton() {
 
   return (
     <View style={styles.wrap}>
-      <Animated.View style={[styles.box, { opacity }]} />
+      <Animated.View style={[styles.box, { opacity, height }]} />
     </View>
   );
 }
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   wrap: { paddingHorizontal: spacing.md, marginBottom: spacing.sm },
   box: {
     width: WIDTH,
-    height: HEIGHT,
+    height: DEFAULT_HEIGHT,
     borderRadius: radius.lg,
     backgroundColor: colors.greyLight,
   },

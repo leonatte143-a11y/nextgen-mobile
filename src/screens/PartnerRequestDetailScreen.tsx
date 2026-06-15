@@ -36,6 +36,10 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   const [description, setDescription] = useState('Partner recommended motor replacement');
   const [estOpen, setEstOpen] = useState(false);
   const [estVal, setEstVal] = useState('');
+  const [startOtpOpen, setStartOtpOpen] = useState(false);
+  const [startOtpInput, setStartOtpInput] = useState('');
+  const [endOtpOpen, setEndOtpOpen] = useState(false);
+  const [endOtpInput, setEndOtpInput] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [canceling, setCanceling] = useState(false);
 
@@ -59,20 +63,49 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
 
   const handleStart = async () => {
     if (!request) return;
+    if (!startOtpInput.trim()) {
+      Alert.alert('Start OTP required', 'Ask the customer for their start OTP.');
+      return;
+    }
     setActionLoading(true);
-    await startJob(request.id);
+    const ok = await startJob(request.id, startOtpInput.trim());
     setActionLoading(false);
-    Alert.alert('Job started', 'You can now navigate to the customer and complete the work.');
+    if (!ok) {
+      Alert.alert('Invalid OTP', 'The start OTP did not match. Ask the customer to share the code shown in the app.');
+      return;
+    }
+    setStartOtpOpen(false);
+    setStartOtpInput('');
+    Alert.alert('Job started', 'You can now complete the work when finished.');
     navigation.goBack();
   };
 
   const handleComplete = async () => {
     if (!request) return;
+    if (!endOtpInput.trim()) {
+      Alert.alert('Completion OTP required', 'Ask the customer for their completion OTP.');
+      return;
+    }
     setActionLoading(true);
-    await completeJob(request.id);
+    const ok = await completeJob(request.id, endOtpInput.trim());
     setActionLoading(false);
+    if (!ok) {
+      Alert.alert('Invalid OTP', 'The completion OTP did not match. Ask the customer for the end OTP shown in the app.');
+      return;
+    }
+    setEndOtpOpen(false);
+    setEndOtpInput('');
     Alert.alert('Job completed', 'The work is finished and earnings are updated.');
     navigation.goBack();
+  };
+
+  const callCustomer = () => {
+    const digits = String(request?.customerPhone || '').replace(/\D/g, '');
+    if (digits.length < 10) {
+      Alert.alert('Unavailable', 'Customer phone number is not available.');
+      return;
+    }
+    Linking.openURL(`tel:+91${digits.slice(-10)}`);
   };
 
   const handleSubmitEstimate = async () => {
@@ -148,6 +181,11 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         <Text style={styles.sectionTitle}>Customer</Text>
         <Text style={styles.sectionText}>{request.customerName}</Text>
         <Text style={styles.sectionText}>{request.address}</Text>
+        {request.customerPhone ? (
+          <Pressable onPress={callCustomer} style={styles.callUserBtn}>
+            <Text style={styles.callUserTxt}>Call User</Text>
+          </Pressable>
+        ) : null}
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Timing</Text>
@@ -166,10 +204,16 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         <Text style={styles.sectionText}>NEXGEN commission ₹{request.commission}</Text>
         <Text style={styles.sectionText}>Your share ₹{request.partnerShare}</Text>
       </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Job OTP</Text>
-        <Text style={styles.sectionText}>{request.startOtp}</Text>
-      </View>
+      {request.lineItems?.length ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Booked services</Text>
+          {request.lineItems.map((li) => (
+            <Text key={li.id || li.title} style={styles.sectionText}>
+              {li.title} × {li.quantity} — ₹{li.lineTotal}
+            </Text>
+          ))}
+        </View>
+      ) : null}
       {request.extraServices?.length ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Extra Service</Text>
@@ -228,7 +272,11 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
             </Pressable>
           </>
         ) : request.status === 'pending' ? (
-          <Pressable style={[styles.inProgAction, styles.acceptButton]} onPress={handleStart} disabled={actionLoading}>
+          <Pressable
+            style={[styles.inProgAction, styles.acceptButton]}
+            onPress={() => setStartOtpOpen(true)}
+            disabled={actionLoading}
+          >
             <Text style={styles.acceptText}>Start Job</Text>
           </Pressable>
         ) : request.status === 'in_progress' ? (
@@ -249,8 +297,12 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
             >
               <Text style={styles.acceptText}>Heavy work quote</Text>
             </Pressable>
-            <Pressable style={[styles.inProgAction, styles.acceptButton]} onPress={handleComplete} disabled={actionLoading}>
-              <Text style={styles.acceptText}>Finish Job</Text>
+            <Pressable
+              style={[styles.inProgAction, styles.acceptButton]}
+              onPress={() => setEndOtpOpen(true)}
+              disabled={actionLoading}
+            >
+              <Text style={styles.acceptText}>Work Done</Text>
             </Pressable>
           </>
         ) : isCancelled ? (
@@ -374,6 +426,48 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={startOtpOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Enter Start OTP</Text>
+            <Text style={styles.modalSub}>Ask the customer for the start OTP shown in their NEXGEN app.</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="number-pad"
+              value={startOtpInput}
+              onChangeText={setStartOtpInput}
+              placeholder="4-digit start OTP"
+              maxLength={8}
+            />
+            <PrimaryButton title="Verify & start job" onPress={handleStart} loading={actionLoading} />
+            <Pressable onPress={() => setStartOtpOpen(false)} style={styles.modalX}>
+              <Text style={styles.modalXT}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={endOtpOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Enter Completion OTP</Text>
+            <Text style={styles.modalSub}>Ask the customer for the completion OTP after work is done.</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="number-pad"
+              value={endOtpInput}
+              onChangeText={setEndOtpInput}
+              placeholder="4-digit completion OTP"
+              maxLength={8}
+            />
+            <PrimaryButton title="Verify & complete" onPress={handleComplete} loading={actionLoading} />
+            <Pressable onPress={() => setEndOtpOpen(false)} style={styles.modalX}>
+              <Text style={styles.modalXT}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -384,6 +478,15 @@ const styles = StyleSheet.create({
   section: { backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.md },
   sectionTitle: { fontSize: 14, color: colors.grey, fontWeight: '700', marginBottom: spacing.xs },
   sectionText: { fontSize: 16, color: colors.charcoal, marginTop: spacing.xs },
+  callUserBtn: {
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.orangeTint,
+    borderRadius: radius.md,
+    alignSelf: 'flex-start',
+  },
+  callUserTxt: { color: colors.primary, fontWeight: '800' },
   quoteTotal: { marginTop: spacing.sm, fontWeight: '800' },
   hintText: { marginTop: spacing.sm, color: colors.primary, fontSize: 13, lineHeight: 20 },
   statusCard: { backgroundColor: colors.primary, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.md },
