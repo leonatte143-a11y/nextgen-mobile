@@ -10,8 +10,9 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
-import type { CatalogService, PartnerSummary, ServiceMenuItem } from '../mock/types';
+import { formatTelUrl } from '../utils/phone';
 import { catalogService } from '../services/catalogService';
+import type { CatalogService, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -92,12 +93,12 @@ export function ServiceDetailScreen() {
   }
 
   const callPartner = () => {
-    const phone = selectedPartner?.phone?.replace(/\D/g, '');
-    if (!phone || phone.length < 10) {
+    const tel = formatTelUrl(selectedPartner?.phone);
+    if (!tel) {
       Alert.alert('Unavailable', 'Partner phone number is not available.');
       return;
     }
-    Linking.openURL(`tel:${phone}`);
+    Linking.openURL(tel);
   };
 
   const chatPartner = () => {

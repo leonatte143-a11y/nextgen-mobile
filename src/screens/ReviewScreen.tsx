@@ -12,6 +12,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'Review'>;
 
 const TAGS = ['Punctual', 'Professional', 'Clean work', 'Fair price'];
+const TIP_OPTIONS = [0, 20, 50, 100];
 
 export function ReviewScreen() {
   const navigation = useNavigation<Nav>();
@@ -19,7 +20,10 @@ export function ReviewScreen() {
   const [stars, setStars] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const [tip, setTip] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const goHome = () => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
 
   const toggle = (t: string) => {
     setPicked((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
@@ -33,9 +37,10 @@ export function ReviewScreen() {
 
     setLoading(true);
     try {
-      await bookingService.submitReview(route.params.bookingId, stars, picked, note);
-      Alert.alert('Thank you', 'Your feedback has been submitted.');
-      navigation.goBack();
+      const reviewNote = tip > 0 ? `${note.trim()}${note.trim() ? ' · ' : ''}Tip: ₹${tip}` : note;
+      await bookingService.submitReview(route.params.bookingId, stars, picked, reviewNote);
+      Alert.alert('Thank you!', 'Your feedback helps us improve NEXGEN.');
+      goHome();
     } catch (error) {
       Alert.alert('Unable to submit', String(error));
     } finally {
@@ -55,6 +60,20 @@ export function ReviewScreen() {
         ))}
       </View>
       {stars === 5 ? <Text style={styles.exc}>Excellent!</Text> : null}
+      <Text style={styles.tipLab}>Add a tip (optional)</Text>
+      <View style={styles.tipRow}>
+        {TIP_OPTIONS.map((amount) => (
+          <Pressable
+            key={amount}
+            onPress={() => setTip(amount)}
+            style={[styles.tipChip, tip === amount && styles.tipChipOn]}
+          >
+            <Text style={[styles.tipChipTxt, tip === amount && styles.tipChipTxtOn]}>
+              {amount === 0 ? 'No tip' : `₹${amount}`}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={styles.tags}>
         {TAGS.map((t) => (
           <Pressable
@@ -73,9 +92,9 @@ export function ReviewScreen() {
         onChangeText={setNote}
         multiline
       />
-      <PrimaryButton title="Submit review" onPress={submit} disabled={stars < 1} loading={loading} />
-      <Pressable onPress={() => navigation.goBack()} style={styles.skip}>
-        <Text style={styles.skipTxt}>Skip for now</Text>
+      <PrimaryButton title="Done" onPress={submit} disabled={stars < 1} loading={loading} />
+      <Pressable onPress={goHome} style={styles.skip}>
+        <Text style={styles.skipTxt}>Skip</Text>
       </Pressable>
     </ScrollView>
   );
@@ -90,20 +109,19 @@ const styles = StyleSheet.create({
   starBtn: { padding: spacing.sm },
   star: { fontSize: 44, color: colors.primary },
   exc: { textAlign: 'center', color: colors.primary, fontWeight: '700', marginBottom: spacing.lg },
-  vidLab: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
-  recHint: { color: colors.grey, fontSize: 12, marginTop: spacing.sm, marginBottom: spacing.sm, textAlign: 'center' },
-  vidPreview: { marginBottom: spacing.lg },
-  vidThumb: {
-    minHeight: 120,
-    borderRadius: radius.md,
-    backgroundColor: colors.charcoal,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.md,
+  tipLab: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
+  tipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
+  tipChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
   },
-  vidPlay: { fontSize: 36, color: colors.white, marginBottom: spacing.xs },
-  vidMeta: { color: colors.white, fontSize: 12, fontWeight: '600' },
-  vidUri: { fontSize: 11, color: colors.grey, marginTop: spacing.xs },
+  tipChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tipChipTxt: { fontWeight: '600', color: colors.charcoal },
+  tipChipTxtOn: { color: colors.white },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg, marginTop: spacing.sm },
   tag: {
     paddingHorizontal: spacing.md,

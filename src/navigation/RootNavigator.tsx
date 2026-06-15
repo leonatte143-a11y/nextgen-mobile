@@ -20,6 +20,8 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { HealthcareEmergenciesScreen } from '../screens/HealthcareEmergenciesScreen';
 import { AmbulanceSosScreen } from '../screens/AmbulanceSosScreen';
 import { ClinicBookingScreen } from '../screens/ClinicBookingScreen';
+import { ShopDetailScreen } from '../screens/ShopDetailScreen';
+import { ShopJoinScreen } from '../screens/ShopJoinScreen';
 import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
 import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
@@ -79,6 +81,8 @@ export function RootNavigator() {
       <Stack.Screen name="HealthcareEmergencies" component={HealthcareEmergenciesScreen} />
       <Stack.Screen name="AmbulanceSos" component={AmbulanceSosScreen} />
       <Stack.Screen name="ClinicBooking" component={ClinicBookingScreen} />
+      <Stack.Screen name="ShopDetail" component={ShopDetailScreen} />
+      <Stack.Screen name="ShopJoin" component={ShopJoinScreen} />
     </Stack.Navigator>
   );
 }

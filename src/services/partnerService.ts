@@ -68,12 +68,12 @@ export const partnerService = {
     return apiService.post(`/api/v1/partners/requests/${requestId}/reject`, {}, 'partner');
   },
 
-  async startJob(requestId: string): Promise<PartnerRequest> {
-    return apiService.post(`/api/v1/partners/requests/${requestId}/start`, {}, 'partner');
+  async startJob(requestId: string, otp: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/start`, { otp }, 'partner');
   },
 
-  async completeJob(requestId: string): Promise<PartnerRequest> {
-    return apiService.post(`/api/v1/partners/requests/${requestId}/complete`, {}, 'partner');
+  async completeJob(requestId: string, otp: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/complete`, { otp }, 'partner');
   },
 
   async submitEstimateUpdate(requestId: string, newAmount: number): Promise<PartnerRequest> {

@@ -64,7 +64,7 @@ export interface PartnerRequest {
   amount: number;
   commission: number;
   partnerShare: number;
-  startOtp: string;
+  customerPhone?: string;
   notes: string;
   requestedAt: string;
   extraServices?: Array<{ id: string; name: string; price: number }>;
@@ -190,9 +190,11 @@ export interface Booking {
   categoryLabel: string;
   partnerName: string;
   partnerRating: number;
+  partnerPhone?: string;
   status: BookingStatus;
   totalAmount: number;
   startOtp: string;
+  endOtp?: string;
   scheduledAt: string;
   createdAt: string;
   address: string;

@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
+import { formatTelUrl, displayPhone } from '../utils/phone';
 import { bookingService } from '../services/bookingService';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -189,12 +190,12 @@ export function ConfirmBookingScreen() {
     : svc!.bucketId === 'tech_supply';
 
   const onCall = () => {
-    const digits = String(partnerPhone || '').replace(/\D/g, '');
-    if (digits.length < 10) {
+    const tel = formatTelUrl(partnerPhone);
+    if (!tel) {
       Alert.alert('Unavailable', 'Partner phone number is not available.');
       return;
     }
-    Linking.openURL(`tel:${digits}`);
+    Linking.openURL(tel);
   };
 
   return (
@@ -217,7 +218,7 @@ export function ConfirmBookingScreen() {
               Partner: {partnerName}
               {partnerRating != null ? ` (★ ${Number(partnerRating).toFixed(1)})` : ''}
             </Text>
-            {partnerPhone ? <Text style={styles.sumPhone}>{partnerPhone}</Text> : null}
+            {partnerPhone ? <Text style={styles.sumPhone}>{displayPhone(partnerPhone)}</Text> : null}
             {isRemote ? (
               <View style={styles.locRow}>
                 <Ionicons name="globe-outline" size={16} color={colors.primary} />

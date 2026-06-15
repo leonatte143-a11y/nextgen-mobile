@@ -1,16 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
+import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { BucketId, CatalogService } from '../mock/types';
 import { sortByFavoritePartner, useFavorites } from '../context/FavoritesContext';
 import { catalogService } from '../services/catalogService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+const BUCKET_ICONS: Record<BucketId, React.ComponentProps<typeof Ionicons>['name']> = Object.fromEntries(
+  MAIN_CATEGORIES.map((c) => [c.bucketId, c.icon]),
+) as Record<BucketId, React.ComponentProps<typeof Ionicons>['name']>;
 
 export function AllServicesScreen() {
   const navigation = useNavigation<Nav>();
@@ -78,7 +83,13 @@ export function AllServicesScreen() {
               style={styles.card}
               onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
             >
-              <Text style={styles.emoji}>🔧</Text>
+              <View style={styles.iconWrap}>
+                <Ionicons
+                  name={BUCKET_ICONS[item.bucketId] ?? 'construct-outline'}
+                  size={28}
+                  color={colors.primary}
+                />
+              </View>
               <Text style={styles.name} numberOfLines={2}>
                 {item.name}
               </Text>
@@ -130,6 +141,15 @@ const styles = StyleSheet.create({
     minHeight: 120,
   },
   emoji: { fontSize: 28, color: colors.primary },
+  iconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.orangeTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
   name: { fontWeight: '800', textAlign: 'center', marginTop: spacing.sm, fontSize: 13, color: colors.charcoal },
   sub: { fontSize: 10, color: colors.grey, textAlign: 'center', marginTop: 4 },
 });

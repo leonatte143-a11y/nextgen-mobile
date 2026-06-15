@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
+import { getSearchQueryCount } from '../lib/localStorage';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/bookingService';
 import type { RootStackParamList, RootStackScreenProps } from '../navigation/types';
@@ -39,6 +40,7 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
   const navigation = useNavigation<Nav>();
   const { user, refreshProfile, logoutUser } = useAuth();
   const [bookingsCount, setBookingsCount] = useState(0);
+  const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -60,6 +62,10 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
 
   useEffect(() => {
     load();
+    void (async () => {
+      const count = await getSearchQueryCount();
+      setQueriesCount(count);
+    })();
   }, [load]);
 
   if (loading) {
@@ -105,6 +111,26 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
           <Ionicons name="help-circle-outline" size={26} color={colors.white} />
         </Pressable>
       </View>
+      <View style={styles.tabRow}>
+        {[
+          { label: 'Profile', target: 'Profile' as const },
+          { label: 'Settings', target: 'Settings' as const },
+          { label: 'Rewards', target: 'Rewards' as const },
+          { label: 'Referrals', target: 'Referrals' as const },
+        ].map((tab) => (
+          <Pressable
+            key={tab.label}
+            style={[styles.tabItem, tab.target === 'Profile' ? styles.tabActive : null]}
+            onPress={() => {
+              if (tab.target !== 'Profile') navigation.navigate(tab.target);
+            }}
+          >
+            <Text style={[styles.tabLabel, tab.target === 'Profile' ? styles.tabActiveLabel : null]}>
+              {tab.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={styles.cardWrap}>
         <View style={styles.card}>
           <View style={styles.avatar}>
@@ -128,7 +154,7 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
           <Text style={styles.statLab}>Bookings</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statNum}>—</Text>
+          <Text style={styles.statNum}>{queriesCount}</Text>
           <Text style={styles.statLab}>Queries</Text>
         </View>
         <View style={styles.stat}>
@@ -193,7 +219,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    backgroundColor: colors.navy,
+    backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl + 24,
   },
@@ -259,6 +285,34 @@ const styles = StyleSheet.create({
   },
   statNum: { fontSize: 20, fontWeight: '800', color: colors.primary },
   statLab: { fontSize: 12, color: colors.grey, marginTop: 4 },
+  tabRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+    marginTop: -16,
+    marginBottom: spacing.sm,
+  },
+  tabItem: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tabLabel: {
+    fontWeight: '700',
+    color: colors.charcoal,
+  },
+  tabActive: {
+    backgroundColor: colors.white,
+    borderColor: colors.primary,
+  },
+  tabActiveLabel: {
+    color: colors.primary,
+  },
   menu: { marginTop: spacing.lg, paddingHorizontal: spacing.md },
   menuRow: {
     flexDirection: 'row',

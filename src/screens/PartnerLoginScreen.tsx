@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
 import { NexgenTextInput } from '../components/NexgenTextInput';
@@ -111,8 +119,16 @@ export function PartnerLoginScreen({ navigation }: Props) {
     }
   };
 
+  const editPhone = () => {
+    setOtpSent(false);
+    setOtpCode('');
+    setDevOtpHint('');
+    setErr('');
+  };
+
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Partner Login</Text>
       <Text style={styles.sub}>Request an OTP on your registered mobile, then enter the code.</Text>
       <NexgenTextInput
@@ -160,15 +176,22 @@ export function PartnerLoginScreen({ navigation }: Props) {
           </Text>
         </Pressable>
       ) : null}
+      {otpSent ? (
+        <Pressable onPress={editPhone} style={styles.wrongNum}>
+          <Text style={styles.wrongNumTxt}>Wrong number? Edit</Text>
+        </Pressable>
+      ) : null}
       <Pressable onPress={() => navigation.navigate('PartnerRegister')} style={styles.link}>
         <Text style={styles.linkTxt}>New Partner</Text>
       </Pressable>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white, padding: spacing.lg, paddingTop: 48 },
+  flex: { flex: 1, backgroundColor: colors.white },
+  root: { flexGrow: 1, backgroundColor: colors.white, padding: spacing.lg, paddingTop: 48 },
   h1: { fontSize: 22, fontWeight: '800' },
   sub: { color: colors.grey, marginVertical: spacing.md },
   err: { color: colors.error, marginBottom: spacing.sm },
@@ -201,4 +224,6 @@ const styles = StyleSheet.create({
   resendDis: { color: colors.grey },
   link: { marginTop: spacing.md, alignItems: 'center' },
   linkTxt: { color: colors.primary, fontWeight: '600' },
+  wrongNum: { marginTop: spacing.sm, alignItems: 'center' },
+  wrongNumTxt: { color: colors.grey, fontWeight: '600', fontSize: 13 },
 });

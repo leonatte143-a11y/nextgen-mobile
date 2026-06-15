@@ -1,3 +1,4 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
@@ -13,7 +14,7 @@ export type RootStackParamList = {
   PartnerLogin: undefined;
   PartnerRegister: undefined;
   PartnerHome: undefined;
-  MainTabs: undefined;
+  MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   AllServices: undefined;
   CategoryServices: { categoryId: MainCategoryId };
   ServiceList: { bucketId?: BucketId | null; title?: string; searchQuery?: string };
@@ -48,6 +49,8 @@ export type RootStackParamList = {
   HealthcareEmergencies: undefined;
   AmbulanceSos: undefined;
   ClinicBooking: undefined;
+  ShopDetail: { shopId: string };
+  ShopJoin: undefined;
 };
 
 export type MainTabParamList = {

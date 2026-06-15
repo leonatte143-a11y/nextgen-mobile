@@ -14,7 +14,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { HomeAdBanner } from '../components/home/HomeAdBanner';
-import { HomeBannerCarousel } from '../components/home/HomeBannerCarousel';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -24,6 +23,7 @@ import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { notificationService } from '../services/notificationService';
+import { incrementSearchQueryCount } from '../lib/localStorage';
 import { t } from '../i18n/strings';
 import type { RootStackParamList } from '../navigation/types';
 import type { MainTabScreenProps } from '../navigation/types';
@@ -83,7 +83,8 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     }, [loadUnread]),
   );
 
-  const onSearch = useCallback(() => {
+  const onSearch = useCallback(async () => {
+    await incrementSearchQueryCount();
     navigation.navigate('ServiceList', {
       bucketId: filters.categoryId as CatalogService['bucketId'] | null,
       title: search.trim() || 'Search results',
@@ -150,15 +151,27 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View style={styles.brandBlock}>
-          <Ionicons name="location" size={16} color={colors.primary} />
-          <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
-            <Text style={styles.loc} numberOfLines={1}>{location}</Text>
-          </Pressable>
+          <View style={styles.logoMark}>
+            <Text style={styles.logoN}>N</Text>
+          </View>
+          <View style={styles.brandTextCol}>
+            <Text style={styles.brandName}>NEXGEN</Text>
+            <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
+              <View style={styles.locRow}>
+                <Ionicons name="location" size={14} color={colors.primary} />
+                <Text style={styles.loc} numberOfLines={1}>{location}</Text>
+              </View>
+            </Pressable>
+          </View>
         </View>
         <View style={styles.headerActions}>
           <Pressable onPress={() => navigation.navigate('Notifications')} style={styles.bellWrap} hitSlop={8}>
-            <Ionicons name="notifications-outline" size={24} color={colors.white} />
-            {unreadCount > 0 ? <View style={styles.badge} /> : null}
+            <Ionicons name="notifications-outline" size={24} color={colors.charcoal} />
+            {unreadCount > 0 ? (
+              <View style={styles.badge}>
+                <Text style={styles.badgeTxt}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+              </View>
+            ) : null}
           </Pressable>
           <Pressable onPress={() => navigation.navigate('Profile')} style={styles.profileRing} hitSlop={8}>
             <View style={styles.profileInner}>
@@ -170,7 +183,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <HomeAdBanner locationLabel={location} />
-        <HomeBannerCarousel locationLabel={location} />
 
         <View style={styles.searchRow}>
           <View style={styles.searchBar}>
@@ -192,6 +204,20 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             <Ionicons name="options-outline" size={22} color={colors.navy} />
           </Pressable>
         </View>
+
+        <Pressable
+          style={styles.marketCard}
+          onPress={() => navigation.navigate('MainTabs', { screen: 'Shop' })}
+        >
+          <View style={styles.marketIcon}>
+            <Ionicons name="storefront-outline" size={28} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.marketTitle}>Shops & Materials</Text>
+            <Text style={styles.marketSub}>Nearby hardware, electrical & building supplies</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={colors.primary} />
+        </Pressable>
 
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
@@ -268,29 +294,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.navy,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  brandBlock: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 },
-  loc: { fontSize: 13, color: colors.white, fontWeight: '600', maxWidth: 200 },
+  brandBlock: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  logoMark: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoN: { fontSize: 20, fontWeight: '900', color: colors.white },
+  brandTextCol: { flex: 1 },
+  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  loc: { fontSize: 12, color: colors.grey, fontWeight: '600', maxWidth: 200 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   bellWrap: { padding: 4, position: 'relative' },
   badge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    top: 0,
+    right: 0,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
     borderWidth: 1.5,
-    borderColor: colors.navy,
+    borderColor: colors.white,
   },
+  badgeTxt: { color: colors.white, fontSize: 10, fontWeight: '800' },
   profileRing: {
     width: 40,
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -334,6 +378,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  marketCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  marketIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.md,
+    backgroundColor: colors.orangeTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.navy },
+  marketSub: { color: colors.grey, fontSize: 12, marginTop: 2 },
   rowTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',

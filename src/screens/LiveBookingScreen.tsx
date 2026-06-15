@@ -11,6 +11,7 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import type { Booking } from '../mock/types';
 import { bookingService } from '../services/bookingService';
+import { formatTelUrl } from '../utils/phone';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -49,12 +50,25 @@ export function LiveBookingScreen() {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    (async () => {
+    let active = true;
+    const load = async () => {
       setLoading(true);
       const b = await bookingService.getBooking(route.params.bookingId);
-      setBooking(b);
-      setLoading(false);
-    })();
+      if (active) {
+        setBooking(b);
+        setLoading(false);
+      }
+    };
+    load();
+    const timer = setInterval(() => {
+      bookingService.getBooking(route.params.bookingId).then((b) => {
+        if (active) setBooking(b);
+      }).catch(() => undefined);
+    }, 15000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
   }, [route.params.bookingId]);
 
   const activeStep = useMemo(() => {
@@ -119,16 +133,30 @@ export function LiveBookingScreen() {
           </View>
         ) : null}
 
-        <View style={styles.otpBox}>
-          <Text style={styles.otpLab}>Start OTP</Text>
-          <Text style={styles.otpVal}>{booking.startOtp.split('').join(' ')}</Text>
-          <Text style={styles.otpHint}>Share only when the partner arrives.</Text>
-        </View>
+        {booking.status === 'completed' ? null : booking.status === 'in_progress' && booking.endOtp ? (
+          <View style={styles.otpBox}>
+            <Text style={styles.otpLab}>Completion OTP</Text>
+            <Text style={styles.otpVal}>{booking.endOtp.split('').join(' ')}</Text>
+            <Text style={styles.otpHint}>Share with the partner when work is finished.</Text>
+          </View>
+        ) : booking.startOtp ? (
+          <View style={styles.otpBox}>
+            <Text style={styles.otpLab}>Start OTP</Text>
+            <Text style={styles.otpVal}>{booking.startOtp.split('').join(' ')}</Text>
+            <Text style={styles.otpHint}>Share only when the partner arrives.</Text>
+          </View>
+        ) : null}
 
         <View style={styles.actions}>
-          <Pressable style={styles.act} onPress={() => Linking.openURL('tel:9876543210')}>
+          <Pressable
+            style={styles.act}
+            onPress={() => {
+              const tel = formatTelUrl(booking.partnerPhone) || formatTelUrl('9876543210');
+              if (tel) Linking.openURL(tel);
+            }}
+          >
             <Ionicons name="call-outline" size={20} color={colors.primary} />
-            <Text style={styles.actTxt}>Contact support</Text>
+            <Text style={styles.actTxt}>{booking.partnerPhone ? 'Call partner' : 'Contact support'}</Text>
           </Pressable>
           <Pressable
             style={styles.act}
@@ -155,9 +183,7 @@ export function LiveBookingScreen() {
               navigation.navigate('Review', { bookingId: booking.id, partnerName: booking.partnerName })
             }
           />
-        ) : (
-          <Text style={styles.statusNote}>A review is available after the service is completed.</Text>
-        )}
+        ) : null}
         <View style={{ height: spacing.md }} />
         <PrimaryButton
           title="Cancel booking"
