@@ -75,6 +75,8 @@ export interface PartnerRequest {
   heavyWorkEstimate?: HeavyWorkEstimate;
   visitingFee?: number;
   isPartnerArrived?: boolean;
+  workDoneRequested?: boolean;
+  customRequirements?: string;
 }
 
 export interface PartnerProfile {
@@ -193,7 +195,7 @@ export interface Booking {
   partnerPhone?: string;
   status: BookingStatus;
   totalAmount: number;
-  startOtp: string;
+  startOtp?: string;
   endOtp?: string;
   scheduledAt: string;
   createdAt: string;
@@ -206,7 +208,11 @@ export interface Booking {
   distanceKm?: number;
   lineItems?: BookingLineItem[];
   isPartnerArrived?: boolean;
+  workDoneRequested?: boolean;
   heavyWorkEstimateRequested?: boolean;
+  customRequirements?: string;
+  paymentStatus?: 'pending' | 'paid';
+  paymentMethod?: string;
 }
 
 export interface VisitingChargeQuote {

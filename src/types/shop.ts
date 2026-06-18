@@ -1,5 +1,7 @@
 export type ShopCategory = { id: string; name: string };
 
+export type TrendingCategorySuggestion = ShopCategory & { searchCount?: number };
+
 export type ShopSummary = {
   id: string;
   shopName: string;
@@ -34,7 +36,8 @@ export type ShopListResponse = {
 export type ShopApplyPayload = {
   shopName: string;
   ownerName: string;
-  categoryId: string;
+  categoryId?: string;
+  categoryName?: string;
   phone: string;
   address: string;
   city: string;

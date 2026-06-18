@@ -68,6 +68,14 @@ export const partnerService = {
     return apiService.post(`/api/v1/partners/requests/${requestId}/reject`, {}, 'partner');
   },
 
+  async markArrived(requestId: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/arrive`, {}, 'partner');
+  },
+
+  async markWorkDone(requestId: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/work-done`, {}, 'partner');
+  },
+
   async startJob(requestId: string, otp: string): Promise<PartnerRequest> {
     return apiService.post(`/api/v1/partners/requests/${requestId}/start`, { otp }, 'partner');
   },

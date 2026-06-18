@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainCategoryId } from '../data/serviceCatalog';
 import type { BucketId } from '../mock/types';
@@ -68,7 +69,9 @@ export function handleBannerPress(
       });
       return;
     case 'external':
-      if (value) Linking.openURL(value).catch(() => {});
+      if (value) {
+        WebBrowser.openBrowserAsync(value).catch(() => Linking.openURL(value).catch(() => {}));
+      }
       return;
     case 'offer':
       navigation.navigate('Rewards');

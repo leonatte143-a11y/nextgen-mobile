@@ -13,6 +13,8 @@ export type AdvertisementBanner = {
   title: string;
   subtitle: string;
   imageUrl: string;
+  mediaType?: 'image' | 'video';
+  mediaUrl?: string;
   ctaText: string;
   redirectType: BannerRedirectType;
   redirectValue: string;

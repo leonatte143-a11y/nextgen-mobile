@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ExpandableNotificationText } from '../components/ExpandableNotificationText';
 import { EmptyState } from '../components/EmptyState';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
@@ -103,7 +104,7 @@ export function NotificationsScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardBody}>{item.body}</Text>
+                <ExpandableNotificationText text={item.body} />
                 <Text style={styles.time}>{item.timeLabel}</Text>
               </View>
               {!item.read ? <View style={styles.dot} /> : null}
