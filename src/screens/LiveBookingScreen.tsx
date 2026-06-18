@@ -3,7 +3,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
@@ -48,6 +48,8 @@ export function LiveBookingScreen() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -74,6 +76,30 @@ export function LiveBookingScreen() {
   const activeStep = useMemo(() => {
     return booking ? STATUS_STEP_INDEX[booking.status] ?? 0 : 0;
   }, [booking]);
+
+  useEffect(() => {
+    if (booking?.status === 'completed' && booking.paymentStatus === 'pending') {
+      setPaymentOpen(true);
+    }
+  }, [booking?.status, booking?.paymentStatus]);
+
+  const handleConfirmPayment = async () => {
+    if (!booking) return;
+    setPaying(true);
+    try {
+      const updated = await bookingService.confirmPayment(booking.id);
+      setBooking(updated);
+      setPaymentOpen(false);
+      Alert.alert('Payment successful', 'Thank you! You can now rate your service.');
+    } catch {
+      Alert.alert('Payment failed', 'Could not process payment. Please try again.');
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const showEndOtp = Boolean(booking?.endOtp);
+  const showStartOtp = !showEndOtp && Boolean(booking?.startOtp);
 
   if (loading || !booking) {
     return <ScreenLoader />;
@@ -133,16 +159,23 @@ export function LiveBookingScreen() {
           </View>
         ) : null}
 
-        {booking.status === 'completed' ? null : booking.status === 'in_progress' && booking.endOtp ? (
+        {booking.customRequirements ? (
+          <View style={styles.customBox}>
+            <Text style={styles.customLab}>Your instructions</Text>
+            <Text style={styles.customTxt}>{booking.customRequirements}</Text>
+          </View>
+        ) : null}
+
+        {showEndOtp ? (
           <View style={styles.otpBox}>
             <Text style={styles.otpLab}>Completion OTP</Text>
-            <Text style={styles.otpVal}>{booking.endOtp.split('').join(' ')}</Text>
+            <Text style={styles.otpVal}>{booking.endOtp!.split('').join(' ')}</Text>
             <Text style={styles.otpHint}>Share with the partner when work is finished.</Text>
           </View>
-        ) : booking.startOtp ? (
+        ) : showStartOtp ? (
           <View style={styles.otpBox}>
             <Text style={styles.otpLab}>Start OTP</Text>
-            <Text style={styles.otpVal}>{booking.startOtp.split('').join(' ')}</Text>
+            <Text style={styles.otpVal}>{booking.startOtp!.split('').join(' ')}</Text>
             <Text style={styles.otpHint}>Share only when the partner arrives.</Text>
           </View>
         ) : null}
@@ -175,7 +208,7 @@ export function LiveBookingScreen() {
           </View>
         ))}
 
-        {booking.status === 'completed' ? (
+        {booking.status === 'completed' && booking.paymentStatus === 'paid' ? (
           <PrimaryButton
             title="Rate service"
             variant="outline"
@@ -183,8 +216,11 @@ export function LiveBookingScreen() {
               navigation.navigate('Review', { bookingId: booking.id, partnerName: booking.partnerName })
             }
           />
+        ) : booking.status === 'completed' && booking.paymentStatus === 'pending' ? (
+          <PrimaryButton title="Pay now" onPress={() => setPaymentOpen(true)} />
         ) : null}
         <View style={{ height: spacing.md }} />
+        {booking.status !== 'completed' ? (
         <PrimaryButton
           title="Cancel booking"
           variant="danger"
@@ -202,7 +238,23 @@ export function LiveBookingScreen() {
             }
           }}
         />
+        ) : null}
       </ScrollView>
+
+      <Modal visible={paymentOpen} transparent animationType="slide">
+        <View style={styles.payOverlay}>
+          <View style={styles.payCard}>
+            <Text style={styles.payTitle}>Complete payment</Text>
+            <Text style={styles.paySub}>
+              Pay ₹{booking.totalAmount} to confirm the service before leaving a review.
+            </Text>
+            <PrimaryButton title={`Pay ₹${booking.totalAmount}`} onPress={handleConfirmPayment} loading={paying} />
+            <Pressable onPress={() => setPaymentOpen(false)} style={styles.payClose}>
+              <Text style={styles.payCloseTxt}>Pay later</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -274,6 +326,20 @@ const styles = StyleSheet.create({
   otpLab: { fontWeight: '700', color: colors.charcoal },
   otpVal: { fontSize: 32, fontWeight: '900', color: colors.primary, marginTop: spacing.sm, letterSpacing: 4 },
   otpHint: { fontSize: 12, color: colors.grey, marginTop: spacing.sm },
+  customBox: {
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  customLab: { fontWeight: '800', color: colors.charcoal, marginBottom: 4 },
+  customTxt: { color: colors.grey, lineHeight: 20 },
+  payOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: spacing.lg },
+  payCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg },
+  payTitle: { fontSize: 20, fontWeight: '900', color: colors.charcoal },
+  paySub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg, lineHeight: 20 },
+  payClose: { marginTop: spacing.md, alignItems: 'center' },
+  payCloseTxt: { color: colors.primary, fontWeight: '700' },
   actions: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg },
   act: {
     flex: 1,

@@ -159,6 +159,7 @@ export function ConfirmBookingScreen() {
         visitingCharges: visitingCharge,
         address,
         notes,
+        customRequirements: route.params.customRequirements,
         paymentMethod: PAY_LABELS[pay],
         promoCode: promo,
         amountOverride: bill.total,

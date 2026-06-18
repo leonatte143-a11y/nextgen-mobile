@@ -1,28 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, spacing } from '../constants/theme';
+import { handleBannerPress } from '../navigation/bannerActions';
+import { bannerService } from '../services/bannerService';
+import type { AdvertisementBanner } from '../types/banner';
+import type { RootStackParamList } from '../navigation/types';
 
-const ADS = [
-  { id: 'a1', title: 'Raja Hardware', sub: 'Tools & materials — Danavaipeta' },
-  { id: 'a2', title: 'Godavari Hospital', sub: '24/7 care — Amalapuram' },
-  { id: 'a3', title: 'Local services', sub: 'Plumber · Electrician · AC' },
-] as const;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const BANNER_W = 320;
 const BANNER_H = 50;
-const ROTATE_MS = 4000;
+const ROTATE_MS = 5000;
 
 export function LiveTrackingAdBanner() {
+  const navigation = useNavigation<Nav>();
+  const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setIdx((i) => (i + 1) % ADS.length);
-    }, ROTATE_MS);
-    return () => clearInterval(t);
+    bannerService.getHomeBanners(undefined, { force: true }).then(setBanners).catch(() => setBanners([]));
   }, []);
 
-  const ad = ADS[idx];
+  useEffect(() => {
+    if (banners.length <= 1) return undefined;
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % banners.length);
+    }, ROTATE_MS);
+    return () => clearInterval(t);
+  }, [banners.length]);
+
+  if (!banners.length) return null;
+
+  const ad = banners[idx];
+  const mediaUrl = ad.mediaUrl || ad.imageUrl;
 
   return (
     <View style={styles.wrap} accessibilityRole="summary" accessibilityLabel="Sponsored ad banner">
@@ -30,22 +42,23 @@ export function LiveTrackingAdBanner() {
         <View style={styles.pill}>
           <Text style={styles.pillTxt}>Ad</Text>
         </View>
+        {mediaUrl && ad.mediaType !== 'video' ? (
+          <Image source={{ uri: mediaUrl }} style={styles.thumb} resizeMode="cover" />
+        ) : null}
         <Pressable
-          onPress={() => {
-            /* mock tap */
-          }}
+          onPress={() => handleBannerPress(ad, navigation)}
           style={styles.content}
         >
           <Text style={styles.title} numberOfLines={1}>
             {ad.title}
           </Text>
           <Text style={styles.sub} numberOfLines={1}>
-            {ad.sub}
+            {ad.subtitle || (ad.mediaType === 'video' ? 'Tap to watch' : 'Tap to learn more')}
           </Text>
         </Pressable>
         <View style={styles.dots}>
-          {ADS.map((_, i) => (
-            <View key={ADS[i].id} style={[styles.dot, i === idx && styles.dotOn]} />
+          {banners.map((b) => (
+            <View key={b.id} style={[styles.dot, b.id === ad.id && styles.dotOn]} />
           ))}
         </View>
       </View>
@@ -72,6 +85,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     gap: spacing.sm,
   },
+  thumb: { width: 36, height: 36, borderRadius: 6 },
   pill: {
     backgroundColor: colors.charcoal,
     paddingHorizontal: 6,

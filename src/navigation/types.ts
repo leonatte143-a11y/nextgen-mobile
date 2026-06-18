@@ -30,6 +30,7 @@ export type RootStackParamList = {
     distanceKm?: number;
     amountOverride?: number;
     serviceNameOverride?: string;
+    customRequirements?: string;
     selectedItems?: SelectedBookingItem[];
   };
   BookingSuccess: { bookingId: string };

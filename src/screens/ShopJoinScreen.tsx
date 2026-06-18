@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -18,7 +18,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
 import { shopService } from '../services/shopService';
-import type { ShopCategory } from '../types/shop';
+import type { TrendingCategorySuggestion } from '../types/shop';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -28,10 +28,12 @@ const CITIES = ['Rajahmundry', 'Guntur'];
 export function ShopJoinScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const [categories, setCategories] = useState<ShopCategory[]>([]);
+  const [suggestions, setSuggestions] = useState<TrendingCategorySuggestion[]>([]);
   const [shopName, setShopName] = useState('');
   const [ownerName, setOwnerName] = useState('');
+  const [categoryQuery, setCategoryQuery] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('Rajahmundry');
@@ -40,16 +42,29 @@ export function ShopJoinScreen() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    shopService.getCategories().then(setCategories).catch(() => setCategories([]));
+    shopService.getTrendingSuggestions().then(setSuggestions).catch(() => setSuggestions([]));
   }, []);
+
+  const filteredSuggestions = useMemo(() => {
+    const q = categoryQuery.trim().toLowerCase();
+    if (!q) return suggestions.slice(0, 8);
+    return suggestions.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
+  }, [categoryQuery, suggestions]);
+
+  const selectCategory = (item: TrendingCategorySuggestion) => {
+    setCategoryId(item.id);
+    setCategoryQuery(item.name);
+    setShowSuggestions(false);
+  };
 
   const submit = async () => {
     if (!shopName.trim()) {
       Alert.alert('Required', 'Please enter your shop name.');
       return;
     }
-    if (!categoryId) {
-      Alert.alert('Required', 'Please select a business category.');
+    const categoryName = categoryQuery.trim();
+    if (!categoryId && !categoryName) {
+      Alert.alert('Required', 'Please enter or select a business category.');
       return;
     }
     setLoading(true);
@@ -67,7 +82,8 @@ export function ShopJoinScreen() {
       await shopService.apply({
         shopName: shopName.trim(),
         ownerName: ownerName.trim(),
-        categoryId,
+        categoryId: categoryId || undefined,
+        categoryName: categoryId ? undefined : categoryName,
         phone: phone.replace(/\D/g, '').slice(0, 10),
         address: address.trim(),
         city,
@@ -110,17 +126,29 @@ export function ShopJoinScreen() {
         <NexgenTextInput label="Owner name" value={ownerName} onChangeText={setOwnerName} />
 
         <Text style={styles.label}>Business category</Text>
-        <View style={styles.catGrid}>
-          {categories.map((c) => (
-            <Pressable
-              key={c.id}
-              style={[styles.catChip, categoryId === c.id && styles.catChipOn]}
-              onPress={() => setCategoryId(c.id)}
-            >
-              <Text style={[styles.catChipTxt, categoryId === c.id && styles.catChipTxtOn]}>{c.name}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <Text style={styles.hint}>Type to search or enter a new category — trending options appear below.</Text>
+        <NexgenTextInput
+          value={categoryQuery}
+          onChangeText={(t) => {
+            setCategoryQuery(t);
+            setCategoryId('');
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          placeholder="e.g. Hardware, Electrical supplies"
+        />
+        {showSuggestions && filteredSuggestions.length > 0 ? (
+          <View style={styles.suggestBox}>
+            {filteredSuggestions.map((item) => (
+              <Pressable key={item.id} style={styles.suggestRow} onPress={() => selectCategory(item)}>
+                <Text style={styles.suggestName}>{item.name}</Text>
+                {item.searchCount != null && item.searchCount > 0 ? (
+                  <Text style={styles.suggestCount}>{item.searchCount} searches</Text>
+                ) : null}
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         <NexgenTextInput
           label="Phone"
@@ -186,18 +214,26 @@ const styles = StyleSheet.create({
   h1: { fontSize: 22, fontWeight: '900', color: colors.charcoal },
   sub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg, lineHeight: 20 },
   label: { fontWeight: '700', color: colors.charcoal, marginTop: spacing.md, marginBottom: spacing.sm },
-  catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  catChip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
+  hint: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm, lineHeight: 18 },
+  suggestBox: {
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: radius.md,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+  },
+  suggestRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     backgroundColor: colors.white,
   },
-  catChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  catChipTxt: { fontWeight: '600', color: colors.charcoal, fontSize: 13 },
-  catChipTxtOn: { color: colors.white },
+  suggestName: { fontWeight: '600', color: colors.charcoal, flex: 1 },
+  suggestCount: { fontSize: 11, color: colors.primary, fontWeight: '700' },
   cityRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   cityChip: {
     paddingHorizontal: spacing.md,

@@ -3,7 +3,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -31,6 +31,7 @@ export function ServiceDetailScreen() {
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [menuItems, setMenuItems] = useState<ServiceMenuItem[]>([]);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  const [customRequirements, setCustomRequirements] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -172,6 +173,17 @@ export function ServiceDetailScreen() {
           })}
         </View>
 
+        <Text style={styles.sectionTitle}>Additional instructions</Text>
+        <TextInput
+          style={styles.customReqInput}
+          value={customRequirements}
+          onChangeText={setCustomRequirements}
+          placeholder="Describe any custom requirements (e.g. bring ladder, fix old wiring)"
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+
         {partnerLoading ? (
           <Text style={styles.partnerLoading}>Loading available providers...</Text>
         ) : selectedPartner ? (
@@ -311,6 +323,7 @@ export function ServiceDetailScreen() {
                     ? selectedItems[0]?.title
                     : undefined,
               selectedItems: selectedItems.length ? selectedItems : undefined,
+              customRequirements: customRequirements.trim() || undefined,
             });
           }}
         />
@@ -346,6 +359,17 @@ const styles = StyleSheet.create({
   heartFab: { position: 'absolute', top: spacing.sm, right: spacing.sm, zIndex: 2, padding: spacing.xs },
   section: { marginTop: spacing.lg },
   sectionTitle: { fontSize: 16, fontWeight: '800', marginBottom: spacing.sm },
+  customReqInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    minHeight: 88,
+    fontSize: 15,
+    color: colors.charcoal,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.greyLight,
+  },
   itemBox: {
     borderWidth: 1,
     borderColor: colors.border,

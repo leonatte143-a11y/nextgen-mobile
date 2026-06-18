@@ -1,9 +1,13 @@
-import type { ShopApplyPayload, ShopCategory, ShopListResponse, ShopSummary } from '../types/shop';
+import type { ShopApplyPayload, ShopCategory, ShopListResponse, ShopSummary, TrendingCategorySuggestion } from '../types/shop';
 import { apiService } from './apiService';
 
 export const shopService = {
   async getCategories(): Promise<ShopCategory[]> {
     return apiService.get('/api/v1/shops/categories');
+  },
+
+  async getTrendingSuggestions(): Promise<TrendingCategorySuggestion[]> {
+    return apiService.get('/api/v1/shops/trending-suggestions');
   },
 
   async listNearby(params: {

@@ -23,6 +23,8 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     requests,
     acceptRequest,
     rejectRequest,
+    markArrived,
+    markWorkDone,
     startJob,
     completeJob,
     requestHeavyWorkEstimate,
@@ -59,6 +61,30 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     await rejectRequest(request.id);
     setActionLoading(false);
     navigation.goBack();
+  };
+
+  const handleArrived = async () => {
+    if (!request) return;
+    setActionLoading(true);
+    const ok = await markArrived(request.id);
+    setActionLoading(false);
+    if (!ok) {
+      Alert.alert('Error', 'Could not mark arrival. Please try again.');
+      return;
+    }
+    Alert.alert('Arrival confirmed', 'Ask the customer for their start OTP, then tap Start Job.');
+  };
+
+  const handleWorkDone = async () => {
+    if (!request) return;
+    setActionLoading(true);
+    const ok = await markWorkDone(request.id);
+    setActionLoading(false);
+    if (!ok) {
+      Alert.alert('Error', 'Could not mark work as done. Please try again.');
+      return;
+    }
+    Alert.alert('Work marked done', 'Ask the customer for their completion OTP, then tap Complete Job.');
   };
 
   const handleStart = async () => {
@@ -226,8 +252,14 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       ) : null}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notes</Text>
-        <Text style={styles.sectionText}>{request.notes}</Text>
+        <Text style={styles.sectionText}>{request.notes || '—'}</Text>
       </View>
+      {request.customRequirements ? (
+        <View style={styles.customReqBox}>
+          <Text style={styles.customReqTitle}>Custom requirements</Text>
+          <Text style={styles.customReqText}>{request.customRequirements}</Text>
+        </View>
+      ) : null}
       {quote ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Heavy Work Quote</Text>
@@ -272,13 +304,23 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
             </Pressable>
           </>
         ) : request.status === 'pending' ? (
-          <Pressable
-            style={[styles.inProgAction, styles.acceptButton]}
-            onPress={() => setStartOtpOpen(true)}
-            disabled={actionLoading}
-          >
-            <Text style={styles.acceptText}>Start Job</Text>
-          </Pressable>
+          request.isPartnerArrived ? (
+            <Pressable
+              style={[styles.inProgAction, styles.acceptButton]}
+              onPress={() => setStartOtpOpen(true)}
+              disabled={actionLoading}
+            >
+              <Text style={styles.acceptText}>Start Job</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={[styles.inProgAction, styles.acceptButton]}
+              onPress={handleArrived}
+              disabled={actionLoading}
+            >
+              <Text style={styles.acceptText}>I've Arrived</Text>
+            </Pressable>
+          )
         ) : request.status === 'in_progress' ? (
           <>
             <Pressable
@@ -297,13 +339,23 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
             >
               <Text style={styles.acceptText}>Heavy work quote</Text>
             </Pressable>
-            <Pressable
-              style={[styles.inProgAction, styles.acceptButton]}
-              onPress={() => setEndOtpOpen(true)}
-              disabled={actionLoading}
-            >
-              <Text style={styles.acceptText}>Work Done</Text>
-            </Pressable>
+            {request.workDoneRequested ? (
+              <Pressable
+                style={[styles.inProgAction, styles.acceptButton]}
+                onPress={() => setEndOtpOpen(true)}
+                disabled={actionLoading}
+              >
+                <Text style={styles.acceptText}>Complete Job</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={[styles.inProgAction, styles.acceptButton]}
+                onPress={handleWorkDone}
+                disabled={actionLoading}
+              >
+                <Text style={styles.acceptText}>Work Done</Text>
+              </Pressable>
+            )}
           </>
         ) : isCancelled ? (
           <Text style={styles.statusText}>This request was cancelled by the customer.</Text>
@@ -499,6 +551,16 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   pendT: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
+  customReqBox: {
+    backgroundColor: colors.orangeTint,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  customReqTitle: { fontSize: 14, color: colors.primary, fontWeight: '800', marginBottom: spacing.xs },
+  customReqText: { fontSize: 15, color: colors.charcoal, lineHeight: 22 },
   buttonRow: { marginTop: spacing.lg, flexDirection: 'row', gap: spacing.sm, justifyContent: 'space-between' },
   actionCol: { marginTop: spacing.lg, width: '100%', gap: spacing.sm },
   directionButton: { backgroundColor: colors.primary, padding: spacing.sm, borderRadius: radius.md, marginBottom: spacing.md, alignItems: 'center' },

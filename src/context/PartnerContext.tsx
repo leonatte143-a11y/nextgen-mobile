@@ -12,6 +12,8 @@ type PartnerContextValue = {
   toggleOnline: (online: boolean) => Promise<void>;
   acceptRequest: (requestId: string) => Promise<void>;
   rejectRequest: (requestId: string) => Promise<void>;
+  markArrived: (requestId: string) => Promise<boolean>;
+  markWorkDone: (requestId: string) => Promise<boolean>;
   startJob: (requestId: string, otp: string) => Promise<boolean>;
   completeJob: (requestId: string, otp: string) => Promise<boolean>;
   requestHeavyWorkEstimate: (requestId: string, payload: { extraLabor: number; materialCost: number; description: string }) => Promise<void>;
@@ -88,6 +90,30 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       setRequests(requestsResult);
     } catch (error) {
       console.warn('Reject request failed', error);
+    }
+  }, []);
+
+  const markArrived = useCallback(async (requestId: string) => {
+    try {
+      await partnerService.markArrived(requestId);
+      const requestsResult = await partnerService.getRequests();
+      setRequests(requestsResult);
+      return true;
+    } catch (error) {
+      console.warn('Mark arrived failed', error);
+      return false;
+    }
+  }, []);
+
+  const markWorkDone = useCallback(async (requestId: string) => {
+    try {
+      await partnerService.markWorkDone(requestId);
+      const requestsResult = await partnerService.getRequests();
+      setRequests(requestsResult);
+      return true;
+    } catch (error) {
+      console.warn('Mark work done failed', error);
+      return false;
     }
   }, []);
 
@@ -198,6 +224,8 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       toggleOnline,
       acceptRequest,
       rejectRequest,
+      markArrived,
+      markWorkDone,
       startJob,
       completeJob,
       requestHeavyWorkEstimate,
@@ -216,6 +244,8 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       toggleOnline,
       acceptRequest,
       rejectRequest,
+      markArrived,
+      markWorkDone,
       startJob,
       completeJob,
       requestHeavyWorkEstimate,

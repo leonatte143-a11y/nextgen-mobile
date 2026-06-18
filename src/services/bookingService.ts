@@ -34,6 +34,7 @@ export const bookingService = {
     userLng?: number;
     address: string;
     notes?: string;
+    customRequirements?: string;
     paymentMethod: string;
     promoCode?: string;
     amountOverride?: number;
@@ -45,6 +46,10 @@ export const bookingService = {
 
   async cancelBooking(id: string): Promise<{ refund: number; fee: number }> {
     return apiService.post(`/api/v1/bookings/${id}/cancel`, {}, 'user');
+  },
+
+  async confirmPayment(bookingId: string): Promise<Booking> {
+    return apiService.post<Booking>(`/api/v1/bookings/${bookingId}/confirm-payment`, {}, 'user');
   },
 
   async submitReview(bookingId: string, stars: number, tags: string[], note?: string) {
