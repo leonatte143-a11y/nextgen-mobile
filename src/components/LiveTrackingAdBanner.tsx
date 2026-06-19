@@ -20,7 +20,7 @@ export function LiveTrackingAdBanner() {
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    bannerService.getHomeBanners(undefined, { force: true }).then(setBanners).catch(() => setBanners([]));
+    bannerService.getHomeBanners(undefined, { force: true, placement: 'partner_live_tracking' }).then(setBanners).catch(() => setBanners([]));
   }, []);
 
   useEffect(() => {

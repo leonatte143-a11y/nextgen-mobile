@@ -15,15 +15,14 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { ANDHRA_PRADESH_CITIES, DEFAULT_AP_CITY } from '../constants/apCities';
 import { colors, radius, spacing } from '../constants/theme';
-import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
+import { detectCityFromGps, getCurrentCoords, requestLocationPermission } from '../services/locationService';
 import { shopService } from '../services/shopService';
 import type { TrendingCategorySuggestion } from '../types/shop';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-const CITIES = ['Rajahmundry', 'Guntur'];
 
 export function ShopJoinScreen() {
   const insets = useSafeAreaInsets();
@@ -36,13 +35,26 @@ export function ShopJoinScreen() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Rajahmundry');
+  const [city, setCity] = useState<string>(DEFAULT_AP_CITY);
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [gstOrLicense, setGstOrLicense] = useState('');
-  const [leadPreference, setLeadPreference] = useState<'online' | 'offline'>('offline');
+  const [leadPreference, setLeadPreference] = useState<'local' | 'regional'>('local');
   const [loading, setLoading] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
 
   useEffect(() => {
     shopService.getTrendingSuggestions().then(setSuggestions).catch(() => setSuggestions([]));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const detected = await detectCityFromGps(ANDHRA_PRADESH_CITIES);
+      if (!cancelled && detected) setCity(detected);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredSuggestions = useMemo(() => {
@@ -50,6 +62,12 @@ export function ShopJoinScreen() {
     if (!q) return suggestions.slice(0, 8);
     return suggestions.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
   }, [categoryQuery, suggestions]);
+
+  const filteredCities = useMemo(() => {
+    const q = citySearch.trim().toLowerCase();
+    if (!q) return ANDHRA_PRADESH_CITIES;
+    return ANDHRA_PRADESH_CITIES.filter((c) => c.toLowerCase().includes(q));
+  }, [citySearch]);
 
   const selectCategory = (item: TrendingCategorySuggestion) => {
     setCategoryId(item.id);
@@ -159,18 +177,38 @@ export function ShopJoinScreen() {
           onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
         />
         <NexgenTextInput label="Address" value={address} onChangeText={setAddress} multiline />
-        <Text style={styles.label}>City</Text>
-        <View style={styles.cityRow}>
-          {CITIES.map((c) => (
-            <Pressable
-              key={c}
-              style={[styles.cityChip, city === c && styles.cityChipOn]}
-              onPress={() => setCity(c)}
-            >
-              <Text style={[styles.cityTxt, city === c && styles.cityTxtOn]}>{c}</Text>
-            </Pressable>
-          ))}
-        </View>
+
+        <Text style={styles.label}>City (Andhra Pradesh)</Text>
+        <Text style={styles.hint}>Auto-detected from GPS when available. Tap to change.</Text>
+        <Pressable style={styles.citySelect} onPress={() => setCityPickerOpen((v) => !v)}>
+          <Text style={styles.citySelectTxt}>{city}</Text>
+          <Ionicons name={cityPickerOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.primary} />
+        </Pressable>
+        {cityPickerOpen ? (
+          <View style={styles.cityPicker}>
+            <NexgenTextInput
+              value={citySearch}
+              onChangeText={setCitySearch}
+              placeholder="Search AP cities"
+            />
+            <ScrollView style={styles.cityList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+              {filteredCities.map((c) => (
+                <Pressable
+                  key={c}
+                  style={[styles.cityRow, city === c && styles.cityRowOn]}
+                  onPress={() => {
+                    setCity(c);
+                    setCityPickerOpen(false);
+                    setCitySearch('');
+                  }}
+                >
+                  <Text style={[styles.cityRowTxt, city === c && styles.cityRowTxtOn]}>{c}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+
         <NexgenTextInput
           label="GST / Trade license (optional)"
           value={gstOrLicense}
@@ -178,18 +216,18 @@ export function ShopJoinScreen() {
         />
 
         <Text style={styles.label}>Lead preference</Text>
-        <View style={styles.cityRow}>
+        <View style={styles.cityRowWrap}>
           <Pressable
-            style={[styles.cityChip, leadPreference === 'offline' && styles.cityChipOn]}
-            onPress={() => setLeadPreference('offline')}
+            style={[styles.cityChip, leadPreference === 'local' && styles.cityChipOn]}
+            onPress={() => setLeadPreference('local')}
           >
-            <Text style={[styles.cityTxt, leadPreference === 'offline' && styles.cityTxtOn]}>Offline visit</Text>
+            <Text style={[styles.cityTxt, leadPreference === 'local' && styles.cityTxtOn]}>Local leads (nearby)</Text>
           </Pressable>
           <Pressable
-            style={[styles.cityChip, leadPreference === 'online' && styles.cityChipOn]}
-            onPress={() => setLeadPreference('online')}
+            style={[styles.cityChip, leadPreference === 'regional' && styles.cityChipOn]}
+            onPress={() => setLeadPreference('regional')}
           >
-            <Text style={[styles.cityTxt, leadPreference === 'online' && styles.cityTxtOn]}>Online booking</Text>
+            <Text style={[styles.cityTxt, leadPreference === 'regional' && styles.cityTxtOn]}>Regional leads (all AP)</Text>
           </Pressable>
         </View>
 
@@ -234,7 +272,37 @@ const styles = StyleSheet.create({
   },
   suggestName: { fontWeight: '600', color: colors.charcoal, flex: 1 },
   suggestCount: { fontSize: 11, color: colors.primary, fontWeight: '700' },
-  cityRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  citySelect: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.md,
+    backgroundColor: colors.greyLight,
+  },
+  citySelectTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 15 },
+  cityPicker: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    marginBottom: spacing.md,
+    padding: spacing.sm,
+    maxHeight: 220,
+  },
+  cityList: { maxHeight: 160 },
+  cityRow: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+  },
+  cityRowOn: { backgroundColor: colors.orangeTint },
+  cityRowTxt: { color: colors.charcoal, fontWeight: '600' },
+  cityRowTxtOn: { color: colors.primary, fontWeight: '800' },
+  cityRowWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   cityChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

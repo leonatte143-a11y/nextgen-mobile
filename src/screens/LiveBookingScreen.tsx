@@ -99,7 +99,6 @@ export function LiveBookingScreen() {
   };
 
   const showEndOtp = Boolean(booking?.endOtp);
-  const showStartOtp = !showEndOtp && Boolean(booking?.startOtp);
 
   if (loading || !booking) {
     return <ScreenLoader />;
@@ -171,12 +170,6 @@ export function LiveBookingScreen() {
             <Text style={styles.otpLab}>Completion OTP</Text>
             <Text style={styles.otpVal}>{booking.endOtp!.split('').join(' ')}</Text>
             <Text style={styles.otpHint}>Share with the partner when work is finished.</Text>
-          </View>
-        ) : showStartOtp ? (
-          <View style={styles.otpBox}>
-            <Text style={styles.otpLab}>Start OTP</Text>
-            <Text style={styles.otpVal}>{booking.startOtp!.split('').join(' ')}</Text>
-            <Text style={styles.otpHint}>Share only when the partner arrives.</Text>
           </View>
         ) : null}
 

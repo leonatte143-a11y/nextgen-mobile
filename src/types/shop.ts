@@ -44,5 +44,5 @@ export type ShopApplyPayload = {
   latitude?: number;
   longitude?: number;
   gstOrLicense?: string;
-  leadPreference: 'online' | 'offline';
+  leadPreference: 'local' | 'regional';
 };

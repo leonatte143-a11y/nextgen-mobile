@@ -25,7 +25,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     rejectRequest,
     markArrived,
     markWorkDone,
-    startJob,
     completeJob,
     requestHeavyWorkEstimate,
     declineHeavyWorkEstimate,
@@ -38,8 +37,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   const [description, setDescription] = useState('Partner recommended motor replacement');
   const [estOpen, setEstOpen] = useState(false);
   const [estVal, setEstVal] = useState('');
-  const [startOtpOpen, setStartOtpOpen] = useState(false);
-  const [startOtpInput, setStartOtpInput] = useState('');
   const [endOtpOpen, setEndOtpOpen] = useState(false);
   const [endOtpInput, setEndOtpInput] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -72,7 +69,7 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       Alert.alert('Error', 'Could not mark arrival. Please try again.');
       return;
     }
-    Alert.alert('Arrival confirmed', 'Ask the customer for their start OTP, then tap Start Job.');
+    Alert.alert('Arrival confirmed', 'The job has started. Complete the work, then tap Work Done.');
   };
 
   const handleWorkDone = async () => {
@@ -85,25 +82,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       return;
     }
     Alert.alert('Work marked done', 'Ask the customer for their completion OTP, then tap Complete Job.');
-  };
-
-  const handleStart = async () => {
-    if (!request) return;
-    if (!startOtpInput.trim()) {
-      Alert.alert('Start OTP required', 'Ask the customer for their start OTP.');
-      return;
-    }
-    setActionLoading(true);
-    const ok = await startJob(request.id, startOtpInput.trim());
-    setActionLoading(false);
-    if (!ok) {
-      Alert.alert('Invalid OTP', 'The start OTP did not match. Ask the customer to share the code shown in the app.');
-      return;
-    }
-    setStartOtpOpen(false);
-    setStartOtpInput('');
-    Alert.alert('Job started', 'You can now complete the work when finished.');
-    navigation.goBack();
   };
 
   const handleComplete = async () => {
@@ -304,23 +282,13 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
             </Pressable>
           </>
         ) : request.status === 'pending' ? (
-          request.isPartnerArrived ? (
-            <Pressable
-              style={[styles.inProgAction, styles.acceptButton]}
-              onPress={() => setStartOtpOpen(true)}
-              disabled={actionLoading}
-            >
-              <Text style={styles.acceptText}>Start Job</Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              style={[styles.inProgAction, styles.acceptButton]}
-              onPress={handleArrived}
-              disabled={actionLoading}
-            >
-              <Text style={styles.acceptText}>I've Arrived</Text>
-            </Pressable>
-          )
+          <Pressable
+            style={[styles.inProgAction, styles.acceptButton]}
+            onPress={handleArrived}
+            disabled={actionLoading}
+          >
+            <Text style={styles.acceptText}>I've Arrived</Text>
+          </Pressable>
         ) : request.status === 'in_progress' ? (
           <>
             <Pressable
@@ -475,27 +443,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
                 style={styles.modalSave}
               />
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={startOtpOpen} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Enter Start OTP</Text>
-            <Text style={styles.modalSub}>Ask the customer for the start OTP shown in their NEXGEN app.</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="number-pad"
-              value={startOtpInput}
-              onChangeText={setStartOtpInput}
-              placeholder="4-digit start OTP"
-              maxLength={8}
-            />
-            <PrimaryButton title="Verify & start job" onPress={handleStart} loading={actionLoading} />
-            <Pressable onPress={() => setStartOtpOpen(false)} style={styles.modalX}>
-              <Text style={styles.modalXT}>Cancel</Text>
-            </Pressable>
           </View>
         </View>
       </Modal>

@@ -27,16 +27,22 @@ export const bannerService = {
     cache = null;
   },
 
-  async getHomeBanners(city?: string, { force = false } = {}): Promise<AdvertisementBanner[]> {
-    const key = cityKey(city);
+  async getHomeBanners(
+    city?: string,
+    { force = false, placement = 'home_dashboard' } = {},
+  ): Promise<AdvertisementBanner[]> {
+    const key = `${cityKey(city)}:${placement}`;
     const now = Date.now();
     if (!force && cache && cache.cityKey === key && now - cache.fetchedAt < CACHE_MS) {
       return cache.data;
     }
 
     try {
-      const q = city ? `?city=${encodeURIComponent(city)}` : '';
-      const data = await apiService.get<AdvertisementBanner[]>(`/api/v1/banners/home${q}`);
+      const params = new URLSearchParams();
+      if (city) params.set('city', city);
+      params.set('placement', placement);
+      const q = params.toString();
+      const data = await apiService.get<AdvertisementBanner[]>(`/api/v1/banners/home?${q}`);
       const list = Array.isArray(data) ? data : [];
       cache = { cityKey: key, fetchedAt: now, data: list };
       return list;

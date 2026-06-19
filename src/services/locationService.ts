@@ -59,3 +59,30 @@ export async function getCurrentCoords(): Promise<Coords | null> {
     return null;
   }
 }
+
+/** Match GPS reverse-geocode result to a known AP city name. */
+export async function detectCityFromGps(cityOptions: readonly string[]): Promise<string | null> {
+  const mod = await getLocationModule();
+  if (!mod) return null;
+  const coords = await getCurrentCoords();
+  if (!coords) return null;
+  try {
+    const results = await mod.reverseGeocodeAsync(coords);
+    const raw = results[0];
+    if (!raw) return null;
+    const candidates = [raw.city, raw.subregion, raw.district, raw.region]
+      .filter(Boolean)
+      .map((s) => String(s).trim());
+    const lowerOptions = cityOptions.map((c) => ({ label: c, lower: c.toLowerCase() }));
+    for (const name of candidates) {
+      const lower = name.toLowerCase();
+      const exact = lowerOptions.find((o) => o.lower === lower);
+      if (exact) return exact.label;
+      const partial = lowerOptions.find((o) => lower.includes(o.lower) || o.lower.includes(lower));
+      if (partial) return partial.label;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
