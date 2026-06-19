@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import type { SubServiceItem } from '../../data/serviceCatalog';
-import { GRID_COLUMNS, getGridCardWidth } from '../../utils/gridLayout';
+import { GRID_COLUMNS, getGridCardWidth, isGridPlaceholder, padGridRows } from '../../utils/gridLayout';
 
 type Props = {
   items: SubServiceItem[];
@@ -13,29 +13,36 @@ type Props = {
 const CARD_WIDTH = getGridCardWidth();
 
 function SubCategoryGridComponent({ items, onItemPress }: Props) {
+  const gridData = useMemo(() => padGridRows(items, GRID_COLUMNS), [items]);
+
   const renderItem = useCallback(
-    ({ item }: { item: SubServiceItem }) => (
-      <Pressable
-        onPress={() => onItemPress(item)}
-        style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
-      >
-        <View style={styles.iconWrap}>
-          <Ionicons name={item.icon} size={24} color={colors.primary} />
-        </View>
-        <Text style={styles.title} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.sub} numberOfLines={1}>
-          {item.subtitle}
-        </Text>
-      </Pressable>
-    ),
+    ({ item }: { item: (typeof gridData)[number] }) => {
+      if (isGridPlaceholder(item)) {
+        return <View style={[styles.placeholder, { width: CARD_WIDTH }]} />;
+      }
+      return (
+        <Pressable
+          onPress={() => onItemPress(item)}
+          style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
+        >
+          <View style={styles.iconWrap}>
+            <Ionicons name={item.icon} size={24} color={colors.primary} />
+          </View>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.sub} numberOfLines={1}>
+            {item.subtitle}
+          </Text>
+        </Pressable>
+      );
+    },
     [onItemPress],
   );
 
   return (
     <FlatList
-      data={items}
+      data={gridData}
       keyExtractor={(item) => item.id}
       numColumns={GRID_COLUMNS}
       showsVerticalScrollIndicator={false}
@@ -50,7 +57,8 @@ export const SubCategoryGrid = memo(SubCategoryGridComponent);
 
 const styles = StyleSheet.create({
   list: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
-  row: { justifyContent: 'space-between', marginBottom: spacing.sm },
+  row: { gap: spacing.sm, marginBottom: spacing.sm },
+  placeholder: { opacity: 0 },
   card: {
     backgroundColor: colors.white,
     borderRadius: radius.md,

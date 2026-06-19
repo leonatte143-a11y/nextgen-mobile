@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { partnerService } from '../services/partnerService';
 import type { PartnerEarningsSummary, PartnerProfile, PartnerRequest } from '../mock/types';
@@ -8,13 +8,14 @@ type PartnerContextValue = {
   requests: PartnerRequest[];
   earnings: PartnerEarningsSummary | null;
   isLoading: boolean;
+  incomingLead: PartnerRequest | null;
   refreshPartner: () => Promise<void>;
+  dismissIncomingLead: () => void;
   toggleOnline: (online: boolean) => Promise<void>;
   acceptRequest: (requestId: string) => Promise<void>;
   rejectRequest: (requestId: string) => Promise<void>;
   markArrived: (requestId: string) => Promise<boolean>;
   markWorkDone: (requestId: string) => Promise<boolean>;
-  startJob: (requestId: string, otp: string) => Promise<boolean>;
   completeJob: (requestId: string, otp: string) => Promise<boolean>;
   requestHeavyWorkEstimate: (requestId: string, payload: { extraLabor: number; materialCost: number; description: string }) => Promise<void>;
   declineHeavyWorkEstimate: (requestId: string) => Promise<void>;
@@ -32,6 +33,11 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const [requests, setRequests] = useState<PartnerRequest[]>([]);
   const [earnings, setEarnings] = useState<PartnerEarningsSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [incomingLead, setIncomingLead] = useState<PartnerRequest | null>(null);
+  const knownRequestIdsRef = useRef<Set<string>>(new Set());
+  const requestsInitializedRef = useRef(false);
+
+  const dismissIncomingLead = useCallback(() => setIncomingLead(null), []);
 
   const refreshPartner = useCallback(async () => {
     if (!partnerToken) return;
@@ -43,7 +49,18 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
         partnerService.getEarnings(),
       ]);
       if (profileResult.status === 'fulfilled') setProfile(profileResult.value);
-      if (requestsResult.status === 'fulfilled') setRequests(requestsResult.value);
+      if (requestsResult.status === 'fulfilled') {
+        const nextRequests = requestsResult.value;
+        if (requestsInitializedRef.current) {
+          const fresh = nextRequests.filter(
+            (r) => r.status === 'new' && !knownRequestIdsRef.current.has(r.id),
+          );
+          if (fresh.length > 0) setIncomingLead(fresh[0]);
+        }
+        nextRequests.forEach((r) => knownRequestIdsRef.current.add(r.id));
+        requestsInitializedRef.current = true;
+        setRequests(nextRequests);
+      }
       if (earningsResult.status === 'fulfilled') setEarnings(earningsResult.value);
     } finally {
       setIsLoading(false);
@@ -55,15 +72,19 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       setRequests([]);
       setEarnings(null);
+      setIncomingLead(null);
+      knownRequestIdsRef.current = new Set();
+      requestsInitializedRef.current = false;
       setIsLoading(false);
       return;
     }
     refreshPartner().catch(() => setIsLoading(false));
+    const pollMs = profile?.isOnline ? 5000 : 15000;
     const timer = setInterval(() => {
       refreshPartner().catch(() => undefined);
-    }, 15000);
+    }, pollMs);
     return () => clearInterval(timer);
-  }, [partnerToken, refreshPartner]);
+  }, [partnerToken, refreshPartner, profile?.isOnline]);
 
   const toggleOnline = useCallback(
     async (online: boolean) => {
@@ -76,6 +97,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const acceptRequest = useCallback(async (requestId: string) => {
     try {
       await partnerService.acceptRequest(requestId);
+      setIncomingLead(null);
       const requestsResult = await partnerService.getRequests();
       setRequests(requestsResult);
     } catch (error) {
@@ -86,6 +108,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const rejectRequest = useCallback(async (requestId: string) => {
     try {
       await partnerService.rejectRequest(requestId);
+      setIncomingLead(null);
       const requestsResult = await partnerService.getRequests();
       setRequests(requestsResult);
     } catch (error) {
@@ -113,18 +136,6 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch (error) {
       console.warn('Mark work done failed', error);
-      return false;
-    }
-  }, []);
-
-  const startJob = useCallback(async (requestId: string, otp: string) => {
-    try {
-      await partnerService.startJob(requestId, otp);
-      const requestsResult = await partnerService.getRequests();
-      setRequests(requestsResult);
-      return true;
-    } catch (error) {
-      console.warn('Start job failed', error);
       return false;
     }
   }, []);
@@ -220,13 +231,14 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       requests,
       earnings,
       isLoading,
+      incomingLead,
       refreshPartner,
+      dismissIncomingLead,
       toggleOnline,
       acceptRequest,
       rejectRequest,
       markArrived,
       markWorkDone,
-      startJob,
       completeJob,
       requestHeavyWorkEstimate,
       declineHeavyWorkEstimate,
@@ -240,13 +252,14 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       requests,
       earnings,
       isLoading,
+      incomingLead,
       refreshPartner,
+      dismissIncomingLead,
       toggleOnline,
       acceptRequest,
       rejectRequest,
       markArrived,
       markWorkDone,
-      startJob,
       completeJob,
       requestHeavyWorkEstimate,
       declineHeavyWorkEstimate,

@@ -69,7 +69,7 @@ export function PartnerRequestsScreen({ navigation }: Props) {
               style={styles.actionButton}
               onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}
             >
-              <Text style={styles.actionLabel}>Start Job</Text>
+              <Text style={styles.actionLabel}>Mark Arrived</Text>
             </Pressable>
           ) : item.status === 'in_progress' ? (
             <Pressable

@@ -1,7 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { PartnerLeadAlert } from '../components/partner/PartnerLeadAlert';
+import { usePartner } from '../context/PartnerContext';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
 import {
@@ -50,13 +53,29 @@ function PartnerTabNavigator() {
 }
 
 export function PartnerTabs() {
+  const { incomingLead, dismissIncomingLead, acceptRequest, rejectRequest } = usePartner();
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
-      <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
-      <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
-      <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
-      <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
-    </Stack.Navigator>
+    <View style={{ flex: 1 }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
+        <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
+        <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
+        <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
+        <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
+      </Stack.Navigator>
+      {incomingLead ? (
+        <PartnerLeadAlert
+          lead={incomingLead}
+          onDismiss={dismissIncomingLead}
+          onAccept={() => {
+            void acceptRequest(incomingLead.id);
+          }}
+          onDecline={() => {
+            void rejectRequest(incomingLead.id);
+          }}
+        />
+      ) : null}
+    </View>
   );
 }
