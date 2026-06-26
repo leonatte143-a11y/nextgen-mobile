@@ -36,19 +36,25 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const [incomingLead, setIncomingLead] = useState<PartnerRequest | null>(null);
   const knownRequestIdsRef = useRef<Set<string>>(new Set());
   const requestsInitializedRef = useRef(false);
+  const hasLoadedOnceRef = useRef(false);
+  const isOnlineRef = useRef(false);
 
   const dismissIncomingLead = useCallback(() => setIncomingLead(null), []);
 
-  const refreshPartner = useCallback(async () => {
+  const refreshPartner = useCallback(async (opts?: { background?: boolean }) => {
     if (!partnerToken) return;
-    setIsLoading(true);
+    const silent = opts?.background || hasLoadedOnceRef.current;
+    if (!silent) setIsLoading(true);
     try {
       const [profileResult, requestsResult, earningsResult] = await Promise.allSettled([
         partnerService.getProfile(),
         partnerService.getRequests(),
         partnerService.getEarnings(),
       ]);
-      if (profileResult.status === 'fulfilled') setProfile(profileResult.value);
+      if (profileResult.status === 'fulfilled') {
+        setProfile(profileResult.value);
+        isOnlineRef.current = profileResult.value.isOnline;
+      }
       if (requestsResult.status === 'fulfilled') {
         const nextRequests = requestsResult.value;
         if (requestsInitializedRef.current) {
@@ -63,6 +69,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       }
       if (earningsResult.status === 'fulfilled') setEarnings(earningsResult.value);
     } finally {
+      hasLoadedOnceRef.current = true;
       setIsLoading(false);
     }
   }, [partnerToken]);
@@ -75,13 +82,19 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
       setIncomingLead(null);
       knownRequestIdsRef.current = new Set();
       requestsInitializedRef.current = false;
+      hasLoadedOnceRef.current = false;
+      isOnlineRef.current = false;
       setIsLoading(false);
       return;
     }
     refreshPartner().catch(() => setIsLoading(false));
+  }, [partnerToken, refreshPartner]);
+
+  useEffect(() => {
+    if (!partnerToken) return;
     const pollMs = profile?.isOnline ? 5000 : 15000;
     const timer = setInterval(() => {
-      refreshPartner().catch(() => undefined);
+      refreshPartner({ background: true }).catch(() => undefined);
     }, pollMs);
     return () => clearInterval(timer);
   }, [partnerToken, refreshPartner, profile?.isOnline]);
@@ -89,6 +102,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const toggleOnline = useCallback(
     async (online: boolean) => {
       const updated = await partnerService.toggleOnline(online);
+      isOnlineRef.current = updated.isOnline;
       setProfile(updated);
     },
     [],

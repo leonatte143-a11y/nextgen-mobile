@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
+import { sortBannersByQueue, useSequentialAdIndex } from '../../hooks/useSequentialAds';
 import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
 import type { AdvertisementBanner } from '../../types/banner';
@@ -16,17 +17,20 @@ type Props = {
 };
 
 const AD_HEIGHT = 168;
+const ROTATE_MS = 15_000;
 
 function HomeAdBannerComponent({ locationLabel }: Props) {
   const navigation = useNavigation<Nav>();
-  const [ad, setAd] = useState<AdvertisementBanner | null>(null);
+  const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
   const [loading, setLoading] = useState(true);
+  const idx = useSequentialAdIndex(banners.length, ROTATE_MS);
+  const ad = banners[idx];
 
   const load = useCallback(async () => {
     setLoading(true);
     const city = parseCityFromLocation(locationLabel);
     const list = await bannerService.getHomeBanners(city);
-    setAd(list[0] ?? null);
+    setBanners(sortBannersByQueue(list));
     setLoading(false);
   }, [locationLabel]);
 
@@ -47,29 +51,40 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
     );
   }
 
+  const mediaUrl = ad.mediaUrl || ad.imageUrl;
+
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      onPress={() => handleBannerPress(ad, navigation)}
-    >
-      {ad.imageUrl ? (
-        <Image source={{ uri: ad.imageUrl }} style={styles.image} resizeMode="cover" />
-      ) : (
-        <View style={styles.imageFallback} />
-      )}
-      <View style={styles.overlay} />
-      <View style={styles.textBlock}>
-        <Text style={styles.sponsored}>Sponsored</Text>
-        <Text style={styles.title} numberOfLines={2}>
-          {ad.title}
-        </Text>
-        {ad.subtitle ? (
-          <Text style={styles.subtitle} numberOfLines={2}>
-            {ad.subtitle}
+    <View>
+      <Pressable
+        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+        onPress={() => handleBannerPress(ad, navigation)}
+      >
+        {mediaUrl && ad.mediaType !== 'video' ? (
+          <Image source={{ uri: mediaUrl }} style={styles.image} resizeMode="cover" />
+        ) : (
+          <View style={styles.imageFallback} />
+        )}
+        <View style={styles.overlay} />
+        <View style={styles.textBlock}>
+          <Text style={styles.sponsored}>Sponsored</Text>
+          <Text style={styles.title} numberOfLines={2}>
+            {ad.title}
           </Text>
-        ) : null}
-      </View>
-    </Pressable>
+          {ad.subtitle ? (
+            <Text style={styles.subtitle} numberOfLines={2}>
+              {ad.subtitle}
+            </Text>
+          ) : null}
+        </View>
+      </Pressable>
+      {banners.length > 1 ? (
+        <View style={styles.dots}>
+          {banners.map((b, i) => (
+            <View key={b.id} style={[styles.dot, i === idx && styles.dotOn]} />
+          ))}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -78,7 +93,7 @@ export const HomeAdBanner = memo(HomeAdBannerComponent);
 const styles = StyleSheet.create({
   card: {
     marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     height: AD_HEIGHT,
     borderRadius: radius.lg,
     overflow: 'hidden',
@@ -103,6 +118,9 @@ const styles = StyleSheet.create({
   },
   title: { color: colors.white, fontSize: 18, fontWeight: '800' },
   subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 13, marginTop: 4 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 5, marginBottom: spacing.sm },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.border },
+  dotOn: { width: 16, backgroundColor: colors.primary },
   placeholder: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
