@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { sortBannersByQueue, useSequentialAdIndex } from '../hooks/useSequentialAds';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, spacing } from '../constants/theme';
@@ -12,24 +13,19 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const BANNER_W = 320;
 const BANNER_H = 50;
-const ROTATE_MS = 5000;
+const ROTATE_MS = 15_000;
 
 export function LiveTrackingAdBanner() {
   const navigation = useNavigation<Nav>();
   const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
-  const [idx, setIdx] = useState(0);
+  const idx = useSequentialAdIndex(banners.length, ROTATE_MS);
 
   useEffect(() => {
-    bannerService.getHomeBanners(undefined, { force: true, placement: 'partner_live_tracking' }).then(setBanners).catch(() => setBanners([]));
+    bannerService
+      .getHomeBanners(undefined, { force: true, placement: 'partner_live_tracking' })
+      .then((list) => setBanners(sortBannersByQueue(list)))
+      .catch(() => setBanners([]));
   }, []);
-
-  useEffect(() => {
-    if (banners.length <= 1) return undefined;
-    const t = setInterval(() => {
-      setIdx((i) => (i + 1) % banners.length);
-    }, ROTATE_MS);
-    return () => clearInterval(t);
-  }, [banners.length]);
 
   if (!banners.length) return null;
 

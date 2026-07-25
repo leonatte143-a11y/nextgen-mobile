@@ -21,6 +21,7 @@ export type AdvertisementBanner = {
   city: string | null;
   isActive: boolean;
   priority: number;
+  displayOrder?: number;
   startDate: string | null;
   endDate: string | null;
   createdBy: string | null;
