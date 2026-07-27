@@ -45,4 +45,5 @@ export type ShopApplyPayload = {
   longitude?: number;
   gstOrLicense?: string;
   leadPreference: 'local' | 'regional';
+  photoUrl?: string;
 };

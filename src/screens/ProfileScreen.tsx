@@ -19,7 +19,6 @@ type MenuTarget =
   | 'MyFavorites'
   | 'Settings'
   | 'Rewards'
-  | 'Referrals'
   | 'Language'
   | 'SavedAddresses'
   | 'Support';
@@ -30,7 +29,6 @@ const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuT
   { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
   { label: 'Settings', icon: 'settings-outline', target: 'Settings' },
   { label: 'Rewards', icon: 'gift-outline', target: 'Rewards' },
-  { label: 'Referrals', icon: 'people-outline', target: 'Referrals' },
   { label: 'Help & Support', icon: 'help-circle-outline', target: 'Support' },
   { label: 'Language', icon: 'globe-outline', target: 'Language' },
 ];
@@ -38,7 +36,7 @@ const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuT
 export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { user, refreshProfile, logoutUser } = useAuth();
+  const { user, partnerToken, refreshProfile, logoutUser } = useAuth();
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -111,12 +109,37 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
           <Ionicons name="help-circle-outline" size={26} color={colors.white} />
         </Pressable>
       </View>
+      <View style={styles.cardWrap}>
+        <View style={styles.card}>
+          <View style={styles.avatar}>
+            <Text style={styles.avText}>{initials}</Text>
+          </View>
+          <Text style={styles.name}>
+            {user.firstName} {user.lastName}
+          </Text>
+          <Text style={styles.email}>{user.email}</Text>
+          <View style={styles.cardActions}>
+            <Pressable style={styles.editBtn} onPress={() => navigation.navigate('EditProfile')}>
+              <Text style={styles.editTxt}>Edit Profile</Text>
+            </Pressable>
+            <Pressable
+              style={styles.supportBtn}
+              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'NEXGEN Support' })}
+            >
+              <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
+              <Text style={styles.supportTxt}>Support</Text>
+            </Pressable>
+          </View>
+          <Pressable style={styles.proBtn}>
+            <Text style={styles.proTxt}>Join NEXGEN PRO — ₹18/mo</Text>
+          </Pressable>
+        </View>
+      </View>
       <View style={styles.tabRow}>
         {[
           { label: 'Profile', target: 'Profile' as const },
           { label: 'Settings', target: 'Settings' as const },
           { label: 'Rewards', target: 'Rewards' as const },
-          { label: 'Referrals', target: 'Referrals' as const },
         ].map((tab) => (
           <Pressable
             key={tab.label}
@@ -131,23 +154,21 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
           </Pressable>
         ))}
       </View>
-      <View style={styles.cardWrap}>
-        <View style={styles.card}>
-          <View style={styles.avatar}>
-            <Text style={styles.avText}>{initials}</Text>
-          </View>
-          <Text style={styles.name}>
-            {user.firstName} {user.lastName}
-          </Text>
-          <Text style={styles.email}>{user.email}</Text>
-          <Pressable style={styles.editBtn} onPress={() => navigation.navigate('EditProfile')}>
-            <Text style={styles.editTxt}>Edit Profile</Text>
-          </Pressable>
-          <Pressable style={styles.proBtn}>
-            <Text style={styles.proTxt}>Join NEXGEN PRO — ₹18/mo</Text>
-          </Pressable>
-        </View>
-      </View>
+      <Pressable
+        style={styles.switchBtn}
+        onPress={() => {
+          if (partnerToken) {
+            navigation.replace('PartnerHome');
+          } else {
+            navigation.navigate('PartnerLogin');
+          }
+        }}
+      >
+        <Ionicons name="swap-horizontal-outline" size={18} color={colors.white} />
+        <Text style={styles.switchBtnTxt}>
+          {partnerToken ? 'Switch to Partner Mode' : 'Become a Service Partner'}
+        </Text>
+      </Pressable>
       <View style={styles.stats}>
         <View style={styles.stat}>
           <Text style={styles.statNum}>{bookingsCount}</Text>
@@ -221,7 +242,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 24,
+    paddingBottom: spacing.xl,
   },
   deleteBtn: {
     flexDirection: 'row',
@@ -234,7 +255,7 @@ const styles = StyleSheet.create({
   },
   h1: { fontSize: 26, fontWeight: '800', color: colors.white },
   sub: { color: colors.orangeTint, marginTop: 4 },
-  cardWrap: { marginTop: -32, paddingHorizontal: spacing.md },
+  cardWrap: { marginTop: -20, paddingHorizontal: spacing.md },
   card: {
     backgroundColor: colors.white,
     borderRadius: radius.lg,
@@ -268,8 +289,33 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   editTxt: { fontWeight: '700', color: colors.charcoal },
+  cardActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  supportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.orangeTint,
+  },
+  supportTxt: { fontWeight: '700', color: colors.primary },
   proBtn: { marginTop: spacing.sm, padding: spacing.sm },
   proTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  switchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    backgroundColor: colors.navy,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+  },
+  switchBtnTxt: { color: colors.white, fontWeight: '800' },
   stats: {
     flexDirection: 'row',
     marginTop: spacing.lg,
@@ -289,7 +335,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
-    marginTop: -16,
+    marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   tabItem: {

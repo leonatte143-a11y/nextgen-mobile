@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { sortBannersByQueue, useSequentialAdIndex } from '../hooks/useSequentialAds';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  sortBannersByQueue,
+  useAdFadeAnimation,
+  useGeoFenceVisibleBanners,
+  useSequentialAdIndex,
+} from '../hooks/useSequentialAds';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, spacing } from '../constants/theme';
@@ -18,7 +23,10 @@ const ROTATE_MS = 15_000;
 export function LiveTrackingAdBanner() {
   const navigation = useNavigation<Nav>();
   const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
-  const idx = useSequentialAdIndex(banners.length, ROTATE_MS);
+  const visibleBanners = useGeoFenceVisibleBanners(banners);
+  const idx = useSequentialAdIndex(visibleBanners.length, ROTATE_MS);
+  const ad = visibleBanners[idx];
+  const fadeOpacity = useAdFadeAnimation(ad?.id);
 
   useEffect(() => {
     bannerService
@@ -27,14 +35,13 @@ export function LiveTrackingAdBanner() {
       .catch(() => setBanners([]));
   }, []);
 
-  if (!banners.length) return null;
+  if (!ad) return null;
 
-  const ad = banners[idx];
   const mediaUrl = ad.mediaUrl || ad.imageUrl;
 
   return (
     <View style={styles.wrap} accessibilityRole="summary" accessibilityLabel="Sponsored ad banner">
-      <View style={styles.inner}>
+      <Animated.View style={[styles.inner, { opacity: fadeOpacity }]}>
         <View style={styles.pill}>
           <Text style={styles.pillTxt}>Ad</Text>
         </View>
@@ -53,11 +60,11 @@ export function LiveTrackingAdBanner() {
           </Text>
         </Pressable>
         <View style={styles.dots}>
-          {banners.map((b) => (
+          {visibleBanners.map((b) => (
             <View key={b.id} style={[styles.dot, b.id === ad.id && styles.dotOn]} />
           ))}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }

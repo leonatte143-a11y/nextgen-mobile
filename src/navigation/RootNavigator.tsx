@@ -5,11 +5,15 @@ import { CategoryServicesScreen } from '../screens/CategoryServicesScreen';
 import { BookingSuccessScreen } from '../screens/BookingSuccessScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
 import { CartScreen } from '../screens/CartScreen';
+import { ChatScreen } from '../screens/ChatScreen';
 import { ConfirmBookingScreen } from '../screens/ConfirmBookingScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LanguageScreen } from '../screens/LanguageScreen';
 import { LiveBookingScreen } from '../screens/LiveBookingScreen';
+import { PostListingScreen } from '../screens/PostListingScreen';
+import { ListingDetailScreen } from '../screens/ListingDetailScreen';
+import { MarketplaceChatScreen } from '../screens/MarketplaceChatScreen';
 import { MyFavoritesScreen } from '../screens/MyFavoritesScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
@@ -23,7 +27,6 @@ import { ClinicBookingScreen } from '../screens/ClinicBookingScreen';
 import { ShopDetailScreen } from '../screens/ShopDetailScreen';
 import { ShopJoinScreen } from '../screens/ShopJoinScreen';
 import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
-import { ReferralsScreen } from '../screens/ReferralsScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
@@ -72,7 +75,6 @@ export function RootNavigator() {
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Rewards" component={RewardsScreen} />
-      <Stack.Screen name="Referrals" component={ReferralsScreen} />
       <Stack.Screen name="Terms" component={TermsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="MyFavorites" component={MyFavoritesScreen} />
@@ -83,6 +85,10 @@ export function RootNavigator() {
       <Stack.Screen name="ClinicBooking" component={ClinicBookingScreen} />
       <Stack.Screen name="ShopDetail" component={ShopDetailScreen} />
       <Stack.Screen name="ShopJoin" component={ShopJoinScreen} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="PostListing" component={PostListingScreen} />
+      <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
+      <Stack.Screen name="MarketplaceChat" component={MarketplaceChatScreen} />
     </Stack.Navigator>
   );
 }

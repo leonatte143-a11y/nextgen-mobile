@@ -41,7 +41,6 @@ export type RootStackParamList = {
   EditProfile: undefined;
   Settings: undefined;
   Rewards: undefined;
-  Referrals: undefined;
   Terms: undefined;
   Privacy: undefined;
   MyFavorites: undefined;
@@ -52,6 +51,10 @@ export type RootStackParamList = {
   ClinicBooking: undefined;
   ShopDetail: { shopId: string };
   ShopJoin: undefined;
+  Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
+  PostListing: undefined;
+  ListingDetail: { listingId: string };
+  MarketplaceChat: { listingId: string; otherPartyName?: string };
 };
 
 export type MainTabParamList = {

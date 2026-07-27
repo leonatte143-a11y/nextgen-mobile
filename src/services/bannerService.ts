@@ -1,5 +1,6 @@
 import type { AdvertisementBanner } from '../types/banner';
 import { apiService } from './apiService';
+import type { Coords } from './locationService';
 
 const CACHE_MS = 5 * 60 * 1000;
 
@@ -29,11 +30,12 @@ export const bannerService = {
 
   async getHomeBanners(
     city?: string,
-    { force = false, placement = 'home_dashboard' } = {},
+    { force = false, placement = 'home_dashboard', coords }: { force?: boolean; placement?: string; coords?: Coords | null } = {},
   ): Promise<AdvertisementBanner[]> {
     const key = `${cityKey(city)}:${placement}`;
     const now = Date.now();
-    if (!force && cache && cache.cityKey === key && now - cache.fetchedAt < CACHE_MS) {
+    // Geo-fenced campaigns need a live coords check, so skip the cache when we have a fresh position.
+    if (!force && !coords && cache && cache.cityKey === key && now - cache.fetchedAt < CACHE_MS) {
       return cache.data;
     }
 
@@ -41,6 +43,10 @@ export const bannerService = {
       const params = new URLSearchParams();
       if (city) params.set('city', city);
       params.set('placement', placement);
+      if (coords) {
+        params.set('lat', String(coords.latitude));
+        params.set('lng', String(coords.longitude));
+      }
       const q = params.toString();
       const data = await apiService.get<AdvertisementBanner[]>(`/api/v1/banners/home?${q}`);
       const list = Array.isArray(data) ? data : [];

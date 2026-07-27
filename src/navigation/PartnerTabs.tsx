@@ -7,6 +7,7 @@ import { PartnerLeadAlert } from '../components/partner/PartnerLeadAlert';
 import { usePartner } from '../context/PartnerContext';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
+import { ChatScreen } from '../screens/ChatScreen';
 import {
   PartnerDashboardScreen,
   PartnerEarningsScreen,
@@ -63,6 +64,7 @@ export function PartnerTabs() {
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
       </Stack.Navigator>
       {incomingLead ? (
         <PartnerLeadAlert

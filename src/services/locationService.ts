@@ -60,6 +60,23 @@ export async function getCurrentCoords(): Promise<Coords | null> {
   }
 }
 
+/** Best-effort coords for non-critical features (e.g. ad geo-fencing) — never prompts the
+ * user; returns null unless location permission was already granted elsewhere. */
+export async function getCoordsIfPermitted(): Promise<Coords | null> {
+  const mod = await getLocationModule();
+  if (!mod) return null;
+  try {
+    const { status } = await mod.getForegroundPermissionsAsync();
+    if (status !== 'granted') return null;
+    const pos = await mod.getCurrentPositionAsync({
+      accuracy: Platform.OS === 'android' ? mod.Accuracy.Balanced : mod.Accuracy.High,
+    });
+    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+  } catch {
+    return null;
+  }
+}
+
 /** Match GPS reverse-geocode result to a known AP city name. */
 export async function detectCityFromGps(cityOptions: readonly string[]): Promise<string | null> {
   const mod = await getLocationModule();
