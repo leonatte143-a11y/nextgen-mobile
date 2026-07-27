@@ -6,6 +6,7 @@ import { colors, radius, spacing } from '../../constants/theme';
 import { sortBannersByQueue, useSequentialAdIndex } from '../../hooks/useSequentialAds';
 import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
+import { getCoordsIfPermitted } from '../../services/locationService';
 import type { AdvertisementBanner } from '../../types/banner';
 import type { RootStackParamList } from '../../navigation/types';
 import { BannerSkeleton } from './BannerSkeleton';
@@ -29,7 +30,8 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
   const load = useCallback(async () => {
     setLoading(true);
     const city = parseCityFromLocation(locationLabel);
-    const list = await bannerService.getHomeBanners(city);
+    const coords = await getCoordsIfPermitted();
+    const list = await bannerService.getHomeBanners(city, { coords });
     setBanners(sortBannersByQueue(list));
     setLoading(false);
   }, [locationLabel]);

@@ -16,6 +16,7 @@ import {
 import { colors, radius, spacing } from '../../constants/theme';
 import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
+import { getCoordsIfPermitted } from '../../services/locationService';
 import type { AdvertisementBanner } from '../../types/banner';
 import type { RootStackParamList } from '../../navigation/types';
 import { BannerSkeleton } from './BannerSkeleton';
@@ -44,7 +45,8 @@ function HomeBannerCarouselComponent({ locationLabel }: Props) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await bannerService.getHomeBanners(city);
+    const coords = await getCoordsIfPermitted();
+    const data = await bannerService.getHomeBanners(city, { coords });
     setBanners(data);
     setLoading(false);
     setIndex(0);
