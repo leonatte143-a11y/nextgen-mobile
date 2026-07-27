@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -41,6 +43,27 @@ export function ShopJoinScreen() {
   const [leadPreference, setLeadPreference] = useState<'local' | 'regional'>('local');
   const [loading, setLoading] = useState(false);
   const [citySearch, setCitySearch] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
+
+  const pickShopPhoto = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Allow photo library access to upload your shop banner.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.5,
+      base64: true,
+      allowsEditing: true,
+      aspect: [16, 9],
+    });
+    if (result.canceled || !result.assets?.[0]?.base64) return;
+    const asset = result.assets[0];
+    const mime = asset.mimeType || 'image/jpeg';
+    setPhotoDataUrl(`data:${mime};base64,${asset.base64}`);
+  };
 
   useEffect(() => {
     shopService.getTrendingSuggestions().then(setSuggestions).catch(() => setSuggestions([]));
@@ -85,6 +108,10 @@ export function ShopJoinScreen() {
       Alert.alert('Required', 'Please enter or select a business category.');
       return;
     }
+    if (!acceptedTerms) {
+      Alert.alert('Terms required', 'Please accept the NEXGEN Terms and Conditions to continue.');
+      return;
+    }
     setLoading(true);
     try {
       const locOk = await requestLocationPermission();
@@ -109,6 +136,7 @@ export function ShopJoinScreen() {
         longitude,
         gstOrLicense: gstOrLicense.trim(),
         leadPreference,
+        photoUrl: photoDataUrl || undefined,
       });
       Alert.alert(
         'Application submitted',
@@ -142,6 +170,19 @@ export function ShopJoinScreen() {
 
         <NexgenTextInput label="Shop name" value={shopName} onChangeText={setShopName} />
         <NexgenTextInput label="Owner name" value={ownerName} onChangeText={setOwnerName} />
+
+        <Text style={styles.label}>Shop photo (optional)</Text>
+        <Text style={styles.hint}>A high-quality storefront or product banner helps you get more leads.</Text>
+        <Pressable style={styles.photoPicker} onPress={pickShopPhoto}>
+          {photoDataUrl ? (
+            <Image source={{ uri: photoDataUrl }} style={styles.photoPreview} resizeMode="cover" />
+          ) : (
+            <View style={styles.photoPlaceholder}>
+              <Ionicons name="camera-outline" size={28} color={colors.primary} />
+              <Text style={styles.photoPlaceholderTxt}>Tap to add a photo</Text>
+            </View>
+          )}
+        </Pressable>
 
         <Text style={styles.label}>Business category</Text>
         <Text style={styles.hint}>Type to search or enter a new category — trending options appear below.</Text>
@@ -231,7 +272,16 @@ export function ShopJoinScreen() {
           </Pressable>
         </View>
 
-        <PrimaryButton title="Submit application" onPress={submit} loading={loading} />
+        <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
+          <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
+          <Text style={styles.termsTxt}>
+            I agree to the NEXGEN{' '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
+              Terms and Conditions
+            </Text>
+          </Text>
+        </Pressable>
+        <PrimaryButton title="Submit application" onPress={submit} loading={loading} disabled={!acceptedTerms} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -312,4 +362,23 @@ const styles = StyleSheet.create({
   cityChipOn: { backgroundColor: colors.primary },
   cityTxt: { fontWeight: '600', color: colors.charcoal },
   cityTxtOn: { color: colors.white },
+  photoPicker: {
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  photoPreview: { width: '100%', height: 160 },
+  photoPlaceholder: {
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.greyLight,
+  },
+  photoPlaceholderTxt: { color: colors.primary, fontWeight: '700', marginTop: spacing.xs },
+  termsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginVertical: spacing.md },
+  termsTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
+  termsLink: { color: colors.primary, fontWeight: '700' },
 });

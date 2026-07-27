@@ -17,8 +17,19 @@ export function PrivacyScreen() {
       </Pressable>
       <Text style={styles.h1}>Privacy Policy</Text>
       <Text style={styles.p}>
-        We collect name, email, phone, and location to fulfil bookings and improve experience. Contact
-        privacy@nexgen.com for deletion requests.
+        We collect your name, email, phone, and location to fulfil bookings, connect you with Service Partners
+        and Shops, and improve your experience across NEXGEN.
+      </Text>
+      <Text style={styles.h2}>Marketplace & Chat</Text>
+      <Text style={styles.p}>
+        For P2P Marketplace and Super-Chat features, your messages are shared with the relevant Buyer/Seller or
+        Service Partner, and with NEXGEN Admin for support and safety moderation. Personal phone numbers are kept
+        private in chat until you choose to share contact details.
+      </Text>
+      <Text style={styles.h2}>Your Choices</Text>
+      <Text style={styles.p}>
+        You can manage notification preferences in Settings at any time. Contact privacy@nexgen.com for data
+        access, correction, or deletion requests.
       </Text>
     </ScrollView>
   );
@@ -26,8 +37,9 @@ export function PrivacyScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
-  body: { padding: spacing.lg, paddingTop: 48 },
+  body: { padding: spacing.lg, paddingTop: 48, paddingBottom: spacing.xl },
   back: { marginBottom: spacing.md },
   h1: { fontSize: 22, fontWeight: '800', marginBottom: spacing.md },
-  p: { lineHeight: 22, color: colors.charcoal },
+  h2: { fontSize: 15, fontWeight: '800', color: colors.charcoal, marginTop: spacing.lg, marginBottom: spacing.sm },
+  p: { lineHeight: 22, color: colors.grey },
 });

@@ -5,6 +5,7 @@ import type {
   PartnerPricingListResponse,
   PartnerPricingRow,
   PartnerProfile,
+  PartnerReferralSummary,
   PartnerRequest,
 } from '../mock/types';
 
@@ -19,6 +20,7 @@ export type PartnerOnboardingPayload = {
   bankName?: string;
   bankAccount?: string;
   trainingProgress?: number;
+  referralCode?: string;
 };
 
 function unwrapPricingList(data: PartnerPricingListResponse | PartnerPricingRow[]): PartnerPricingListResponse {
@@ -54,6 +56,10 @@ export const partnerService = {
 
   async getEarnings(): Promise<PartnerEarningsSummary> {
     return apiService.get('/api/v1/partners/earnings', 'partner');
+  },
+
+  async getReferralEarnings(): Promise<PartnerReferralSummary> {
+    return apiService.get('/api/v1/partners/referrals/earnings', 'partner');
   },
 
   async toggleOnline(online: boolean): Promise<PartnerProfile> {

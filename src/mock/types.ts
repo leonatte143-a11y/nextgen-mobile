@@ -103,7 +103,21 @@ export interface PartnerProfile {
   serviceInnerRadiusKm: number;
   serviceOuterRadiusKm: number;
   allowOutOfStation: boolean;
+  referralCode?: string;
 }
+
+export type PartnerReferralEarning = {
+  id: string;
+  bookingId: string;
+  amount: number;
+  createdAt: string;
+};
+
+export type PartnerReferralSummary = {
+  referralCode: string;
+  totalEarned: number;
+  earnings: PartnerReferralEarning[];
+};
 
 /** Partner-editable service line (My Services / pricing management) */
 export interface PartnerPricingRow {

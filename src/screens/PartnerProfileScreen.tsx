@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +13,7 @@ type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
 export function PartnerProfileScreen() {
   const navigation = useNavigation<NavigationProps>();
-  const { logoutPartner } = useAuth();
+  const { userToken, logoutPartner } = useAuth();
   const { profile, updateProfile, isLoading } = usePartner();
   const [bio, setBio] = useState('Trusted expert for home electrical and repair services.');
   const [loading, setLoading] = useState(false);
@@ -76,6 +77,19 @@ export function PartnerProfileScreen() {
         <Text style={styles.sectionTitle}>Dark Mode</Text>
         <Switch value={isDarkMode} onValueChange={setIsDarkMode} trackColor={{ true: colors.primary }} />
       </View>
+      <Pressable
+        style={styles.switchModeBtn}
+        onPress={() => {
+          if (userToken) {
+            navigation.replace('MainTabs');
+          } else {
+            navigation.navigate('UserLogin');
+          }
+        }}
+      >
+        <Ionicons name="swap-horizontal-outline" size={18} color={colors.white} />
+        <Text style={styles.switchModeTxt}>{userToken ? 'Switch to User Mode' : 'Sign in as User'}</Text>
+      </Pressable>
       <View style={styles.bankCard}>
         <Text style={styles.sectionTitle}>Bank Details</Text>
         <Text style={styles.sectionText}>{profile.bankName} • {profile.bankAccount}</Text>
@@ -112,4 +126,15 @@ const styles = StyleSheet.create({
   bankCard: { marginTop: spacing.lg, backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg },
   trainingCard: { marginTop: spacing.lg, backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg },
   logoutButton: { marginTop: spacing.md, borderWidth: 1, borderColor: colors.primary },
+  switchModeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    backgroundColor: colors.navy,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+  },
+  switchModeTxt: { color: colors.white, fontWeight: '800' },
 });

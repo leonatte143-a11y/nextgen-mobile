@@ -185,11 +185,25 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         <Text style={styles.sectionTitle}>Customer</Text>
         <Text style={styles.sectionText}>{request.customerName}</Text>
         <Text style={styles.sectionText}>{request.address}</Text>
-        {request.customerPhone ? (
-          <Pressable onPress={callCustomer} style={styles.callUserBtn}>
-            <Text style={styles.callUserTxt}>Call User</Text>
+        <View style={styles.customerActionsRow}>
+          {request.customerPhone ? (
+            <Pressable onPress={callCustomer} style={styles.callUserBtn}>
+              <Text style={styles.callUserTxt}>Call User</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={() =>
+              navigation.navigate('Chat', {
+                role: 'partner',
+                bookingId: request.id,
+                otherPartyName: request.customerName,
+              })
+            }
+            style={styles.chatUserBtn}
+          >
+            <Text style={styles.chatUserTxt}>Chat with Customer</Text>
           </Pressable>
-        ) : null}
+        </View>
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Timing</Text>
@@ -486,6 +500,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   callUserTxt: { color: colors.primary, fontWeight: '800' },
+  customerActionsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, flexWrap: 'wrap' },
+  chatUserBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    alignSelf: 'flex-start',
+  },
+  chatUserTxt: { color: colors.white, fontWeight: '800' },
   quoteTotal: { marginTop: spacing.sm, fontWeight: '800' },
   hintText: { marginTop: spacing.sm, color: colors.primary, fontSize: 13, lineHeight: 20 },
   statusCard: { backgroundColor: colors.primary, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.md },

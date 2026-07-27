@@ -186,10 +186,16 @@ export function LiveBookingScreen() {
           </Pressable>
           <Pressable
             style={styles.act}
-            onPress={() => Linking.openURL('mailto:support@nexgen.com?subject=Live%20booking%20help')}
+            onPress={() =>
+              navigation.navigate('Chat', {
+                role: 'user',
+                bookingId: booking.id,
+                otherPartyName: booking.partnerName,
+              })
+            }
           >
             <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-            <Text style={styles.actTxt}>Chat support</Text>
+            <Text style={styles.actTxt}>Chat with partner</Text>
           </Pressable>
         </View>
 

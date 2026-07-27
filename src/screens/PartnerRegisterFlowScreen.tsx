@@ -81,6 +81,8 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [qAns, setQAns] = useState<number | null>(null);
   const [videoSeen, setVideoSeen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const needsDl = selectedCategories.some((item) => item.toLowerCase().includes('driver'));
   const quizPass = qIdx >= Q10.length ? qScore >= 8 : null;
@@ -140,10 +142,14 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const canNext2 = certFile && certNo.length > 2;
   const canNext3 = videoSeen && qIdx >= Q10.length && quizPass === true;
   const canComplete = ENABLE_PARTNER_QUESTIONS
-    ? canNext0 && canNext1 && canNext2 && canNext3
-    : canNext0 && canNext1 && canNext2;
+    ? canNext0 && canNext1 && canNext2 && canNext3 && acceptedTerms
+    : canNext0 && canNext1 && canNext2 && acceptedTerms;
 
   const finish = async () => {
+    if (!acceptedTerms) {
+      Alert.alert('Terms required', 'Please accept the NEXGEN Terms and Conditions to continue.');
+      return;
+    }
     if (!canComplete) {
       Alert.alert('Incomplete', 'Check all required fields (mock).');
       return;
@@ -175,6 +181,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         bankName: `${bName} · IFSC ${bIfsc}`,
         bankAccount: bAcc,
         trainingProgress: 100,
+        referralCode: referralCode.trim() || undefined,
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
@@ -440,11 +447,34 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         ) : (
           <View style={styles.end}>
             <Text style={styles.hint}>Score: {qScore} / 10 {quizPass ? ' — pass' : ' — fail'}</Text>
+            <NexgenTextInput
+              label="Referral code (optional)"
+              value={referralCode}
+              onChangeText={setReferralCode}
+              placeholder="e.g. NEXGEN-RAJU-1234"
+              autoCapitalize="characters"
+            />
+            <Pressable
+              style={styles.termsRow}
+              onPress={() => setAcceptedTerms((v) => !v)}
+            >
+              <Ionicons
+                name={acceptedTerms ? 'checkbox' : 'square-outline'}
+                size={22}
+                color={colors.primary}
+              />
+              <Text style={styles.termsTxt}>
+                I agree to the NEXGEN{' '}
+                <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
+                  Terms and Conditions
+                </Text>
+              </Text>
+            </Pressable>
             <PrimaryButton
               title="Complete registration (mock save)"
               onPress={finish}
               loading={saving}
-              disabled={!canNext3}
+              disabled={!canNext3 || !acceptedTerms}
             />
             {!quizPass ? (
               <PrimaryButton
@@ -471,6 +501,9 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   root: { padding: spacing.lg, paddingTop: 40, backgroundColor: colors.white, flexGrow: 1 },
+  termsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginVertical: spacing.md },
+  termsTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
+  termsLink: { color: colors.primary, fontWeight: '700' },
   h1: { fontSize: 20, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.lg },
   lab: { fontSize: 14, fontWeight: '600', color: colors.grey, marginTop: spacing.md, marginBottom: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.md },

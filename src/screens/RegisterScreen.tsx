@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
 import { NexgenTextInput } from '../components/NexgenTextInput';
@@ -16,6 +17,7 @@ export function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const save = async () => {
     setLoading(true);
@@ -35,7 +37,7 @@ export function RegisterScreen({ navigation }: Props) {
     }
   };
 
-  const ok = firstName.length > 1 && phone.replace(/\D/g, '').length === 10;
+  const ok = firstName.length > 1 && phone.replace(/\D/g, '').length === 10 && acceptedTerms;
 
   return (
     <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
@@ -58,6 +60,15 @@ export function RegisterScreen({ navigation }: Props) {
         value={phone}
         onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
       />
+      <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
+        <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
+        <Text style={styles.termsTxt}>
+          I agree to the NEXGEN{' '}
+          <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
+            Terms and Conditions
+          </Text>
+        </Text>
+      </Pressable>
       <PrimaryButton title="Save & go to Login" onPress={save} disabled={!ok} loading={loading} />
     </ScrollView>
   );
@@ -67,4 +78,7 @@ const styles = StyleSheet.create({
   root: { padding: spacing.lg, paddingTop: 48, backgroundColor: colors.white, flexGrow: 1 },
   h1: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   sub: { color: colors.grey, marginBottom: spacing.lg, marginTop: spacing.sm },
+  termsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
+  termsTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
+  termsLink: { color: colors.primary, fontWeight: '700' },
 });

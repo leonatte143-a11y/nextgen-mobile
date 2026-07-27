@@ -19,6 +19,7 @@ export type AdvertisementBanner = {
   redirectType: BannerRedirectType;
   redirectValue: string;
   city: string | null;
+  geoFence?: { lat: number; lng: number }[] | null;
   isActive: boolean;
   priority: number;
   displayOrder?: number;

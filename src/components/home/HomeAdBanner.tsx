@@ -1,9 +1,14 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
-import { sortBannersByQueue, useSequentialAdIndex } from '../../hooks/useSequentialAds';
+import {
+  sortBannersByQueue,
+  useAdFadeAnimation,
+  useGeoFenceVisibleBanners,
+  useSequentialAdIndex,
+} from '../../hooks/useSequentialAds';
 import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
 import { getCoordsIfPermitted } from '../../services/locationService';
@@ -24,8 +29,10 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
   const navigation = useNavigation<Nav>();
   const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
   const [loading, setLoading] = useState(true);
-  const idx = useSequentialAdIndex(banners.length, ROTATE_MS);
-  const ad = banners[idx];
+  const visibleBanners = useGeoFenceVisibleBanners(banners);
+  const idx = useSequentialAdIndex(visibleBanners.length, ROTATE_MS);
+  const ad = visibleBanners[idx];
+  const fadeOpacity = useAdFadeAnimation(ad?.id);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,31 +64,33 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
 
   return (
     <View>
-      <Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        onPress={() => handleBannerPress(ad, navigation)}
-      >
-        {mediaUrl && ad.mediaType !== 'video' ? (
-          <Image source={{ uri: mediaUrl }} style={styles.image} resizeMode="cover" />
-        ) : (
-          <View style={styles.imageFallback} />
-        )}
-        <View style={styles.overlay} />
-        <View style={styles.textBlock}>
-          <Text style={styles.sponsored}>Sponsored</Text>
-          <Text style={styles.title} numberOfLines={2}>
-            {ad.title}
-          </Text>
-          {ad.subtitle ? (
-            <Text style={styles.subtitle} numberOfLines={2}>
-              {ad.subtitle}
+      <Animated.View style={{ opacity: fadeOpacity }}>
+        <Pressable
+          style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+          onPress={() => handleBannerPress(ad, navigation)}
+        >
+          {mediaUrl && ad.mediaType !== 'video' ? (
+            <Image source={{ uri: mediaUrl }} style={styles.image} resizeMode="cover" />
+          ) : (
+            <View style={styles.imageFallback} />
+          )}
+          <View style={styles.overlay} />
+          <View style={styles.textBlock}>
+            <Text style={styles.sponsored}>Sponsored</Text>
+            <Text style={styles.title} numberOfLines={2}>
+              {ad.title}
             </Text>
-          ) : null}
-        </View>
-      </Pressable>
-      {banners.length > 1 ? (
+            {ad.subtitle ? (
+              <Text style={styles.subtitle} numberOfLines={2}>
+                {ad.subtitle}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
+      </Animated.View>
+      {visibleBanners.length > 1 ? (
         <View style={styles.dots}>
-          {banners.map((b, i) => (
+          {visibleBanners.map((b, i) => (
             <View key={b.id} style={[styles.dot, i === idx && styles.dotOn]} />
           ))}
         </View>
