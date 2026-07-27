@@ -9,6 +9,7 @@ export type PartnerStackParamList = {
   PartnerServicePricing: undefined;
   PartnerLocationEdit: undefined;
   PartnerHRV: undefined;
+  Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
 };
 
 export type PartnerTabParamList = {
