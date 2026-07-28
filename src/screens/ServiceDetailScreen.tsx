@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
-import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { formatTelUrl } from '../utils/phone';
 import { catalogService } from '../services/catalogService';
@@ -22,7 +21,6 @@ export function ServiceDetailScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
-  const { addService } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [svc, setSvc] = useState<CatalogService | null>(null);
   const [servicePartners, setServicePartners] = useState<PartnerSummary[]>([]);
@@ -166,7 +164,6 @@ export function ServiceDetailScreen() {
                       <Text style={styles.itemBoxSubtitle}>{item.subtitle}</Text>
                     ) : null}
                   </View>
-                  <Text style={styles.itemBoxPrice}>₹{item.price}</Text>
                 </View>
               </Pressable>
             );
@@ -280,22 +277,7 @@ export function ServiceDetailScreen() {
           </View>
         ) : null}
       </ScrollView>
-      <View style={styles.totalBar}>
-        <Text style={styles.totalLabel}>Total amount</Text>
-        <Text style={styles.totalValue}>₹{selectedAmount}</Text>
-      </View>
       <View style={styles.footer}>
-        <PrimaryButton
-          title="Add to cart"
-          variant="outline"
-          disabled={!selectedPartner}
-          onPress={async () => {
-            if (!selectedPartner) return;
-            await addService({ ...svc, partner: selectedPartner });
-            Alert.alert('Cart', `${svc.name} added to cart.`);
-          }}
-        />
-        <View style={{ height: spacing.sm }} />
         <PrimaryButton
           title="Book service"
           disabled={!selectedPartner}

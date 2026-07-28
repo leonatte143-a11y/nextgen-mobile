@@ -42,11 +42,9 @@ export function PartnerDashboardScreen(_props: Props) {
           }}
         />
         <PartnerCommandGrid
-          todayEarnings={earnings.todayEarnings}
           pendingCount={pendingCount}
           newCount={newCount}
           lifetimeCompleted={profile.jobsCompleted}
-          nexgenPoints={earnings.rewardPoints}
         />
         <PartnerSocialProofSection />
         <Text style={styles.section}>Recent Activity</Text>
@@ -80,22 +78,6 @@ export function PartnerDashboardScreen(_props: Props) {
             </View>
           </View>
         ))}
-        <Text style={styles.section}>Wallet</Text>
-        <View style={styles.walletCard}>
-          <View>
-            <Text style={styles.walletTitle}>Available Balance</Text>
-            <Text style={styles.walletAmount}>₹{earnings.availableBalance}</Text>
-          </View>
-          <View style={styles.walletBadge}>
-            <Text style={styles.walletBadgeText}>₹{earnings.pendingPayout} pending</Text>
-          </View>
-        </View>
-        <Text style={styles.section}>Training and Safety</Text>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Training Progress</Text>
-          <Text style={styles.infoText}>{profile.trainingProgress}% completed</Text>
-          <Text style={styles.infoText}>Verified: {profile.verificationStatus}</Text>
-        </View>
       </ScrollView>
       <PartnerServiceLocationBar
         initialCity={profile.primaryCity}

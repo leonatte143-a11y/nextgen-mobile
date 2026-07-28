@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ExpandableNotificationText } from '../components/ExpandableNotificationText';
 import { EmptyState } from '../components/EmptyState';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -16,6 +17,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Tab = 'all' | 'orders' | 'offers';
 
 export function NotificationsScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const [tab, setTab] = useState<Tab>('all');
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -60,7 +62,7 @@ export function NotificationsScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
@@ -82,12 +84,7 @@ export function NotificationsScreen() {
       {loading ? (
         <ScreenLoader />
       ) : filtered.length === 0 ? (
-        <EmptyState
-          icon="🔔"
-          title="No new updates"
-          actionLabel="Explore services"
-          onAction={() => navigation.navigate('AllServices')}
-        />
+        <EmptyState icon="🔔" title="No new updates" />
       ) : (
         <FlatList
           data={filtered}

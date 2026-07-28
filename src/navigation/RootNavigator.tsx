@@ -2,9 +2,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { AllServicesScreen } from '../screens/AllServicesScreen';
 import { CategoryServicesScreen } from '../screens/CategoryServicesScreen';
-import { BookingSuccessScreen } from '../screens/BookingSuccessScreen';
+import { BookingTrackingScreen } from '../screens/BookingTrackingScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
-import { CartScreen } from '../screens/CartScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConfirmBookingScreen } from '../screens/ConfirmBookingScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
@@ -20,10 +19,10 @@ import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
 import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
 import { PartnerRegisterScreen } from '../screens/PartnerRegisterScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
 import { HealthcareEmergenciesScreen } from '../screens/HealthcareEmergenciesScreen';
 import { AmbulanceSosScreen } from '../screens/AmbulanceSosScreen';
 import { ClinicBookingScreen } from '../screens/ClinicBookingScreen';
+import { ShopScreen } from '../screens/ShopScreen';
 import { ShopDetailScreen } from '../screens/ShopDetailScreen';
 import { ShopJoinScreen } from '../screens/ShopJoinScreen';
 import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
@@ -67,7 +66,7 @@ export function RootNavigator() {
       <Stack.Screen name="ServiceProviders" component={ServiceProvidersScreen} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
       <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
-      <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} />
+      <Stack.Screen name="BookingTracking" component={BookingTrackingScreen} />
       <Stack.Screen name="LiveBooking" component={LiveBookingScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />
@@ -78,11 +77,11 @@ export function RootNavigator() {
       <Stack.Screen name="Terms" component={TermsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="MyFavorites" component={MyFavoritesScreen} />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="SavedAddresses" component={SavedAddressesScreen} />
       <Stack.Screen name="HealthcareEmergencies" component={HealthcareEmergenciesScreen} />
       <Stack.Screen name="AmbulanceSos" component={AmbulanceSosScreen} />
       <Stack.Screen name="ClinicBooking" component={ClinicBookingScreen} />
+      <Stack.Screen name="Shop" component={ShopScreen} />
       <Stack.Screen name="ShopDetail" component={ShopDetailScreen} />
       <Stack.Screen name="ShopJoin" component={ShopJoinScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />

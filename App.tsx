@@ -8,7 +8,6 @@ ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 import { DevDebugPanel } from './src/components/DevDebugPanel';
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
-import { CartProvider } from './src/context/CartContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
 import { PartnerProvider } from './src/context/PartnerContext';
 import { onNavigationStateChange } from './src/navigation/navigationDev';
@@ -47,9 +46,7 @@ export default function App() {
         <AuthProvider>
           <PartnerProvider>
             <FavoritesProvider>
-              <CartProvider>
-                <AppShell />
-              </CartProvider>
+              <AppShell />
             </FavoritesProvider>
           </PartnerProvider>
         </AuthProvider>

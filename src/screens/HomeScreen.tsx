@@ -12,14 +12,12 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CategoryGrid } from '../components/home/CategoryGrid';
 import { HomeAdBanner } from '../components/home/HomeAdBanner';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { notificationService } from '../services/notificationService';
@@ -40,7 +38,7 @@ const DEFAULT_FILTERS: SearchFilters = {
 export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { language, user } = useAuth();
+  const { language } = useAuth();
   const [location] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
@@ -92,17 +90,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     });
   }, [navigation, search, filters.categoryId]);
 
-  const onCategoryPress = useCallback(
-    (category: MainCategory) => {
-      if (category.id === 'life_health') {
-        navigation.navigate('HealthcareEmergencies');
-        return;
-      }
-      navigation.navigate('CategoryServices', { categoryId: category.id });
-    },
-    [navigation],
-  );
-
   const onPopularPress = useCallback(
     (item: { service?: CatalogService; searchTerms: string[]; name: string }) => {
       if (item.service) {
@@ -127,12 +114,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
       searchQuery: search.trim() || undefined,
     });
   };
-
-  const initials = user
-    ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || 'N'
-    : 'N';
-
-  const categories = useMemo(() => MAIN_CATEGORIES, []);
 
   const filteredTopRated = useMemo(() => {
     return topRated.filter((item) => {
@@ -173,11 +154,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
               </View>
             ) : null}
           </Pressable>
-          <Pressable onPress={() => navigation.navigate('Profile')} style={styles.profileRing} hitSlop={8}>
-            <View style={styles.profileInner}>
-              <Text style={styles.profileInitials}>{initials}</Text>
-            </View>
-          </Pressable>
         </View>
       </View>
 
@@ -207,7 +183,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
 
         <Pressable
           style={styles.marketCard}
-          onPress={() => navigation.navigate('MainTabs', { screen: 'Shop' })}
+          onPress={() => navigation.navigate('Shop')}
         >
           <View style={styles.marketIcon}>
             <Ionicons name="storefront-outline" size={28} color={colors.primary} />
@@ -220,15 +196,11 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </Pressable>
 
         <View style={styles.rowTitle}>
-          <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
+          <Text style={styles.h2}>Popular services</Text>
           <Pressable onPress={() => navigation.navigate('AllServices')}>
             <Text style={styles.seeAll}>See all</Text>
           </Pressable>
         </View>
-        <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
-        <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
-
-        <Text style={styles.sectionTitle}>Popular services</Text>
         <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
 
         <View style={styles.rowTitle}>
@@ -245,29 +217,9 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
                 <Text style={styles.topPhotoTxt}>{item.partner.name[0]}</Text>
               </View>
               <Text style={styles.topName} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.topRate}>★ {item.rating.toFixed(1)}</Text>
-              <Text style={styles.topPrice}>from ₹{item.basePrice}</Text>
             </Pressable>
           ))}
         </ScrollView>
-
-        <Text style={styles.h2}>Why choose NEXGEN?</Text>
-        <View style={styles.why}>
-          {[
-            ['🔍', 'Verified Partners', 'Background verified professionals'],
-            ['💯', 'Quality Service', 'Top-rated with proven track record'],
-            ['⚡', 'Quick Response', 'Within 30 minutes of booking'],
-            ['💰', 'Best Prices', 'Transparent pricing, no hidden charges'],
-          ].map(([icon, t1, t2]) => (
-            <View key={String(t1)} style={styles.whyRow}>
-              <Text style={styles.whyIcon}>{icon}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.whyTitle}>{t1}</Text>
-                <Text style={styles.whySub}>{t2}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerBrand}>NEXGEN</Text>

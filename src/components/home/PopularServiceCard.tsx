@@ -15,9 +15,6 @@ type Props = {
 const CARD_WIDTH = getGridCardWidth();
 
 function PopularServiceCardComponent({ slot, service, onPress }: Props) {
-  const price = service?.basePrice ?? slot.fallbackPrice ?? 299;
-  const rating = service?.rating ?? slot.fallbackRating ?? 4.5;
-
   return (
     <Pressable
       onPress={onPress}
@@ -32,10 +29,6 @@ function PopularServiceCardComponent({ slot, service, onPress }: Props) {
       <Text style={styles.sub} numberOfLines={1}>
         {service?.subtext ?? slot.subtitle}
       </Text>
-      <View style={styles.meta}>
-        <Text style={styles.rate}>★ {rating.toFixed(1)}</Text>
-      </View>
-      <Text style={styles.price}>from ₹{price}</Text>
     </Pressable>
   );
 }

@@ -7,15 +7,14 @@ import { PartnerLeadAlert } from '../components/partner/PartnerLeadAlert';
 import { usePartner } from '../context/PartnerContext';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
+import { PartnerSettingsScreen } from '../screens/PartnerSettingsScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import {
   PartnerDashboardScreen,
-  PartnerEarningsScreen,
   PartnerLocationEditScreen,
   PartnerProfileScreen,
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
-  PartnerMyServicesScreen,
   PartnerServicePricingScreen,
 } from '../screens';
 import type { PartnerStackParamList, PartnerTabParamList } from './PartnerStackTypes';
@@ -34,9 +33,7 @@ function PartnerTabNavigator() {
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, string> = {
             Dashboard: 'speedometer-outline',
-            MyServices: 'construct-outline',
             Requests: 'notifications-outline',
-            Earnings: 'wallet-outline',
             Profile: 'person-outline',
           };
           const iconName = icons[route.name] ?? 'ellipse-outline';
@@ -45,9 +42,7 @@ function PartnerTabNavigator() {
       })}
     >
       <Tab.Screen name="Dashboard" component={PartnerDashboardScreen} options={{ title: 'Dashboard' }} />
-      <Tab.Screen name="MyServices" component={PartnerMyServicesScreen} options={{ title: 'My Services' }} />
       <Tab.Screen name="Requests" component={PartnerRequestsScreen} options={{ title: 'Requests' }} />
-      <Tab.Screen name="Earnings" component={PartnerEarningsScreen} options={{ title: 'Wallet' }} />
       <Tab.Screen name="Profile" component={PartnerProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
@@ -64,6 +59,7 @@ export function PartnerTabs() {
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
+        <Stack.Screen name="PartnerSettings" component={PartnerSettingsScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
       </Stack.Navigator>
       {incomingLead ? (

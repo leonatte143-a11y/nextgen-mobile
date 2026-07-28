@@ -20,7 +20,6 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { formatTelUrl, displayPhone } from '../utils/phone';
@@ -50,8 +49,6 @@ export function ConfirmBookingScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { user } = useAuth();
-  const { lines, subtotal, visitingFee, clear } = useCart();
-  const fromCart = route.params.fromCart && lines.length > 0;
   const selectedItems = route.params.selectedItems;
 
   const [svc, setSvc] = useState<CatalogService | null>(null);
@@ -60,7 +57,7 @@ export function ConfirmBookingScreen() {
   const [promo, setPromo] = useState('');
   const [pay, setPay] = useState<PaymentMethodId>('upi');
   const [submitting, setSubmitting] = useState(false);
-  const [visitingCharge, setVisitingCharge] = useState(fromCart ? visitingFee : 30);
+  const [visitingCharge, setVisitingCharge] = useState(30);
   const [quotedDistanceKm, setQuotedDistanceKm] = useState<number | null>(
     route.params.distanceKm ?? null,
   );
@@ -82,10 +79,6 @@ export function ConfirmBookingScreen() {
   }, [route.params.serviceId]);
 
   useEffect(() => {
-    if (fromCart) {
-      setVisitingCharge(visitingFee);
-      return;
-    }
     if (!partnerId) return;
 
     let cancelled = false;
@@ -122,15 +115,14 @@ export function ConfirmBookingScreen() {
     return () => {
       cancelled = true;
     };
-  }, [fromCart, visitingFee, partnerId, user?.address, route.params.distanceKm, svc?.distanceKm]);
+  }, [partnerId, user?.address, route.params.distanceKm, svc?.distanceKm]);
 
   const itemsSubtotal = useMemo(() => {
-    if (fromCart) return subtotal;
     if (selectedItems?.length) {
       return selectedItems.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0);
     }
     return route.params.amountOverride ?? svc?.basePrice ?? 0;
-  }, [fromCart, subtotal, selectedItems, route.params.amountOverride, svc?.basePrice]);
+  }, [selectedItems, route.params.amountOverride, svc?.basePrice]);
 
   const bill = useMemo(() => {
     const base = itemsSubtotal;
@@ -143,17 +135,15 @@ export function ConfirmBookingScreen() {
     return { base, vf, gst, total, promoDiscount };
   }, [itemsSubtotal, visitingCharge, promo]);
 
-  const titleName = fromCart
-    ? `${lines.length} services`
-    : route.params.serviceNameOverride ?? svc?.name ?? 'Service';
+  const titleName = route.params.serviceNameOverride ?? svc?.name ?? 'Service';
 
   const book = async () => {
-    if (!svc && !fromCart) return;
+    if (!svc) return;
     setSubmitting(true);
     try {
       const address = user?.address ?? 'Rajahmundry, AP';
       const b = await bookingService.createBooking({
-        serviceId: fromCart ? lines[0].serviceId : svc!.id,
+        serviceId: svc.id,
         partnerId,
         distanceKm: quotedDistanceKm ?? route.params.distanceKm,
         visitingCharges: visitingCharge,
@@ -163,18 +153,10 @@ export function ConfirmBookingScreen() {
         paymentMethod: PAY_LABELS[pay],
         promoCode: promo,
         amountOverride: bill.total,
-        serviceNameOverride: fromCart ? `${lines.length} services (cart)` : route.params.serviceNameOverride,
-        selectedItems: fromCart
-          ? lines.map((l) => ({
-              serviceItemId: l.serviceId,
-              title: l.service.name,
-              price: l.service.basePrice,
-              quantity: l.qty,
-            }))
-          : selectedItems,
+        serviceNameOverride: route.params.serviceNameOverride,
+        selectedItems,
       });
-      if (fromCart) await clear();
-      navigation.replace('BookingSuccess', { bookingId: b.id });
+      navigation.replace('BookingTracking', { bookingId: b.id });
     } catch {
       Alert.alert('Error', 'Could not complete booking.');
     } finally {
@@ -182,13 +164,11 @@ export function ConfirmBookingScreen() {
     }
   };
 
-  if (loading || (!svc && !fromCart)) {
+  if (loading || !svc) {
     return <ScreenLoader />;
   }
 
-  const isRemote = fromCart
-    ? lines[0]?.service.bucketId === 'tech_supply'
-    : svc!.bucketId === 'tech_supply';
+  const isRemote = svc.bucketId === 'tech_supply';
 
   const onCall = () => {
     const tel = formatTelUrl(partnerPhone);
@@ -232,7 +212,6 @@ export function ConfirmBookingScreen() {
               </View>
             )}
           </View>
-          <Text style={styles.sumPrice}>₹{bill.base}</Text>
         </View>
 
         {selectedItems && selectedItems.length > 0 ? (
@@ -243,7 +222,6 @@ export function ConfirmBookingScreen() {
                 <Text style={styles.lineItemTitle}>
                   {item.title} × {item.quantity || 1}
                 </Text>
-                <Text style={styles.lineItemPrice}>₹{item.price * (item.quantity || 1)}</Text>
               </View>
             ))}
           </View>
@@ -264,35 +242,27 @@ export function ConfirmBookingScreen() {
         <Text style={styles.label}>Promo code</Text>
         <NexgenTextInput placeholder="NEXGEN2026" value={promo} onChangeText={setPromo} />
 
-        <Text style={styles.h2}>Bill</Text>
-        <Text style={styles.row}>Service total: ₹{bill.base}</Text>
         {!isRemote && (
           <>
             {quoteLoading ? (
-              <Text style={styles.rowMuted}>Calculating visiting charges…</Text>
+              <Text style={styles.rowMuted}>Calculating visiting details…</Text>
             ) : (
               <>
                 {quotedDistanceKm != null ? (
                   <Text style={styles.rowMuted}>Distance: {quotedDistanceKm.toFixed(1)} km</Text>
                 ) : null}
-                <Text style={styles.row}>Visiting charges: ₹{bill.vf}</Text>
                 {quoteWarning ? <Text style={styles.warn}>{quoteWarning}</Text> : null}
               </>
             )}
           </>
         )}
-        <Text style={styles.row}>GST (18%): ₹{bill.gst}</Text>
-        {bill.promoDiscount > 0 ? (
-          <Text style={styles.promo}>Applied: NEXGEN2026 (−₹{bill.promoDiscount})</Text>
-        ) : null}
-        <Text style={styles.payable}>Total payable: ₹{bill.total}</Text>
 
         <Text style={styles.h2}>Payment method</Text>
         <PaymentMethodGrid selected={pay} onSelect={setPay} />
       </ScrollView>
       <View style={styles.footer}>
         <PrimaryButton
-          title={pay === 'cash' ? `Confirm booking · ₹${bill.total}` : `Book now · ₹${bill.total}`}
+          title="Book Now"
           onPress={book}
           loading={submitting}
           disabled={quoteLoading}

@@ -9,20 +9,16 @@ import type { PartnerStackParamList } from '../../navigation/PartnerStackTypes';
 const ORANGE = '#FF8C00';
 
 type Props = {
-  todayEarnings: number;
   pendingCount: number;
   newCount: number;
   /** Lifetime successful jobs (spec: Completed History). */
   lifetimeCompleted: number;
-  nexgenPoints: number;
 };
 
 export function PartnerCommandGrid({
-  todayEarnings,
   pendingCount,
   newCount,
   lifetimeCompleted,
-  nexgenPoints,
 }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<PartnerStackParamList>>();
   const pulse = useRef(new Animated.Value(1)).current;
@@ -49,22 +45,6 @@ export function PartnerCommandGrid({
 
   return (
     <View style={styles.grid}>
-      <View style={styles.row2}>
-        <Pressable
-          style={styles.card}
-          onPress={() => (navigation as any).navigate('Earnings')}
-        >
-          <Ionicons name="cash-outline" size={22} color={ORANGE} />
-          <Text style={styles.val}>₹{todayEarnings}</Text>
-          <Text style={styles.lab}>{"Today's Earnings"}</Text>
-        </Pressable>
-        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
-          <Ionicons name="time-outline" size={22} color={ORANGE} />
-          <Text style={styles.val}>{pendingCount}</Text>
-          <Text style={styles.lab}>Pending Works</Text>
-        </Pressable>
-      </View>
-
       <Animated.View style={{ transform: [{ scale: pulse }] }}>
         <Pressable style={styles.wide} onPress={() => (navigation as any).navigate('Requests')}>
           <Text style={styles.wideTitle}>NEW REQUESTS</Text>
@@ -74,27 +54,16 @@ export function PartnerCommandGrid({
       </Animated.View>
 
       <View style={styles.row2}>
-        <Pressable
-          style={styles.card}
-          onPress={() => (navigation as any).navigate('MyServices')}
-        >
-          <Ionicons name="pricetag-outline" size={22} color={ORANGE} />
-          <Text style={styles.labSm}>My Services</Text>
+        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
+          <Ionicons name="time-outline" size={22} color={ORANGE} />
+          <Text style={styles.val}>{pendingCount}</Text>
+          <Text style={styles.lab}>Pending Works</Text>
         </Pressable>
         <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
           <Ionicons name="checkmark-done-outline" size={22} color={ORANGE} />
           <Text style={styles.val}>{lifetimeCompleted}</Text>
           <Text style={styles.lab}>Completed History</Text>
         </Pressable>
-      </View>
-
-      <View style={styles.nexRow} accessibilityLabel="NEXGEN points balance">
-        <Ionicons name="ribbon-outline" size={24} color={ORANGE} />
-        <View style={{ flex: 1, marginLeft: spacing.md }}>
-          <Text style={styles.nexTitle}>NEXGEN Points</Text>
-          <Text style={styles.nexVal}>{nexgenPoints} pts</Text>
-        </View>
-        <Ionicons name="trophy-outline" size={22} color={colors.grey} />
       </View>
     </View>
   );

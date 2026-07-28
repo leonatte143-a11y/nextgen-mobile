@@ -22,7 +22,6 @@ export type RootStackParamList = {
   ServiceDetail: { serviceId: string; selectedPartnerId?: string };
   ConfirmBooking: {
     serviceId: string;
-    fromCart?: boolean;
     partnerId?: string;
     partnerName?: string;
     partnerPhone?: string;
@@ -33,7 +32,7 @@ export type RootStackParamList = {
     customRequirements?: string;
     selectedItems?: SelectedBookingItem[];
   };
-  BookingSuccess: { bookingId: string };
+  BookingTracking: { bookingId: string };
   LiveBooking: { bookingId: string };
   Notifications: undefined;
   Support: undefined;
@@ -44,11 +43,11 @@ export type RootStackParamList = {
   Terms: undefined;
   Privacy: undefined;
   MyFavorites: undefined;
-  Profile: undefined;
   SavedAddresses: undefined;
   HealthcareEmergencies: undefined;
   AmbulanceSos: undefined;
   ClinicBooking: undefined;
+  Shop: undefined;
   ShopDetail: { shopId: string };
   ShopJoin: undefined;
   Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
@@ -60,8 +59,7 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Bookings: undefined;
-  Shop: undefined;
-  Cart: undefined;
+  Profile: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<

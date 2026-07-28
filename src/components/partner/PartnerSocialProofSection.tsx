@@ -1,10 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
-import type { PartnerStackParamList } from '../../navigation/PartnerStackTypes';
 
 const REVIEWS = [
   { id: 'r1', name: 'Lakshmi R.', line: 'Punctual and very professional. Fan works like new.' },
@@ -14,10 +11,7 @@ const REVIEWS = [
 
 const VIDEO_TITLES = ['5★ Job · Fan repair', 'Customer shout-out', 'Safety first tips'] as const;
 
-const ACADEMY = ['Payouts & wallet', 'Handling cancellations', 'Upskilling: AC service'] as const;
-
 export function PartnerSocialProofSection() {
-  const navigation = useNavigation<NativeStackNavigationProp<PartnerStackParamList>>();
   return (
     <View style={styles.wrap}>
       <Text style={styles.h}>Social proof and performance</Text>
@@ -63,18 +57,6 @@ export function PartnerSocialProofSection() {
           </View>
         ))}
       </ScrollView>
-
-      <Text style={styles.sh}>NEXGEN Academy — Training and Safety</Text>
-      {ACADEMY.map((a) => (
-        <View key={a} style={styles.acRow}>
-          <Ionicons name="play-circle-outline" size={20} color={colors.primary} />
-          <Text style={styles.acTxt}>Video · {a}</Text>
-        </View>
-      ))}
-      <Pressable style={styles.hrLink} onPress={() => navigation.navigate('PartnerHRV')}>
-        <Text style={styles.hrLinkTxt}>Open HR verification dashboard</Text>
-        <Ionicons name="open-outline" size={16} color={colors.primary} />
-      </Pressable>
     </View>
   );
 }
