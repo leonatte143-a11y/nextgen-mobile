@@ -12,12 +12,14 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CategoryGrid } from '../components/home/CategoryGrid';
 import { HomeAdBanner } from '../components/home/HomeAdBanner';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
 import { notificationService } from '../services/notificationService';
@@ -90,6 +92,17 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     });
   }, [navigation, search, filters.categoryId]);
 
+  const onCategoryPress = useCallback(
+    (category: MainCategory) => {
+      if (category.id === 'life_health') {
+        navigation.navigate('HealthcareEmergencies');
+        return;
+      }
+      navigation.navigate('CategoryServices', { categoryId: category.id });
+    },
+    [navigation],
+  );
+
   const onPopularPress = useCallback(
     (item: { service?: CatalogService; searchTerms: string[]; name: string }) => {
       if (item.service) {
@@ -114,6 +127,8 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
       searchQuery: search.trim() || undefined,
     });
   };
+
+  const categories = useMemo(() => MAIN_CATEGORIES, []);
 
   const filteredTopRated = useMemo(() => {
     return topRated.filter((item) => {
@@ -196,11 +211,15 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </Pressable>
 
         <View style={styles.rowTitle}>
-          <Text style={styles.h2}>Popular services</Text>
+          <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
           <Pressable onPress={() => navigation.navigate('AllServices')}>
             <Text style={styles.seeAll}>See all</Text>
           </Pressable>
         </View>
+        <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
+        <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
+
+        <Text style={styles.sectionTitle}>Popular services</Text>
         <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
 
         <View style={styles.rowTitle}>
