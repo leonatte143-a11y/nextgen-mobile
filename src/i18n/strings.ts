@@ -13,7 +13,6 @@ const dict: Dict = {
   home: { en: 'Home', te: 'హోమ్' },
   bookings: { en: 'Booking', te: 'బుకింగ్' },
   shop: { en: 'Shop', te: 'షాప్' },
-  cart: { en: 'Cart', te: 'కార్ట్' },
   profile: { en: 'Profile', te: 'ప్రొఫైల్' },
   searchPlaceholder: {
     en: "Search for 'Fan Repair' or 'Plumber'...",

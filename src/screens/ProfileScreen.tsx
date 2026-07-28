@@ -9,31 +9,19 @@ import { colors, radius, spacing } from '../constants/theme';
 import { getSearchQueryCount } from '../lib/localStorage';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/bookingService';
-import type { RootStackParamList, RootStackScreenProps } from '../navigation/types';
+import type { RootStackParamList, MainTabScreenProps } from '../navigation/types';
 import { userService } from '../services/userService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuTarget =
-  | 'EditProfile'
-  | 'MyFavorites'
-  | 'Settings'
-  | 'Rewards'
-  | 'Language'
-  | 'SavedAddresses'
-  | 'Support';
+type MenuTarget = 'MyFavorites' | 'SavedAddresses';
 
 const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
-  { label: 'Edit profile', icon: 'person-outline', target: 'EditProfile' },
   { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
   { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
-  { label: 'Settings', icon: 'settings-outline', target: 'Settings' },
-  { label: 'Rewards', icon: 'gift-outline', target: 'Rewards' },
-  { label: 'Help & Support', icon: 'help-circle-outline', target: 'Support' },
-  { label: 'Language', icon: 'globe-outline', target: 'Language' },
 ];
 
-export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
+export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { user, partnerToken, refreshProfile, logoutUser } = useAuth();
@@ -98,9 +86,6 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
   return (
     <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
-        <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color={colors.white} />
-        </Pressable>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={styles.h1}>My Profile</Text>
           <Text style={styles.sub}>Manage your account</Text>
@@ -119,9 +104,6 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
           </Text>
           <Text style={styles.email}>{user.email}</Text>
           <View style={styles.cardActions}>
-            <Pressable style={styles.editBtn} onPress={() => navigation.navigate('EditProfile')}>
-              <Text style={styles.editTxt}>Edit Profile</Text>
-            </Pressable>
             <Pressable
               style={styles.supportBtn}
               onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'NEXGEN Support' })}
@@ -130,29 +112,7 @@ export function ProfileScreen(_props: RootStackScreenProps<'Profile'>) {
               <Text style={styles.supportTxt}>Support</Text>
             </Pressable>
           </View>
-          <Pressable style={styles.proBtn}>
-            <Text style={styles.proTxt}>Join NEXGEN PRO — ₹18/mo</Text>
-          </Pressable>
         </View>
-      </View>
-      <View style={styles.tabRow}>
-        {[
-          { label: 'Profile', target: 'Profile' as const },
-          { label: 'Settings', target: 'Settings' as const },
-          { label: 'Rewards', target: 'Rewards' as const },
-        ].map((tab) => (
-          <Pressable
-            key={tab.label}
-            style={[styles.tabItem, tab.target === 'Profile' ? styles.tabActive : null]}
-            onPress={() => {
-              if (tab.target !== 'Profile') navigation.navigate(tab.target);
-            }}
-          >
-            <Text style={[styles.tabLabel, tab.target === 'Profile' ? styles.tabActiveLabel : null]}>
-              {tab.label}
-            </Text>
-          </Pressable>
-        ))}
       </View>
       <Pressable
         style={styles.switchBtn}

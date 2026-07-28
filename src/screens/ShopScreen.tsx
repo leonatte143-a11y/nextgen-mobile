@@ -19,8 +19,7 @@ import { getCurrentCoords, requestLocationPermission } from '../services/locatio
 import { shopService } from '../services/shopService';
 import { MaterialsTabContent } from '../components/materials/MaterialsTabContent';
 import type { ShopCategory, ShopSummary } from '../types/shop';
-import type { MainTabScreenProps } from '../navigation/types';
-import type { RootStackParamList } from '../navigation/types';
+import type { RootStackParamList, RootStackScreenProps } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -55,7 +54,7 @@ function ShopCard({
   );
 }
 
-export function ShopScreen(_props: MainTabScreenProps<'Shop'>) {
+export function ShopScreen(_props: RootStackScreenProps<'Shop'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');

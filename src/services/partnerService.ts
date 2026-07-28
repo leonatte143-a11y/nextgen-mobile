@@ -62,6 +62,10 @@ export const partnerService = {
     return apiService.get('/api/v1/partners/referrals/earnings', 'partner');
   },
 
+  async deleteAccount(): Promise<void> {
+    await apiService.delete('/api/v1/partners/me', 'partner');
+  },
+
   async toggleOnline(online: boolean): Promise<PartnerProfile> {
     return apiService.post('/api/v1/partners/online', { online }, 'partner');
   },
