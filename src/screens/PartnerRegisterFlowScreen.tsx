@@ -15,6 +15,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { authService } from '../services/authService';
 import { partnerService } from '../services/partnerService';
+import { SHOW_DEBUG_OTP } from '../config/debug';
 import { logAuth } from '../lib/devLog';
 import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { RootStackParamList } from '../navigation/types';
@@ -49,6 +50,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [idType, setIdType] = useState<IdType | null>(null);
   const [idTypeOpen, setIdTypeOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [devOtpHint, setDevOtpHint] = useState('');
 
   const [paying, setPaying] = useState(false);
 
@@ -59,6 +61,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       return;
     }
     setOtpSending(true);
+    setDevOtpHint('');
     try {
       const r = await authService.requestOtp(digits);
       if (!r.ok) {
@@ -69,6 +72,9 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       setOtpVerified(false);
       setOtpLength(r.otpLength ?? 6);
       setOtpCode('');
+      if (r.debugOtp && (SHOW_DEBUG_OTP || r.debugOtp)) {
+        setDevOtpHint(`🧪 Test OTP: ${r.debugOtp}`);
+      }
       logAuth('partner_register_otp_sent', { phoneLast4: digits.slice(-4), otpLength: r.otpLength });
     } finally {
       setOtpSending(false);
@@ -223,6 +229,12 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
           )}
         </View>
       ) : null}
+      {devOtpHint ? (
+        <View style={styles.debugOtpBox}>
+          <Text style={styles.debugOtpLabel}>Testing OTP</Text>
+          <Text style={styles.debugOtpCode}>{devOtpHint}</Text>
+        </View>
+      ) : null}
 
       <Text style={styles.lab}>Service Categories</Text>
       <Pressable style={styles.dropdown} onPress={() => setCategoriesOpen(true)}>
@@ -327,6 +339,16 @@ const styles = StyleSheet.create({
   otpVerifyTxt: { color: colors.white, fontWeight: '700' },
   otpVerifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   otpVerifiedTxt: { color: colors.success, fontWeight: '700', fontSize: 12 },
+  debugOtpBox: {
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 8,
+    padding: spacing.md,
+    backgroundColor: '#FFF8E7',
+    marginBottom: spacing.md,
+  },
+  debugOtpLabel: { fontSize: 12, fontWeight: '600', color: colors.primary, marginBottom: spacing.xs },
+  debugOtpCode: { fontSize: 20, fontWeight: '700', color: colors.primary, letterSpacing: 4 },
   dropdown: {
     flexDirection: 'row',
     alignItems: 'center',
