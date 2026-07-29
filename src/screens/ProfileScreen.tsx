@@ -9,22 +9,28 @@ import { colors, radius, spacing } from '../constants/theme';
 import { getSearchQueryCount } from '../lib/localStorage';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/bookingService';
+import { t } from '../i18n/strings';
 import type { RootStackParamList, MainTabScreenProps } from '../navigation/types';
 import { userService } from '../services/userService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuTarget = 'MyFavorites' | 'SavedAddresses';
-
-const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
-  { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
-  { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
-];
+type MenuTarget = 'EditProfile' | 'Settings' | 'Rewards' | 'Support' | 'Language' | 'MyFavorites' | 'SavedAddresses';
 
 export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { user, partnerToken, refreshProfile, logoutUser } = useAuth();
+  const { user, partnerToken, refreshProfile, logoutUser, language } = useAuth();
+
+  const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
+    { label: t(language, 'editProfile'), icon: 'create-outline', target: 'EditProfile' },
+    { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
+    { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
+    { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Support' },
+    { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
+    { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
+    { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
+  ];
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);

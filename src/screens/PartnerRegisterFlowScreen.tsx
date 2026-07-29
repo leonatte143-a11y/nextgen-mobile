@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
   Alert,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,78 +15,42 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { authService } from '../services/authService';
 import { partnerService } from '../services/partnerService';
-import { ENABLE_PARTNER_QUESTIONS } from '../config/featureFlags';
 import { logAuth } from '../lib/devLog';
 import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { RootStackParamList } from '../navigation/types';
 
-const DEFAULT_PARTNER_OPTIONS = ['Electrician', 'Plumber', 'Driver', 'Home Repair'] as const;
 const ALL_PARTNER_SERVICES = Array.from(
-  new Set([
-    ...DEFAULT_PARTNER_OPTIONS,
-    ...MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title)),
-  ]),
+  new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
 );
-const LOCATIONS = [
-  'Rajahmundry',
-  'Guntur',
-] as const;
 
-const Q10 = [
-  { q: 'NEXGEN service fee to partner is always shown to customer as?', o: ['GST 18%', '10% only', 'Hidden', '0%'] as const, a: 0 },
-  { q: 'Before job start, who confirms OTP on site?', o: ['Customer & partner', 'Only partner', 'Admin only', 'Nobody'] as const, a: 0 },
-  { q: 'Cancellations with visiting fee to wallet are?', o: ['UI mock only', 'Real cash', 'Paid daily', 'Never'] as const, a: 0 },
-  { q: 'Payout threshold is (mock topic)?', o: ['On wallet screen', 'Instant always', 'Never', '1 year'] as const, a: 0 },
-  { q: 'RMP in app refers to (mock context)?', o: ['Rural med practitioner', 'Racing', 'Rental', 'Random'] as const, a: 0 },
-  { q: 'Geo-fence in partner app (mock) controls?', o: ['Job radius', 'App theme', 'Battery', 'Call recording'] as const, a: 0 },
-  { q: 'Verified badge is shown to?', o: ['Users', 'Nobody', 'Only you', 'Govt only'] as const, a: 0 },
-  { q: 'Mock wallet credit here is for?', o: ['Demo', 'Lawsuit', 'Loans', 'Laundry'] as const, a: 0 },
-  { q: 'Academy pass score is required at least?', o: ['8/10 (mock rule)', '0/10', '2/10', '10/10 or fail'] as const, a: 0 },
-  { q: 'Partner registration flow ends with?', o: ['Go to partner login', 'Uninstall', 'Reboot phone', 'Pay ₹5000'] as const, a: 0 },
-] as const;
+const ID_TYPES = ['Aadhaar', 'PAN', 'Driving License', 'Voter ID'] as const;
+type IdType = (typeof ID_TYPES)[number];
+
+const REGISTRATION_FEE = 49;
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'PartnerRegister'> };
 
 export function PartnerRegisterFlowScreen({ navigation }: Props) {
-  const [step, setStep] = useState(0);
-  // Step 0 — KYC
+  const [step, setStep] = useState<'details' | 'payment'>('details');
+
+  // Step 1 — Profile & KYC
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpLength, setOtpLength] = useState(6);
   const [otpVisible, setOtpVisible] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [otpSending, setOtpSending] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([DEFAULT_PARTNER_OPTIONS[0]]);
-  const [showMoreServices, setShowMoreServices] = useState(false);
-  const [workLocation, setWorkLocation] = useState<typeof LOCATIONS[number]>(LOCATIONS[0]);
-  const [idType, setIdType] = useState<'Aadhaar' | 'Voter ID'>('Aadhaar');
-  const [idNo, setIdNo] = useState('');
-  const [idFront, setIdFront] = useState(false);
-  const [idBack, setIdBack] = useState(false);
-  const [selfie, setSelfie] = useState(false);
-  // Step 1 — legal
-  const [addr, setAddr] = useState('');
-  const [pin, setPin] = useState('');
-  const [exp, setExp] = useState('0–1 yrs');
-  const [dl, setDl] = useState('');
-  const [pcc, setPcc] = useState(false);
-  const [bName, setBName] = useState('');
-  const [bAcc, setBAcc] = useState('');
-  const [bIfsc, setBIfsc] = useState('');
-  // Step 2 — skills
-  const [certFile, setCertFile] = useState(false);
-  const [certNo, setCertNo] = useState('');
-  // Academy
-  const [qIdx, setQIdx] = useState(0);
-  const [qScore, setQScore] = useState(0);
-  const [qAns, setQAns] = useState<number | null>(null);
-  const [videoSeen, setVideoSeen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [referralCode, setReferralCode] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [workLocation, setWorkLocation] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [idType, setIdType] = useState<IdType | null>(null);
+  const [idTypeOpen, setIdTypeOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const needsDl = selectedCategories.some((item) => item.toLowerCase().includes('driver'));
-  const quizPass = qIdx >= Q10.length ? qScore >= 8 : null;
+  const [paying, setPaying] = useState(false);
 
   const sendOtp = async () => {
     const digits = phone.replace(/\D/g, '').slice(0, 10);
@@ -101,6 +66,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         return;
       }
       setOtpVisible(true);
+      setOtpVerified(false);
       setOtpLength(r.otpLength ?? 6);
       setOtpCode('');
       logAuth('partner_register_otp_sent', { phoneLast4: digits.slice(-4), otpLength: r.otpLength });
@@ -109,84 +75,67 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     }
   };
 
-  const onQuizPick = (idx: number) => {
-    setQAns(idx);
-  };
-
-  const onQuizNext = () => {
-    if (qAns === null) return;
-    if (Q10[qIdx].a === qAns) setQScore((s) => s + 1);
-    if (qIdx < Q10.length - 1) {
-      setQIdx((i) => i + 1);
-      setQAns(null);
-    } else {
-      setQIdx((i) => i + 1);
+  const verifyOtp = async () => {
+    const digits = phone.replace(/\D/g, '').slice(0, 10);
+    if (otpCode.length !== otpLength) return;
+    setOtpVerifying(true);
+    try {
+      const r = await authService.verifyOtp(digits, otpCode);
+      if (!r.ok) {
+        Alert.alert('OTP', r.message || 'Incorrect OTP. Try again.');
+        return;
+      }
+      setOtpVerified(true);
+    } finally {
+      setOtpVerifying(false);
     }
   };
 
-  const canNext0 =
+  const canProceed =
     name.trim().length > 1 &&
     phone.length === 10 &&
-    (otpVisible ? otpCode.replace(/\D/g, '').length === otpLength : true) &&
-    idNo.length > 3 &&
-    idFront &&
-    idBack &&
-    selfie &&
-    selectedCategories.length > 0;
+    otpVerified &&
+    selectedCategories.length > 0 &&
+    workLocation.trim().length > 1 &&
+    pincode.trim().length >= 6 &&
+    !!idType &&
+    acceptedTerms;
 
-  const canNext1 =
-    addr.length > 4 && pin.length >= 6 && bName.length > 2 && bAcc.length > 4 && bIfsc.length > 8;
-  if (needsDl && !dl) {
-    // handled in button disabled: !needsDl || dl
-  }
-  const canNext2 = certFile && certNo.length > 2;
-  const canNext3 = videoSeen && qIdx >= Q10.length && quizPass === true;
-  const canComplete = ENABLE_PARTNER_QUESTIONS
-    ? canNext0 && canNext1 && canNext2 && canNext3 && acceptedTerms
-    : canNext0 && canNext1 && canNext2 && acceptedTerms;
-
-  const finish = async () => {
+  const onNext = () => {
+    if (!otpVerified) {
+      Alert.alert('Verify mobile', 'Please verify your mobile number with OTP first.');
+      return;
+    }
     if (!acceptedTerms) {
-      Alert.alert('Terms required', 'Please accept the NEXGEN Terms and Conditions to continue.');
+      Alert.alert('Terms required', 'Please accept NEXGEN terms and conditions to continue.');
       return;
     }
-    if (!canComplete) {
-      Alert.alert('Incomplete', 'Check all required fields (mock).');
+    if (!canProceed) {
+      Alert.alert('Incomplete', 'Please fill in all the required fields.');
       return;
     }
-    if (ENABLE_PARTNER_QUESTIONS && quizPass !== true) {
-      Alert.alert('Academy', 'You need 8/10. Retry quiz (mock).');
-      setQIdx(0);
-      setQScore(0);
-      setQAns(null);
-      return;
-    }
-    setSaving(true);
+    setStep('payment');
+  };
+
+  const completeRegistration = async () => {
+    setPaying(true);
     const digits = phone.replace(/\D/g, '').slice(0, 10);
     try {
+      // Mock payment capture — replace with a real gateway (Razorpay/PayU/etc.) integration.
+      await new Promise((resolve) => setTimeout(resolve, 900));
+
       const profile = await partnerService.applyOnboarding({
         phone: digits,
         name: name.trim(),
         serviceCategory: selectedCategories[0],
         categories: selectedCategories,
-        primaryCity: workLocation,
-        skills: [
-          ...selectedCategories,
-          certNo,
-          `exp:${exp}`,
-          `addr:${addr.slice(0, 80)}`,
-          `pin:${pin}`,
-          ...(needsDl && dl ? [`DL:${dl}`] : []),
-        ],
-        bankName: `${bName} · IFSC ${bIfsc}`,
-        bankAccount: bAcc,
-        trainingProgress: 100,
-        referralCode: referralCode.trim() || undefined,
+        workLocation: workLocation.trim(),
+        skills: [...selectedCategories, `pin:${pincode.trim()}`, `idType:${idType}`],
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
         'NEXGEN Partner',
-        'Registration saved. On the partner login screen, request an OTP to sign in.',
+        'Registration and payment complete. On the partner login screen, request an OTP to sign in.',
       );
       navigation.replace('PartnerLogin');
     } catch (e: unknown) {
@@ -194,344 +143,244 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       logAuth('partner_register_failed', { message: msg });
       Alert.alert('Registration failed', msg);
     } finally {
-      setSaving(false);
+      setPaying(false);
     }
   };
 
-  if (step === 0) {
+  if (step === 'payment') {
     return (
       <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-        <Text style={styles.h1}>Step 1 — Profile and KYC</Text>
-        <NexgenTextInput label="Name" value={name} onChangeText={setName} />
-        <NexgenTextInput
-          label="Phone"
-          prefix="+91"
-          value={phone}
-          keyboardType="number-pad"
-          maxLength={10}
-          onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
+        <Text style={styles.h1}>Complete Registration</Text>
+        <View style={styles.payCard}>
+          <Ionicons name="card-outline" size={40} color={colors.primary} />
+          <Text style={styles.payTitle}>One-time registration fee</Text>
+          <Text style={styles.paySub}>
+            To activate your NEXGEN Partner account and start receiving job requests, complete the
+            one-time registration payment below.
+          </Text>
+          <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
+        </View>
+        <PrimaryButton
+          title={paying ? 'Processing payment…' : `Pay ₹${REGISTRATION_FEE} to complete registration`}
+          onPress={completeRegistration}
+          loading={paying}
         />
-        <Pressable onPress={sendOtp} disabled={otpSending} style={styles.otpLink}>
-          <Text style={styles.otpLinkTxt}>{otpSending ? 'Sending OTP…' : 'Send OTP to verify mobile'}</Text>
+        <Pressable onPress={() => setStep('details')} style={styles.back} disabled={paying}>
+          <Text style={styles.backTxt}>Back</Text>
         </Pressable>
-        {otpVisible ? (
-          <NexgenTextInput
-            label={`${otpLength}-digit OTP`}
-            value={otpCode}
-            keyboardType="number-pad"
-            maxLength={otpLength}
-            onChangeText={(t) => setOtpCode(t.replace(/\D/g, '').slice(0, otpLength))}
-          />
-        ) : null}
-        <Text style={styles.lab}>Service categories</Text>
-        <Text style={styles.helper}>Pick all services you can provide. Tap again to deselect.</Text>
-        <View style={styles.chips}>
-          {DEFAULT_PARTNER_OPTIONS.map((option) => {
-            const selected = selectedCategories.includes(option);
-            return (
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
+      <Text style={styles.h1}>Step 1 — Profile & KYC</Text>
+
+      <NexgenTextInput label="Full Name" value={name} onChangeText={setName} />
+
+      <NexgenTextInput
+        label="Mobile Number"
+        prefix="+91"
+        value={phone}
+        keyboardType="number-pad"
+        maxLength={10}
+        onChangeText={(v) => {
+          setPhone(v.replace(/\D/g, '').slice(0, 10));
+          setOtpVerified(false);
+          setOtpVisible(false);
+        }}
+      />
+      <Pressable onPress={sendOtp} disabled={otpSending || phone.length !== 10} style={styles.otpLink}>
+        <Text style={styles.otpLinkTxt}>{otpSending ? 'Sending OTP…' : 'Send OTP'}</Text>
+      </Pressable>
+      {otpVisible ? (
+        <View style={styles.otpRow}>
+          <View style={{ flex: 1 }}>
+            <NexgenTextInput
+              label={`${otpLength}-digit OTP`}
+              value={otpCode}
+              keyboardType="number-pad"
+              maxLength={otpLength}
+              onChangeText={(v) => {
+                setOtpCode(v.replace(/\D/g, '').slice(0, otpLength));
+                setOtpVerified(false);
+              }}
+            />
+          </View>
+          {otpVerified ? (
+            <View style={styles.otpVerifiedBadge}>
+              <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+              <Text style={styles.otpVerifiedTxt}>Verified</Text>
+            </View>
+          ) : (
+            <Pressable
+              style={styles.otpVerifyBtn}
+              onPress={verifyOtp}
+              disabled={otpVerifying || otpCode.length !== otpLength}
+            >
+              <Text style={styles.otpVerifyTxt}>{otpVerifying ? 'Checking…' : 'Verify'}</Text>
+            </Pressable>
+          )}
+        </View>
+      ) : null}
+
+      <Text style={styles.lab}>Service Categories</Text>
+      <Pressable style={styles.dropdown} onPress={() => setCategoriesOpen(true)}>
+        <Text style={styles.dropdownTxt} numberOfLines={1}>
+          {selectedCategories.length > 0 ? selectedCategories.join(', ') : 'Select the services you offer'}
+        </Text>
+        <Ionicons name="chevron-down" size={18} color={colors.grey} />
+      </Pressable>
+
+      <NexgenTextInput label="Work Location" value={workLocation} onChangeText={setWorkLocation} />
+
+      <NexgenTextInput
+        label="Pincode"
+        value={pincode}
+        keyboardType="number-pad"
+        maxLength={6}
+        onChangeText={(v) => setPincode(v.replace(/\D/g, '').slice(0, 6))}
+      />
+
+      <Text style={styles.lab}>ID Type</Text>
+      <Pressable style={styles.dropdown} onPress={() => setIdTypeOpen(true)}>
+        <Text style={styles.dropdownTxt}>{idType ?? 'Select an ID type'}</Text>
+        <Ionicons name="chevron-down" size={18} color={colors.grey} />
+      </Pressable>
+
+      <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
+        <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
+        <Text style={styles.termsTxt}>Please accept NEXGEN terms and conditions to continue.</Text>
+      </Pressable>
+
+      <PrimaryButton title="Next" onPress={onNext} disabled={!canProceed} />
+
+      <Modal visible={categoriesOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Select service categories</Text>
+            <ScrollView style={styles.modalScroll}>
+              <View style={styles.chips}>
+                {ALL_PARTNER_SERVICES.map((option) => {
+                  const selected = selectedCategories.includes(option);
+                  return (
+                    <Pressable
+                      key={option}
+                      style={[styles.chip, selected && styles.chipOn]}
+                      onPress={() =>
+                        setSelectedCategories((prev) =>
+                          prev.includes(option) ? prev.filter((c) => c !== option) : [...prev, option],
+                        )
+                      }
+                    >
+                      <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+            <PrimaryButton title="Done" onPress={() => setCategoriesOpen(false)} />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={idTypeOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Select ID type</Text>
+            {ID_TYPES.map((option) => (
               <Pressable
                 key={option}
-                style={[styles.chip, selected && styles.chipOn]}
+                style={styles.idOption}
                 onPress={() => {
-                  setSelectedCategories((prev) =>
-                    prev.includes(option)
-                      ? prev.filter((item) => item !== option)
-                      : [...prev, option],
-                  );
+                  setIdType(option);
+                  setIdTypeOpen(false);
                 }}
               >
-                <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <Pressable onPress={() => setShowMoreServices((prev) => !prev)} style={styles.moreBtn}>
-          <Text style={styles.moreBtnTxt}>{showMoreServices ? 'Hide all services' : 'Show more services'}</Text>
-        </Pressable>
-        {showMoreServices ? (
-          <View style={styles.chipsWide}>
-            {ALL_PARTNER_SERVICES.map((option) => {
-              const selected = selectedCategories.includes(option);
-              return (
-                <Pressable
-                  key={option}
-                  style={[styles.chip, selected && styles.chipOn]}
-                  onPress={() => {
-                    setSelectedCategories((prev) =>
-                      prev.includes(option)
-                        ? prev.filter((item) => item !== option)
-                        : [...prev, option],
-                    );
-                  }}
-                >
-                  <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
-        <Text style={styles.lab}>Work location</Text>
-        <View style={styles.chips}>
-          {LOCATIONS.map((c) => (
-            <Pressable
-              key={c}
-              style={[styles.chip, workLocation === c && styles.chipOn]}
-              onPress={() => setWorkLocation(c)}
-            >
-              <Text style={[styles.chipTxt, workLocation === c && styles.chipOnTxt]}>{c}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.lab}>ID type</Text>
-        <View style={styles.chips}>
-          {(['Aadhaar', 'Voter ID'] as const).map((c) => (
-            <Pressable
-              key={c}
-              style={[styles.chip, idType === c && styles.chipOn]}
-              onPress={() => setIdType(c as 'Aadhaar' | 'Voter ID')}
-            >
-              <Text style={[styles.chipTxt, idType === c && styles.chipOnTxt]}>{c}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <NexgenTextInput label="ID number" value={idNo} onChangeText={setIdNo} />
-        <Pressable style={styles.file} onPress={() => setIdFront((x) => !x)}>
-          <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
-          <Text style={styles.fileTxt}>Upload ID front (mock) {idFront ? ' — saved' : ''}</Text>
-        </Pressable>
-        <Pressable style={styles.file} onPress={() => setIdBack((x) => !x)}>
-          <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
-          <Text style={styles.fileTxt}>Upload ID back (mock) {idBack ? ' — saved' : ''}</Text>
-        </Pressable>
-        <Pressable style={styles.file} onPress={() => setSelfie((x) => !x)}>
-          <Ionicons name="camera-outline" size={20} color={colors.primary} />
-          <Text style={styles.fileTxt}>Live selfie (mock camera) {selfie ? ' — saved' : ''}</Text>
-        </Pressable>
-        <PrimaryButton
-          title="Next"
-          onPress={() => (canNext0 ? setStep(1) : Alert.alert('KYC', 'Complete required field markers.'))}
-          disabled={!canNext0}
-        />
-      </ScrollView>
-    );
-  }
-
-  if (step === 1) {
-    return (
-      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-        <Text style={styles.h1}>Step 2 — Professional and legal</Text>
-        <NexgenTextInput label="Address" value={addr} onChangeText={setAddr} multiline />
-        <NexgenTextInput
-          label="Pincode"
-          value={pin}
-          keyboardType="number-pad"
-          maxLength={6}
-          onChangeText={setPin}
-        />
-        <Text style={styles.lab}>Experience</Text>
-        <View style={styles.chips}>
-          {['0–1 yrs', '1–3 yrs', '3+ yrs'].map((e) => (
-            <Pressable
-              key={e}
-              style={[styles.chip, exp === e && styles.chipOn]}
-              onPress={() => setExp(e)}
-            >
-              <Text style={[styles.chipTxt, exp === e && styles.chipOnTxt]}>{e}</Text>
-            </Pressable>
-          ))}
-        </View>
-        {needsDl ? (
-          <NexgenTextInput
-            label="Driving license number"
-            value={dl}
-            onChangeText={setDl}
-          />
-        ) : null}
-        <Pressable style={styles.file} onPress={() => setPcc((x) => !x)}>
-          <Ionicons name="document-text-outline" size={20} color={colors.primary} />
-          <Text style={styles.fileTxt}>PCC upload (mock) {pcc ? ' — saved' : ''}</Text>
-        </Pressable>
-        <NexgenTextInput label="Account holder" value={bName} onChangeText={setBName} />
-        <NexgenTextInput label="Account number" value={bAcc} onChangeText={setBAcc} keyboardType="number-pad" />
-        <NexgenTextInput label="IFSC" value={bIfsc} onChangeText={setBIfsc} autoCapitalize="characters" />
-        <Text style={styles.noteRed}>A ₹1 verification (mock) will be done on your account.</Text>
-        <PrimaryButton
-          title="Next"
-          onPress={() => {
-            if (needsDl && !dl.trim()) {
-              Alert.alert('License', 'Driving category requires license number (mock).');
-              return;
-            }
-            if (!canNext1) {
-              Alert.alert('Form', 'Fill address, pincode, bank (mock).');
-              return;
-            }
-            setStep(2);
-          }}
-        />
-        <Pressable onPress={() => setStep(0)} style={styles.back}>
-          <Text style={styles.backTxt}>Back</Text>
-        </Pressable>
-      </ScrollView>
-    );
-  }
-
-  if (step === 2) {
-    return (
-      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-        <Text style={styles.h1}>Step 3 — Skills and certification</Text>
-        <Pressable style={styles.file} onPress={() => setCertFile((x) => !x)}>
-          <Ionicons name="ribbon-outline" size={20} color={colors.primary} />
-          <Text style={styles.fileTxt}>Certificate file (mock) {certFile ? ' — saved' : ''}</Text>
-        </Pressable>
-        <NexgenTextInput label="Certificate number" value={certNo} onChangeText={setCertNo} />
-        <PrimaryButton
-          title={ENABLE_PARTNER_QUESTIONS ? 'Next — NEXGEN Academy' : 'Complete registration'}
-          onPress={() => {
-            if (!canNext2) {
-              Alert.alert('Certificate', 'Upload + number (mock).');
-              return;
-            }
-            if (ENABLE_PARTNER_QUESTIONS) {
-              setStep(3);
-            } else {
-              finish();
-            }
-          }}
-          disabled={!canNext2}
-        />
-        <Pressable onPress={() => setStep(1)} style={styles.back}>
-          <Text style={styles.backTxt}>Back</Text>
-        </Pressable>
-      </ScrollView>
-    );
-  }
-
-  // Academy
-  if (step === 3) {
-    return (
-      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-        <Text style={styles.h1}>NEXGEN Academy</Text>
-        <View style={styles.videoPh}>
-          <Ionicons name="play" size={40} color={colors.primary} />
-          <Text style={styles.videoTxt}>Product training video (placeholder)</Text>
-          <PrimaryButton
-            title={videoSeen ? 'Marked as watched' : 'Mark as watched (mock)'}
-            variant="outline"
-            onPress={() => setVideoSeen(true)}
-          />
-        </View>
-        {qIdx < Q10.length && videoSeen ? (
-          <View style={styles.quiz}>
-            <Text style={styles.qHead}>
-              Q{qIdx + 1}/10 (need 8+ correct)
-            </Text>
-            <Text style={styles.qTxt}>{Q10[qIdx].q}</Text>
-            {Q10[qIdx].o.map((op, oi) => (
-              <Pressable
-                key={op}
-                style={[styles.opt, qAns === oi && styles.optOn]}
-                onPress={() => onQuizPick(oi)}
-              >
-                <Text style={styles.optTxt}>{op}</Text>
+                <Text style={styles.idOptionTxt}>{option}</Text>
+                {idType === option ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
               </Pressable>
             ))}
-            <PrimaryButton
-              title={qIdx < Q10.length - 1 ? 'Next question' : 'Finish quiz'}
-              onPress={onQuizNext}
-              disabled={qAns === null}
-            />
-          </View>
-        ) : !videoSeen ? (
-          <Text style={styles.hint}>Watch the short video to unlock the quiz (mock gate).</Text>
-        ) : (
-          <View style={styles.end}>
-            <Text style={styles.hint}>Score: {qScore} / 10 {quizPass ? ' — pass' : ' — fail'}</Text>
-            <NexgenTextInput
-              label="Referral code (optional)"
-              value={referralCode}
-              onChangeText={setReferralCode}
-              placeholder="e.g. NEXGEN-RAJU-1234"
-              autoCapitalize="characters"
-            />
-            <Pressable
-              style={styles.termsRow}
-              onPress={() => setAcceptedTerms((v) => !v)}
-            >
-              <Ionicons
-                name={acceptedTerms ? 'checkbox' : 'square-outline'}
-                size={22}
-                color={colors.primary}
-              />
-              <Text style={styles.termsTxt}>
-                I agree to the NEXGEN{' '}
-                <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
-                  Terms and Conditions
-                </Text>
-              </Text>
-            </Pressable>
-            <PrimaryButton
-              title="Complete registration (mock save)"
-              onPress={finish}
-              loading={saving}
-              disabled={!canNext3 || !acceptedTerms}
-            />
-            {!quizPass ? (
-              <PrimaryButton
-                title="Retry quiz"
-                variant="outline"
-                onPress={() => {
-                  setQIdx(0);
-                  setQScore(0);
-                  setQAns(null);
-                }}
-              />
-            ) : null}
-            <Pressable onPress={() => setStep(2)} style={styles.back}>
-              <Text style={styles.backTxt}>Back</Text>
+            <Pressable style={styles.modalCancel} onPress={() => setIdTypeOpen(false)}>
+              <Text style={styles.modalCancelTxt}>Cancel</Text>
             </Pressable>
           </View>
-        )}
-      </ScrollView>
-    );
-  }
-
-  return null;
+        </View>
+      </Modal>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
   root: { padding: spacing.lg, paddingTop: 40, backgroundColor: colors.white, flexGrow: 1 },
-  termsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginVertical: spacing.md },
-  termsTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
-  termsLink: { color: colors.primary, fontWeight: '700' },
   h1: { fontSize: 20, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.lg },
   lab: { fontSize: 14, fontWeight: '600', color: colors.grey, marginTop: spacing.md, marginBottom: 8 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.md },
-  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.full, backgroundColor: colors.greyLight, borderWidth: 1, borderColor: colors.border },
-  chipOn: { backgroundColor: colors.orangeTint, borderColor: colors.primary },
-  chipTxt: { fontSize: 13, fontWeight: '600' },
-  chipOnTxt: { color: colors.primary, fontWeight: '800' },
-  otpRow: { flexDirection: 'row', gap: 8, marginBottom: spacing.lg, justifyContent: 'center' },
-  otpBox: { width: 40, height: 44, borderWidth: 1, borderColor: colors.primary, textAlign: 'center', fontSize: 20, fontWeight: '800', borderRadius: radius.sm },
   otpLink: { marginBottom: spacing.md },
   otpLinkTxt: { color: colors.primary, fontWeight: '700' },
-  file: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.primary, borderRadius: radius.md, padding: spacing.md },
-  fileTxt: { color: colors.charcoal, fontWeight: '600' },
-  helper: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm },
-  moreBtn: { marginBottom: spacing.md },
-  moreBtnTxt: { color: colors.primary, fontWeight: '700' },
-  chipsWide: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.md },
-  noteRed: { color: colors.error, fontSize: 12, marginBottom: spacing.lg, fontStyle: 'italic' },
+  otpRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  otpVerifyBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  otpVerifyTxt: { color: colors.white, fontWeight: '700' },
+  otpVerifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  otpVerifiedTxt: { color: colors.success, fontWeight: '700', fontSize: 12 },
+  dropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    backgroundColor: colors.greyLight,
+  },
+  dropdownTxt: { flex: 1, color: colors.charcoal, fontWeight: '600' },
+  termsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginVertical: spacing.md },
+  termsTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
   back: { marginTop: spacing.lg, alignItems: 'center' },
   backTxt: { color: colors.primary, fontWeight: '700' },
-  videoPh: { minHeight: 200, backgroundColor: colors.orangeTint, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, marginBottom: spacing.lg, gap: spacing.md },
-  videoTxt: { fontWeight: '600', color: colors.charcoal, textAlign: 'center' },
-  quiz: { marginTop: spacing.lg, gap: spacing.md },
-  qHead: { fontWeight: '800' },
-  qTxt: { fontSize: 15, fontWeight: '600' },
-  opt: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, marginTop: 8 },
-  optOn: { borderColor: colors.primary, backgroundColor: colors.orangeTint },
-  optTxt: { color: colors.charcoal },
-  hint: { textAlign: 'center', color: colors.grey, margin: spacing.lg },
-  end: { gap: spacing.md },
+  payCard: {
+    alignItems: 'center',
+    backgroundColor: colors.orangeTint,
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    padding: spacing.xl,
+    marginBottom: spacing.xl,
+    gap: spacing.sm,
+  },
+  payTitle: { fontSize: 17, fontWeight: '800', color: colors.navy, marginTop: spacing.sm },
+  paySub: { color: colors.charcoal, textAlign: 'center', lineHeight: 20 },
+  payAmount: { fontSize: 36, fontWeight: '900', color: colors.primary, marginTop: spacing.sm },
+  modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.lg },
+  modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg, maxHeight: '80%' },
+  modalTitle: { fontSize: 18, fontWeight: '800', marginBottom: spacing.md },
+  modalScroll: { marginBottom: spacing.md },
+  modalCancel: { padding: spacing.md, alignItems: 'center' },
+  modalCancelTxt: { color: colors.grey, fontWeight: '700' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    backgroundColor: colors.greyLight,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  chipOn: { backgroundColor: colors.orangeTint, borderColor: colors.primary },
+  chipTxt: { fontSize: 13, fontWeight: '600', color: colors.charcoal },
+  chipOnTxt: { color: colors.primary, fontWeight: '800' },
+  idOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  idOptionTxt: { fontSize: 15, color: colors.charcoal, fontWeight: '600' },
 });

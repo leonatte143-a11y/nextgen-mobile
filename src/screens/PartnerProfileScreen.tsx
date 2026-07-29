@@ -250,11 +250,6 @@ export function PartnerProfileScreen() {
         )}
       </View>
 
-      <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerServicePricing')}>
-        <Ionicons name="pricetag-outline" size={20} color={colors.primary} />
-        <Text style={styles.menuTxt}>Manage My Services & Pricing</Text>
-        <Ionicons name="chevron-forward" size={20} color={colors.grey} />
-      </Pressable>
       <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerSettings')}>
         <Ionicons name="settings-outline" size={20} color={colors.primary} />
         <Text style={styles.menuTxt}>Settings</Text>

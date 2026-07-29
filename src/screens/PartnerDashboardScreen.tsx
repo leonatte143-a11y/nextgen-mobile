@@ -35,6 +35,7 @@ export function PartnerDashboardScreen(_props: Props) {
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>
         <PartnerCommandHeader
           name={profile.name}
+          photoUrl={profile.photoUrl}
           rating={profile.rating}
           isOnline={profile.isOnline}
           onToggleOnline={(o) => {

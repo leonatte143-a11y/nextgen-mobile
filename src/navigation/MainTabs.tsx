@@ -7,6 +7,7 @@ import { colors } from '../constants/theme';
 import type { MainTabParamList } from './types';
 import { HomeScreen } from '../screens/HomeScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
+import { ShopsRentalsMainScreen } from '../screens/ShopsRentalsMainScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -36,6 +37,14 @@ export function MainTabs() {
         options={{
           title: t(language, 'bookings'),
           tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Store"
+        component={ShopsRentalsMainScreen}
+        options={{
+          title: t(language, 'store'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -22,6 +23,7 @@ import type { ShopCategory, ShopSummary } from '../types/shop';
 import type { RootStackParamList, RootStackScreenProps } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type R = RouteProp<RootStackParamList, 'Shop'>;
 
 function ShopCard({
   item,
@@ -57,6 +59,7 @@ function ShopCard({
 export function ShopScreen(_props: RootStackScreenProps<'Shop'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<R>();
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [filterCat, setFilterCat] = useState<string | null>(null);
@@ -67,7 +70,7 @@ export function ShopScreen(_props: RootStackScreenProps<'Shop'>) {
   const [loading, setLoading] = useState(true);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [pageTab, setPageTab] = useState<'shops' | 'materials'>('shops');
+  const [pageTab, setPageTab] = useState<'shops' | 'materials'>(route.params?.initialTab ?? 'shops');
 
   const load = useCallback(async () => {
     setLoading(true);

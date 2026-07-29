@@ -3,12 +3,11 @@ import Constants from 'expo-constants';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import type { RootStackParamList } from '../navigation/types';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
@@ -19,7 +18,6 @@ export function PartnerSettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { logoutPartner } = useAuth();
-  const { isDark, setDarkMode } = useTheme();
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.body, { paddingTop: insets.top + spacing.md }]}>
@@ -32,10 +30,6 @@ export function PartnerSettingsScreen() {
       </View>
 
       <Text style={styles.section}>Preferences</Text>
-      <View style={styles.row}>
-        <Text style={styles.rowTxt}>Dark mode</Text>
-        <Switch value={isDark} onValueChange={(v) => void setDarkMode(v)} trackColor={{ true: colors.primary }} />
-      </View>
       <NavRow icon="globe-outline" label="Language" onPress={() => navigation.navigate('Language')} />
 
       <Text style={styles.section}>Support</Text>

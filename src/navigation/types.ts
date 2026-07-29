@@ -47,7 +47,7 @@ export type RootStackParamList = {
   HealthcareEmergencies: undefined;
   AmbulanceSos: undefined;
   ClinicBooking: undefined;
-  Shop: undefined;
+  Shop: { initialTab?: 'shops' | 'materials' } | undefined;
   ShopDetail: { shopId: string };
   ShopJoin: undefined;
   Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
@@ -59,6 +59,7 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Bookings: undefined;
+  Store: undefined;
   Profile: undefined;
 };
 

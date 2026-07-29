@@ -196,20 +196,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           </Pressable>
         </View>
 
-        <Pressable
-          style={styles.marketCard}
-          onPress={() => navigation.navigate('Shop')}
-        >
-          <View style={styles.marketIcon}>
-            <Ionicons name="storefront-outline" size={28} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.marketTitle}>Shops & Materials</Text>
-            <Text style={styles.marketSub}>Nearby hardware, electrical & building supplies</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={22} color={colors.primary} />
-        </Pressable>
-
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
           <Pressable onPress={() => navigation.navigate('AllServices')}>
@@ -218,6 +204,21 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
         <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
+
+        <Pressable
+          style={styles.marketCard}
+          onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
+        >
+          <View style={styles.marketAccent} />
+          <View style={styles.marketIcon}>
+            <Ionicons name="storefront-outline" size={28} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.marketTitle}>{t(language, 'shopsMaterialsRentals')}</Text>
+            <Text style={styles.marketSub}>Nearby hardware, electrical & building supplies</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={colors.primary} />
+        </Pressable>
 
         <Text style={styles.sectionTitle}>Popular services</Text>
         <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
@@ -354,12 +355,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
     marginBottom: spacing.md,
     padding: spacing.md,
+    paddingLeft: spacing.lg,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  marketAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 5,
+    backgroundColor: colors.primary,
   },
   marketIcon: {
     width: 52,
@@ -369,7 +386,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.navy },
+  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.navy, letterSpacing: 0.2 },
   marketSub: { color: colors.grey, fontSize: 12, marginTop: 2 },
   rowTitle: {
     flexDirection: 'row',
