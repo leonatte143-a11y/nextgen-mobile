@@ -8,6 +8,7 @@ import { usePartner } from '../context/PartnerContext';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
 import { PartnerSettingsScreen } from '../screens/PartnerSettingsScreen';
+import { PartnerActiveStatusScreen } from '../screens/PartnerActiveStatusScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import {
   PartnerDashboardScreen,
@@ -56,6 +57,7 @@ export function PartnerTabs() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
         <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
+        <Stack.Screen name="PartnerActiveStatus" component={PartnerActiveStatusScreen} />
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />

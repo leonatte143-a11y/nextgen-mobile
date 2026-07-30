@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { NexgenTextInput } from '../components/NexgenTextInput';
 import { colors, radius, spacing } from '../constants/theme';
@@ -10,6 +11,7 @@ import type { PartnerLocationEditScreenProps } from '../navigation/PartnerStackT
 const RADIUS_OPTIONS = [3, 5, 8, 10, 15] as const;
 
 export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScreenProps) {
+  const insets = useSafeAreaInsets();
   const { profile, updateProfile, refreshPartner, isLoading } = usePartner();
   const [city, setCity] = useState('');
   const [innerKm, setInnerKm] = useState(5);
@@ -52,7 +54,7 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
@@ -60,7 +62,7 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
         <Text style={styles.title}>Service location</Text>
         <View style={{ width: 24 }} />
       </View>
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + spacing.xl }]}>
         <View style={styles.statusCard}>
           <Ionicons name="navigate-circle" size={22} color={colors.primary} />
           <View style={{ flex: 1 }}>
@@ -128,7 +130,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
-    paddingTop: 48,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

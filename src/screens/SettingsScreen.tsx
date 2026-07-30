@@ -3,12 +3,9 @@ import Constants from 'expo-constants';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../constants/theme';
 import { LOCAL_STORAGE_KEYS, getBooleanSetting, setBooleanSetting } from '../lib/localStorage';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import type { RootStackParamList } from '../navigation/types';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
@@ -17,17 +14,13 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
-  const { logoutUser } = useAuth();
-  const { isDark, setDarkMode } = useTheme();
   const [bookingUpdates, setBookingUpdates] = useState(true);
   const [specialOffers, setSpecialOffers] = useState(true);
-  const [appUpdates, setAppUpdates] = useState(false);
 
   useEffect(() => {
     void (async () => {
       setBookingUpdates(await getBooleanSetting(LOCAL_STORAGE_KEYS.notificationBookingUpdates, true));
       setSpecialOffers(await getBooleanSetting(LOCAL_STORAGE_KEYS.notificationSpecialOffers, true));
-      setAppUpdates(await getBooleanSetting(LOCAL_STORAGE_KEYS.notificationAppUpdates, false));
     })();
   }, []);
 
@@ -40,22 +33,8 @@ export function SettingsScreen() {
         <Text style={styles.title}>Settings</Text>
         <View style={{ width: 24 }} />
       </View>
-      <Text style={styles.section}>Account</Text>
-      <NavRow icon="person-outline" label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
-      <NavRow
-        icon="lock-closed-outline"
-        label="Change Password"
-        onPress={() =>
-          Alert.alert(
-            'No password needed',
-            'NEXGEN accounts sign in securely with a one-time OTP sent to your phone — there is no password to change.',
-          )
-        }
-      />
-      <NavRow icon="location-outline" label="Manage Addresses" onPress={() => navigation.navigate('SavedAddresses')} />
 
       <Text style={styles.section}>Preferences</Text>
-      <Row label="Dark mode" value={isDark} onChange={(v) => void setDarkMode(v)} />
       <Row
         label="Booking updates"
         value={bookingUpdates}
@@ -72,14 +51,6 @@ export function SettingsScreen() {
           void setBooleanSetting(LOCAL_STORAGE_KEYS.notificationSpecialOffers, next);
         }}
       />
-      <Row
-        label="App updates"
-        value={appUpdates}
-        onChange={(next) => {
-          setAppUpdates(next);
-          void setBooleanSetting(LOCAL_STORAGE_KEYS.notificationAppUpdates, next);
-        }}
-      />
       <NavRow icon="globe-outline" label="Language" onPress={() => navigation.navigate('Language')} />
 
       <Text style={styles.section}>Support</Text>
@@ -89,16 +60,6 @@ export function SettingsScreen() {
       <View style={styles.versionRow}>
         <Text style={styles.versionTxt}>NEXGEN v{APP_VERSION}</Text>
       </View>
-
-      <Text style={styles.section}>Actions</Text>
-      <PrimaryButton
-        title="Logout"
-        variant="danger"
-        onPress={async () => {
-          await logoutUser();
-          navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
-        }}
-      />
     </ScrollView>
   );
 }

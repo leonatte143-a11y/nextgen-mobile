@@ -51,7 +51,7 @@ export function PartnerCommandHeader({ name, photoUrl, rating, isOnline, onToggl
           </View>
         </View>
         <View style={styles.infoCol}>
-          <Text style={styles.verifiedPro}>Verified Professional</Text>
+          <Text style={styles.verifiedPro}>Verified</Text>
           <StarBar r={rating} />
           <Text style={styles.ratingText}>
             {rating.toFixed(1)} <Text style={styles.star}>★</Text>
@@ -59,7 +59,7 @@ export function PartnerCommandHeader({ name, photoUrl, rating, isOnline, onToggl
         </View>
       </View>
 
-      <View style={styles.toggleRow}>
+      <View style={styles.toggleCol}>
         <Text style={styles.tinyOn}>{isOnline ? 'Online' : 'Offline'}</Text>
         <Pressable
           onPress={() => onToggleOnline(!isOnline)}
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   starRow: { flexDirection: 'row', gap: 2, marginTop: 4 },
   ratingText: { color: colors.charcoal, fontWeight: '700', marginTop: 4, fontSize: 13 },
   star: { fontSize: 13 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
+  toggleCol: { alignItems: 'center', gap: 6, marginTop: spacing.xs },
   tinyOn: { fontSize: 12, fontWeight: '700', color: colors.charcoal },
   smallToggle: {
     width: 44,

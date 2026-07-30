@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePartner } from '../context/PartnerContext';
@@ -21,6 +22,7 @@ const ALL_CATEGORY_OPTIONS = Array.from(
 );
 
 export function PartnerProfileScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProps>();
   const { userToken, logoutPartner } = useAuth();
   const { profile, updateProfile, isLoading } = usePartner();
@@ -135,7 +137,10 @@ export function PartnerProfileScreen() {
   };
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
+    >
       <View style={styles.appHeader}>
         <View style={styles.logoMark}>
           <Text style={styles.logoN}>N</Text>

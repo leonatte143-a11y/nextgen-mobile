@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { EmptyState } from '../components/EmptyState';
@@ -9,6 +10,7 @@ import type { PartnerRequest } from '../mock/types';
 type Props = { navigation: any };
 
 export function PartnerRequestsScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const { requests, acceptRequest, rejectRequest, refreshPartner, isLoading } = usePartner();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -44,8 +46,15 @@ export function PartnerRequestsScreen({ navigation }: Props) {
           ? styles.badgeProgress
           : styles.badgeComplete,
     ];
+    const onPressCard = () => {
+      if (item.status === 'pending') {
+        navigation.navigate('PartnerActiveStatus', { requestId: item.id });
+        return;
+      }
+      navigation.navigate('PartnerRequestDetail', { requestId: item.id });
+    };
     return (
-      <Pressable style={styles.requestCard} onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}>
+      <Pressable style={styles.requestCard} onPress={onPressCard}>
         <View style={styles.requestHeader}>
           <Text style={styles.requestTitle}>{item.serviceName}</Text>
           <View style={badgeStyle}>
@@ -105,7 +114,7 @@ export function PartnerRequestsScreen({ navigation }: Props) {
   return (
     <FlatList
       style={styles.root}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
       data={visibleRequests}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}

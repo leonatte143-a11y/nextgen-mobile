@@ -54,6 +54,17 @@ export function PartnerCommandGrid({
       </Animated.View>
 
       <View style={styles.row2}>
+        <Pressable style={styles.smallAction} onPress={() => (navigation as any).navigate('Requests')}>
+          <Ionicons name="help-buoy-outline" size={18} color={ORANGE} />
+          <Text style={styles.smallActionTxt}>Enquiry</Text>
+        </Pressable>
+        <Pressable style={styles.smallAction} onPress={() => (navigation as any).navigate('Requests')}>
+          <Ionicons name="chatbubbles-outline" size={18} color={ORANGE} />
+          <Text style={styles.smallActionTxt}>Chat</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.row2}>
         <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
           <Ionicons name="time-outline" size={22} color={ORANGE} />
           <Text style={styles.val}>{pendingCount}</Text>
@@ -81,6 +92,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  smallAction: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  smallActionTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
   nexRow: {
     flexDirection: 'row',
     alignItems: 'center',

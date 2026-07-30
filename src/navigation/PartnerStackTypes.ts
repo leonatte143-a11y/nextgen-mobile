@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-n
 export type PartnerStackParamList = {
   PartnerTabs: undefined;
   PartnerRequestDetail: { requestId: string };
+  PartnerActiveStatus: { requestId: string };
   PartnerServicePricing: undefined;
   PartnerLocationEdit: undefined;
   PartnerHRV: undefined;

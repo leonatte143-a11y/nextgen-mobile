@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
@@ -13,28 +15,68 @@ import { t } from '../i18n/strings';
 import type { RootStackParamList, MainTabScreenProps } from '../navigation/types';
 import { userService } from '../services/userService';
 
+const PHOTO_KEY = 'nexgen_user_photo';
+
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuTarget = 'EditProfile' | 'Settings' | 'Rewards' | 'Support' | 'Language' | 'MyFavorites' | 'SavedAddresses';
+type MenuTarget = 'Settings' | 'Rewards' | 'Support' | 'Language' | 'MyFavorites' | 'SavedAddresses';
 
 export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { user, partnerToken, refreshProfile, logoutUser, language } = useAuth();
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
-    { label: t(language, 'editProfile'), icon: 'create-outline', target: 'EditProfile' },
+    { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
     { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
     { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
     { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Support' },
     { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
-    { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
   ];
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PHOTO_KEY).then((v) => {
+      if (v) setPhotoUri(v);
+    });
+  }, []);
+
+  const pickFrom = async (source: 'camera' | 'library') => {
+    const perm =
+      source === 'camera'
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', `Allow ${source === 'camera' ? 'camera' : 'photo library'} access to update your profile photo.`);
+      return;
+    }
+    const result =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: true, aspect: [1, 1] })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 0.6,
+            allowsEditing: true,
+            aspect: [1, 1],
+          });
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+    const uri = result.assets[0].uri;
+    setPhotoUri(uri);
+    await AsyncStorage.setItem(PHOTO_KEY, uri);
+  };
+
+  const choosePhoto = () => {
+    Alert.alert('Update profile photo', undefined, [
+      { text: 'Take Photo', onPress: () => void pickFrom('camera') },
+      { text: 'Choose from Gallery', onPress: () => void pickFrom('library') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,9 +144,20 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
       </View>
       <View style={styles.cardWrap}>
         <View style={styles.card}>
-          <View style={styles.avatar}>
-            <Text style={styles.avText}>{initials}</Text>
-          </View>
+          <Pressable style={styles.avatar} onPress={choosePhoto}>
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avText}>{initials}</Text>
+            )}
+            <View style={styles.cameraBadge}>
+              <Ionicons name="camera" size={13} color={colors.white} />
+            </View>
+          </Pressable>
+          <Pressable style={styles.editProfileBtn} onPress={() => navigation.navigate('EditProfile')}>
+            <Ionicons name="create-outline" size={16} color={colors.primary} />
+            <Text style={styles.editProfileTxt}>{t(language, 'editProfile')}</Text>
+          </Pressable>
           <Text style={styles.name}>
             {user.firstName} {user.lastName}
           </Text>
@@ -182,8 +235,8 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             );
           }}
         >
-          <Ionicons name="trash-outline" size={22} color={colors.error} />
-          <Text style={styles.logoutTxt}>Delete Account</Text>
+          <Ionicons name="trash-outline" size={16} color={colors.error} />
+          <Text style={styles.deleteTxt}>Delete Account</Text>
         </Pressable>
         <Pressable
           style={styles.logout}
@@ -213,8 +266,8 @@ const styles = StyleSheet.create({
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
+    gap: spacing.sm,
+    padding: spacing.sm,
     marginBottom: spacing.sm,
     backgroundColor: colors.white,
     borderRadius: radius.md,
@@ -240,8 +293,35 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
   },
+  avatarImage: { width: '100%', height: '100%' },
+  cameraBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.navy,
+    borderWidth: 2,
+    borderColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginBottom: spacing.sm,
+  },
+  editProfileTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   avText: { fontSize: 24, fontWeight: '800', color: colors.primary },
   name: { fontSize: 20, fontWeight: '800', color: colors.charcoal },
   email: { fontSize: 14, color: colors.grey, marginTop: 4 },
@@ -342,8 +422,11 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     marginTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   logoutTxt: { color: colors.error, fontWeight: '800', fontSize: 16 },
+  deleteTxt: { color: colors.error, fontWeight: '700', fontSize: 13 },
   errTitle: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   errSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg },
 });

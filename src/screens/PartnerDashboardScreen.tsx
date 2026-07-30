@@ -31,6 +31,12 @@ export function PartnerDashboardScreen(_props: Props) {
         style={styles.root}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm, paddingBottom: 120 + insets.bottom }]}
       >
+        <View style={styles.brandRow}>
+          <View style={styles.logoMark}>
+            <Text style={styles.logoN}>N</Text>
+          </View>
+          <Text style={styles.brandName}>NEXGEN</Text>
+        </View>
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>
         <PartnerCommandHeader
@@ -94,6 +100,17 @@ const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: colors.greyLight },
   root: { flex: 1 },
   content: { padding: spacing.lg, paddingTop: 16 + 8, paddingBottom: spacing.xl },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
+  logoMark: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoN: { fontSize: 14, fontWeight: '900', color: colors.white },
+  brandName: { fontSize: 15, fontWeight: '900', color: colors.navy },
   welcome: { color: colors.charcoal, fontSize: 20, fontWeight: '800' },
   welcomeSub: { color: colors.grey, marginTop: 4, marginBottom: 4, fontSize: 13, fontWeight: '600' },
   section: { marginTop: spacing.lg, fontSize: 16, fontWeight: '800' },

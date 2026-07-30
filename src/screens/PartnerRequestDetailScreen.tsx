@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -19,6 +20,7 @@ import type { PartnerStackParamList } from '../navigation/PartnerStackTypes';
 type Props = NativeStackScreenProps<PartnerStackParamList, 'PartnerRequestDetail'>;
 
 export function PartnerRequestDetailScreen({ route, navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const {
     requests,
     acceptRequest,
@@ -49,7 +51,7 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     setActionLoading(true);
     await acceptRequest(request.id);
     setActionLoading(false);
-    navigation.goBack();
+    navigation.replace('PartnerActiveStatus', { requestId: request.id });
   };
 
   const handleReject = async () => {
@@ -172,7 +174,10 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   }, [isCancelled, quote?.status, request.status]);
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
+    >
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Status</Text>
         <Text style={styles.sectionText}>{statusLabel}</Text>

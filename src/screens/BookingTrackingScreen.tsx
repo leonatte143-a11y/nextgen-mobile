@@ -1,11 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import type { Booking } from '../mock/types';
@@ -19,6 +20,7 @@ const STATUS_LABEL: Record<string, string> = {
   confirmed: 'Waiting for partner acceptance',
   partner_assigned: 'Partner accepted your booking',
   en_route: 'Partner is on the way',
+  awaiting_otp: 'Partner Reached',
   in_progress: 'Service in progress',
   completed: 'Service completed',
   cancelled: 'Booking cancelled',
@@ -59,6 +61,8 @@ export function BookingTrackingScreen() {
 
   const statusLabel = booking ? STATUS_LABEL[booking.status] ?? 'Booking status' : 'Booking status';
 
+  const goHome = () => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+
   if (loading || !booking) {
     return <ScreenLoader />;
   }
@@ -66,26 +70,20 @@ export function BookingTrackingScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
-        <Pressable
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })}
-          hitSlop={12}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
-        </Pressable>
-        <Text style={styles.title}>Booking Tracking</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.logoMark}>
+          <Text style={styles.logoN}>N</Text>
+        </View>
+        <Text style={styles.brandName}>NEXGEN</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
-        <View style={styles.statusCard}>
-          <View style={[styles.statusDot, accepted ? styles.statusDotOn : styles.statusDotWaiting]} />
+        <View style={styles.partnerCard}>
+          <View style={styles.partnerAvatar}>
+            <Text style={styles.partnerAvatarTxt}>{booking.partnerName?.[0] ?? 'P'}</Text>
+          </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.statusTitle}>{statusLabel}</Text>
-            <Text style={styles.statusSub}>
-              {accepted
-                ? `${booking.partnerName} has accepted your booking.`
-                : 'We are notifying nearby partners about your booking.'}
-            </Text>
+            <Text style={styles.partnerName}>{booking.partnerName}</Text>
+            <Text style={styles.partnerMeta}>★ {booking.partnerRating?.toFixed(1) ?? '—'}</Text>
           </View>
         </View>
 
@@ -98,7 +96,16 @@ export function BookingTrackingScreen() {
         </View>
 
         <LiveTrackingAdBanner />
+
+        <View style={styles.statusCard}>
+          <View style={[styles.statusDot, accepted ? styles.statusDotOn : styles.statusDotWaiting]} />
+          <Text style={styles.statusTitle}>{statusLabel}</Text>
+        </View>
       </ScrollView>
+
+      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
+        <PrimaryButton title="Close" variant="outline" onPress={goHome} />
+      </View>
     </View>
   );
 }
@@ -108,14 +115,24 @@ const styles = StyleSheet.create({
   top: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: spacing.sm,
     padding: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  title: { fontSize: 18, fontWeight: '800' },
+  logoMark: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoN: { fontSize: 15, fontWeight: '900', color: colors.white },
+  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
   body: { padding: spacing.md, paddingBottom: spacing.xl },
-  statusCard: {
+  partnerCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
@@ -124,11 +141,17 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
-  statusDot: { width: 14, height: 14, borderRadius: 7 },
-  statusDotOn: { backgroundColor: colors.success },
-  statusDotWaiting: { backgroundColor: colors.warning },
-  statusTitle: { fontWeight: '800', fontSize: 15, color: colors.charcoal },
-  statusSub: { color: colors.grey, marginTop: 4, fontSize: 13 },
+  partnerAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.orangeTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  partnerAvatarTxt: { fontSize: 20, fontWeight: '800', color: colors.primary },
+  partnerName: { fontWeight: '800', fontSize: 16, color: colors.charcoal },
+  partnerMeta: { color: colors.grey, marginTop: 4, fontSize: 13 },
   map: {
     aspectRatio: 1,
     borderRadius: radius.lg,
@@ -140,4 +163,18 @@ const styles = StyleSheet.create({
   },
   mapLabel: { fontWeight: '800', color: colors.charcoal },
   mapSub: { color: colors.grey, fontSize: 12 },
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginTop: spacing.lg,
+  },
+  statusDot: { width: 14, height: 14, borderRadius: 7 },
+  statusDotOn: { backgroundColor: colors.success },
+  statusDotWaiting: { backgroundColor: colors.warning },
+  statusTitle: { fontWeight: '800', fontSize: 15, color: colors.charcoal },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
 });
