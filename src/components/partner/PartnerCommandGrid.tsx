@@ -54,13 +54,13 @@ export function PartnerCommandGrid({
       </Animated.View>
 
       <View style={styles.row2}>
-        <Pressable style={styles.smallAction} onPress={() => (navigation as any).navigate('Requests')}>
-          <Ionicons name="help-buoy-outline" size={18} color={ORANGE} />
-          <Text style={styles.smallActionTxt}>Enquiry</Text>
+        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('PartnerEnquiry')}>
+          <Ionicons name="help-buoy-outline" size={22} color={ORANGE} />
+          <Text style={styles.lab}>Enquiry</Text>
         </Pressable>
-        <Pressable style={styles.smallAction} onPress={() => (navigation as any).navigate('Requests')}>
-          <Ionicons name="chatbubbles-outline" size={18} color={ORANGE} />
-          <Text style={styles.smallActionTxt}>Chat</Text>
+        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
+          <Ionicons name="chatbubbles-outline" size={22} color={ORANGE} />
+          <Text style={styles.lab}>Chat</Text>
         </Pressable>
       </View>
 
@@ -76,6 +76,11 @@ export function PartnerCommandGrid({
           <Text style={styles.lab}>Completed History</Text>
         </Pressable>
       </View>
+
+      <Pressable style={styles.galleryBtn} onPress={() => (navigation as any).navigate('PartnerGallery')}>
+        <Ionicons name="images-outline" size={22} color={colors.white} />
+        <Text style={styles.galleryBtnTxt}>Manage Gallery Photos</Text>
+      </Pressable>
     </View>
   );
 }
@@ -92,19 +97,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  smallAction: {
-    flex: 1,
+  galleryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: colors.white,
+    gap: spacing.sm,
+    backgroundColor: ORANGE,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingVertical: spacing.md,
   },
-  smallActionTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
+  galleryBtnTxt: { color: colors.white, fontWeight: '800', fontSize: 15 },
   nexRow: {
     flexDirection: 'row',
     alignItems: 'center',

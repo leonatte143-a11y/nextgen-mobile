@@ -8,7 +8,9 @@ import { usePartner } from '../context/PartnerContext';
 import { colors } from '../constants/theme';
 import { PartnerHRVScreen } from '../screens/PartnerHRVScreen';
 import { PartnerSettingsScreen } from '../screens/PartnerSettingsScreen';
-import { PartnerActiveStatusScreen } from '../screens/PartnerActiveStatusScreen';
+import { PartnerRequestStatusScreen } from '../screens/PartnerRequestStatusScreen';
+import { PartnerEnquiryScreen } from '../screens/PartnerEnquiryScreen';
+import { PartnerGalleryScreen } from '../screens/PartnerGalleryScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import {
   PartnerDashboardScreen,
@@ -57,11 +59,13 @@ export function PartnerTabs() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="PartnerTabs" component={PartnerTabNavigator} />
         <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
-        <Stack.Screen name="PartnerActiveStatus" component={PartnerActiveStatusScreen} />
+        <Stack.Screen name="PartnerRequestStatus" component={PartnerRequestStatusScreen} />
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
         <Stack.Screen name="PartnerSettings" component={PartnerSettingsScreen} />
+        <Stack.Screen name="PartnerEnquiry" component={PartnerEnquiryScreen} />
+        <Stack.Screen name="PartnerGallery" component={PartnerGalleryScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
       </Stack.Navigator>
       {incomingLead ? (

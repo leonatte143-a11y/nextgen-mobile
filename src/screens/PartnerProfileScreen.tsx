@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,16 +10,11 @@ import { usePartner } from '../context/PartnerContext';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import { partnerService } from '../services/partnerService';
 import type { PartnerReferralSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
-
-const ALL_CATEGORY_OPTIONS = Array.from(
-  new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
-);
 
 export function PartnerProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -31,8 +26,6 @@ export function PartnerProfileScreen() {
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [pendingCategories, setPendingCategories] = useState<string[]>([]);
   const [referrals, setReferrals] = useState<PartnerReferralSummary | null>(null);
   const [referralsLoading, setReferralsLoading] = useState(true);
 
@@ -91,16 +84,6 @@ export function PartnerProfileScreen() {
     const asset = result.assets[0];
     const mime = asset.mimeType || 'image/jpeg';
     await updateProfile({ photoUrl: `data:${mime};base64,${asset.base64}` });
-  };
-
-  const openCategoryPicker = () => {
-    setPendingCategories(profile.categories);
-    setCategoriesOpen(true);
-  };
-
-  const saveCategoryPicker = async () => {
-    await updateProfile({ categories: pendingCategories });
-    setCategoriesOpen(false);
   };
 
   const shareReferralCode = async (code: string) => {
@@ -195,34 +178,16 @@ export function PartnerProfileScreen() {
       )}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Skills</Text>
-        <View style={styles.tagsRow}>
-          {profile.skills.map((skill) => (
-            <View key={skill} style={styles.tag}>
-              <Text style={styles.tagText}>{skill}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.categoriesSection}>
-        <Text style={styles.categoriesTitle}>Your Service Categories</Text>
-        <View style={styles.tagsRow}>
-          {profile.categories.map((category) => (
-            <View key={category} style={styles.tagGrey}>
-              <Text style={styles.tagText}>{category}</Text>
-            </View>
-          ))}
-        </View>
-        <Pressable style={styles.addCategoriesBtn} onPress={openCategoryPicker}>
-          <Ionicons name="add-circle-outline" size={18} color={colors.white} />
-          <Text style={styles.addCategoriesTxt}>Add Categories</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Partner Bio</Text>
-        <TextInput value={bio} onChangeText={setBio} style={styles.textArea} multiline />
+        <Text style={styles.sectionTitle}>Bio</Text>
+        <TextInput
+          value={bio}
+          onChangeText={setBio}
+          style={styles.bioInput}
+          multiline
+          numberOfLines={2}
+          placeholder="Write a short description of who you are and what you do"
+          placeholderTextColor={colors.grey}
+        />
       </View>
 
       <View style={styles.section}>
@@ -286,40 +251,6 @@ export function PartnerProfileScreen() {
         <Ionicons name="trash-outline" size={20} color={colors.error} />
         <Text style={styles.deleteTxt}>Delete Account</Text>
       </Pressable>
-
-      <Modal visible={categoriesOpen} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Add Categories</Text>
-            <ScrollView style={styles.modalScroll}>
-              <View style={styles.tagsRow}>
-                {ALL_CATEGORY_OPTIONS.map((option) => {
-                  const selected = pendingCategories.includes(option);
-                  return (
-                    <Pressable
-                      key={option}
-                      style={[styles.chip, selected && styles.chipOn]}
-                      onPress={() => {
-                        setPendingCategories((prev) =>
-                          prev.includes(option) ? prev.filter((c) => c !== option) : [...prev, option],
-                        );
-                      }}
-                    >
-                      <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
-            <View style={styles.modalActions}>
-              <Pressable style={styles.modalCancel} onPress={() => setCategoriesOpen(false)}>
-                <Text style={styles.modalCancelTxt}>Cancel</Text>
-              </Pressable>
-              <PrimaryButton title="Save" onPress={() => void saveCategoryPicker()} style={{ flex: 1 }} />
-            </View>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
@@ -332,8 +263,8 @@ const styles = StyleSheet.create({
   logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
   brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
   profileCard: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
-  profileImage: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
-  profileLetter: { color: colors.primary, fontSize: 28, fontWeight: '800' },
+  profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
+  profileLetter: { color: colors.primary, fontSize: 40, fontWeight: '800' },
   cameraBadge: {
     position: 'absolute',
     right: -2,
@@ -390,6 +321,7 @@ const styles = StyleSheet.create({
   tagGrey: { backgroundColor: colors.greyLight, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.sm },
   tagText: { color: colors.white, fontWeight: '700' },
   textArea: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 120, padding: spacing.md, textAlignVertical: 'top' },
+  bioInput: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 52, padding: spacing.md, textAlignVertical: 'top', color: colors.charcoal },
   categoriesSection: {
     marginTop: spacing.lg,
     backgroundColor: colors.orangeTint,

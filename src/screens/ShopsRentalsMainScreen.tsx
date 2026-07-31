@@ -25,7 +25,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
         >
           <Ionicons
             name="storefront-outline"
-            size={26}
+            size={34}
             color={activeTab === 'shops' ? colors.white : colors.primary}
           />
           <Text style={[styles.cardTitle, activeTab === 'shops' && styles.cardTitleOn]}>Shops</Text>
@@ -37,11 +37,11 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
         >
           <Ionicons
             name="cube-outline"
-            size={26}
+            size={34}
             color={activeTab === 'materials' ? colors.white : colors.primary}
           />
-          <Text style={[styles.cardTitle, activeTab === 'materials' && styles.cardTitleOn]}>
-            Materials & Rentals
+          <Text style={[styles.cardTitle, styles.cardTitleStacked, activeTab === 'materials' && styles.cardTitleOn]}>
+            Sell{'\n'}or{'\n'}Rental
           </Text>
         </Pressable>
       </View>
@@ -56,21 +56,22 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
   title: { fontSize: 20, fontWeight: '800', color: colors.navy },
   sub: { color: colors.grey, marginTop: 4, fontSize: 13 },
-  cardsRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
+  cardsRow: { flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
   card: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.white,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 2,
     borderColor: colors.primary,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.xl,
     paddingHorizontal: spacing.sm,
+    minHeight: 130,
   },
   cardOn: { backgroundColor: colors.primary },
-  cardTitle: { fontSize: 14, fontWeight: '800', color: colors.navy },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: colors.navy, textAlign: 'center' },
+  cardTitleStacked: { lineHeight: 20 },
   cardTitleOn: { color: colors.white },
 });

@@ -51,7 +51,6 @@ export function SettingsScreen() {
           void setBooleanSetting(LOCAL_STORAGE_KEYS.notificationSpecialOffers, next);
         }}
       />
-      <NavRow icon="globe-outline" label="Language" onPress={() => navigation.navigate('Language')} />
 
       <Text style={styles.section}>Support</Text>
       <NavRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => navigation.navigate('Privacy')} />

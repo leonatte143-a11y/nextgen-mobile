@@ -106,7 +106,7 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
                 ) : (
                   <Pressable
                     onPress={() =>
-                      navigation.navigate('ConfirmBooking', { serviceId: item.serviceId })
+                      navigation.navigate('ServiceDetail', { serviceId: item.serviceId })
                     }
                   >
                     <Text style={styles.rebook}>Re-book</Text>

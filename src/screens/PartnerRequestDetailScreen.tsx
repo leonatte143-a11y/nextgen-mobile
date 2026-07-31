@@ -10,8 +10,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -23,8 +25,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const {
     requests,
-    acceptRequest,
-    rejectRequest,
     markArrived,
     markWorkDone,
     completeJob,
@@ -45,22 +45,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   const [canceling, setCanceling] = useState(false);
 
   const request = requests.find((item) => item.id === route.params.requestId);
-
-  const handleAccept = async () => {
-    if (!request) return;
-    setActionLoading(true);
-    await acceptRequest(request.id);
-    setActionLoading(false);
-    navigation.replace('PartnerActiveStatus', { requestId: request.id });
-  };
-
-  const handleReject = async () => {
-    if (!request) return;
-    setActionLoading(true);
-    await rejectRequest(request.id);
-    setActionLoading(false);
-    navigation.goBack();
-  };
 
   const handleArrived = async () => {
     if (!request) return;
@@ -178,6 +162,16 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       style={styles.root}
       contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
     >
+      <View style={styles.map}>
+        <Ionicons name="navigate-outline" size={32} color={colors.grey} />
+        <Text style={styles.mapLabel}>Navigating to customer</Text>
+        <Text style={styles.mapSub}>
+          {request.distanceKm != null ? `${request.distanceKm} km away` : 'Live location will appear here'}
+        </Text>
+      </View>
+
+      <LiveTrackingAdBanner />
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Status</Text>
         <Text style={styles.sectionText}>{statusLabel}</Text>
@@ -286,21 +280,8 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       >
         <Text style={styles.directionText}>Open Directions</Text>
       </Pressable>
-      <View
-        style={
-          request.status === 'new' ? styles.buttonRow : canCancelActive ? styles.actionCol : styles.buttonRow
-        }
-      >
-        {request.status === 'new' ? (
-          <>
-            <Pressable style={[styles.button, styles.rejectButton]} onPress={handleReject} disabled={actionLoading}>
-              <Text style={styles.rejectText}>Reject</Text>
-            </Pressable>
-            <Pressable style={[styles.button, styles.acceptButton]} onPress={handleAccept} disabled={actionLoading}>
-              <Text style={styles.acceptText}>Accept</Text>
-            </Pressable>
-          </>
-        ) : request.status === 'pending' ? (
+      <View style={canCancelActive ? styles.actionCol : styles.buttonRow}>
+        {request.status === 'pending' ? (
           <Pressable
             style={[styles.inProgAction, styles.acceptButton]}
             onPress={handleArrived}
@@ -493,6 +474,17 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.greyLight },
   content: { padding: spacing.lg, paddingBottom: spacing.xl },
+  map: {
+    aspectRatio: 1,
+    borderRadius: radius.lg,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  mapLabel: { fontWeight: '800', color: colors.charcoal },
+  mapSub: { color: colors.grey, fontSize: 12 },
   section: { backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.md },
   sectionTitle: { fontSize: 14, color: colors.grey, fontWeight: '700', marginBottom: spacing.xs },
   sectionText: { fontSize: 16, color: colors.charcoal, marginTop: spacing.xs },

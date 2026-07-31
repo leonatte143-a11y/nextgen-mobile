@@ -2,24 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import { getCoordsIfPermitted } from '../../services/locationService';
 import { marketplaceService } from '../../services/marketplaceService';
-import type { ListingType, MarketplaceCategory, MarketplaceListing } from '../../types/marketplace';
+import type { MarketplaceCategory, MarketplaceListing } from '../../types/marketplace';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const TYPE_FILTERS: { label: string; value: ListingType | 'all' }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Rentals', value: 'rent' },
-  { label: 'Classifieds', value: 'sell' },
-  { label: 'Resale', value: 'resale' },
-];
-
-const BADGE_LABEL: Record<ListingType, string> = { rent: 'RENT', sell: 'SELL', resale: 'RE-SELL' };
-const BADGE_COLOR: Record<ListingType, string> = { rent: colors.trustTeal, sell: colors.primary, resale: colors.premiumGold };
+const BADGE_LABEL: Record<string, string> = { rent: 'RENT', sell: 'SELL', resale: 'RE-SELL' };
+const BADGE_COLOR: Record<string, string> = { rent: colors.trustTeal, sell: colors.primary, resale: colors.premiumGold };
 
 function ListingCard({ item, onPress }: { item: MarketplaceListing; onPress: () => void }) {
   const priceLabel =
@@ -51,11 +44,13 @@ function ListingCard({ item, onPress }: { item: MarketplaceListing; onPress: () 
 
 export function MaterialsTabContent() {
   const navigation = useNavigation<Nav>();
-  const [typeFilter, setTypeFilter] = useState<ListingType | 'all'>('all');
+  const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<MarketplaceCategory[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,8 +59,8 @@ export function MaterialsTabContent() {
       const [cats, items] = await Promise.all([
         marketplaceService.getCategories(),
         marketplaceService.listListings({
-          listingType: typeFilter === 'all' ? undefined : typeFilter,
           categoryId: categoryId || undefined,
+          q: search.trim() || undefined,
           lat: coords?.latitude,
           lng: coords?.longitude,
         }),
@@ -77,7 +72,7 @@ export function MaterialsTabContent() {
     } finally {
       setLoading(false);
     }
-  }, [typeFilter, categoryId]);
+  }, [categoryId, search]);
 
   useEffect(() => {
     load();
@@ -85,40 +80,24 @@ export function MaterialsTabContent() {
 
   return (
     <View style={styles.root}>
-      <FlatList
-        horizontal
-        data={TYPE_FILTERS}
-        keyExtractor={(t) => t.value}
-        style={styles.filterRow}
-        contentContainerStyle={styles.filterIn}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.pill, typeFilter === item.value && styles.pillOn]}
-            onPress={() => setTypeFilter(item.value)}
-          >
-            <Text style={[styles.pillTxt, typeFilter === item.value && styles.pillTxtOn]}>{item.label}</Text>
-          </Pressable>
-        )}
-      />
-      <FlatList
-        horizontal
-        data={[{ id: '', name: 'All categories' }, ...categories]}
-        keyExtractor={(c) => c.id || 'all'}
-        style={styles.filterRow}
-        contentContainerStyle={styles.filterIn}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.catPill, (categoryId === item.id || (!item.id && !categoryId)) && styles.pillOn]}
-            onPress={() => setCategoryId(item.id || null)}
-          >
-            <Text style={[styles.pillTxt, (categoryId === item.id || (!item.id && !categoryId)) && styles.pillTxtOn]}>
-              {item.name}
-            </Text>
-          </Pressable>
-        )}
-      />
+      <View style={styles.searchRow}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={18} color={colors.grey} />
+          <TextInput
+            style={styles.searchIn}
+            placeholder="Search materials, tools, rentals…"
+            placeholderTextColor={colors.grey}
+            value={search}
+            onChangeText={setSearch}
+            onSubmitEditing={() => load()}
+            returnKeyType="search"
+          />
+        </View>
+        <Pressable style={styles.filterBtn} onPress={() => setFilterOpen(true)}>
+          <Ionicons name="options-outline" size={20} color={colors.white} />
+        </Pressable>
+      </View>
+
       <FlatList
         data={listings}
         keyExtractor={(l) => l.id}
@@ -138,31 +117,93 @@ export function MaterialsTabContent() {
         <Ionicons name="add" size={22} color={colors.white} />
         <Text style={styles.fabTxt}>Post Ad</Text>
       </Pressable>
+
+      <Modal visible={filterOpen} transparent animationType="fade" onRequestClose={() => setFilterOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setFilterOpen(false)}>
+          <View style={styles.modalCard}>
+            <Pressable
+              style={styles.modalRow}
+              onPress={() => {
+                setCategoryId(null);
+                setFilterOpen(false);
+              }}
+            >
+              <Ionicons name="apps-outline" size={20} color={colors.primary} />
+              <Text style={styles.modalRowTxt}>All</Text>
+              {!categoryId ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
+            </Pressable>
+            <Pressable
+              style={styles.modalRow}
+              onPress={() => {
+                setFilterOpen(false);
+                setCategoryPickerOpen(true);
+              }}
+            >
+              <Ionicons name="pricetags-outline" size={20} color={colors.primary} />
+              <Text style={styles.modalRowTxt}>Categories</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.grey} />
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={categoryPickerOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCategoryPickerOpen(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setCategoryPickerOpen(false)}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Categories</Text>
+            {categories.map((c) => (
+              <Pressable
+                key={c.id}
+                style={styles.modalRow}
+                onPress={() => {
+                  setCategoryId(c.id);
+                  setCategoryPickerOpen(false);
+                }}
+              >
+                <Text style={styles.modalRowTxt}>{c.name}</Text>
+                {categoryId === c.id ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  filterRow: { maxHeight: 44, backgroundColor: colors.white },
-  filterIn: { paddingHorizontal: spacing.md, paddingBottom: spacing.sm, gap: spacing.sm },
-  pill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    backgroundColor: colors.greyLight,
-    marginRight: spacing.sm,
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.white,
   },
-  catPill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     backgroundColor: colors.greyLight,
-    marginRight: spacing.sm,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    minHeight: 44,
   },
-  pillOn: { backgroundColor: colors.primary },
-  pillTxt: { fontWeight: '600', color: colors.charcoal, fontSize: 12 },
-  pillTxtOn: { color: colors.white },
+  searchIn: { flex: 1, fontSize: 15, color: colors.charcoal },
+  filterBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   grid: { padding: spacing.md, paddingBottom: 100 },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
   card: {
@@ -196,4 +237,15 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   fabTxt: { color: colors.white, fontWeight: '800' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: spacing.lg },
+  modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.md, maxHeight: '70%' },
+  modalTitle: { fontSize: 16, fontWeight: '800', color: colors.charcoal, padding: spacing.sm },
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+  },
+  modalRowTxt: { flex: 1, fontWeight: '600', color: colors.charcoal },
 });

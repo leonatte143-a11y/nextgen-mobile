@@ -13,6 +13,13 @@ export interface ServiceBucket {
   emoji: string;
 }
 
+export interface PartnerReview {
+  id: string;
+  author: string;
+  rating: number;
+  comment: string;
+}
+
 export interface PartnerSummary {
   id: string;
   name: string;
@@ -24,6 +31,10 @@ export interface PartnerSummary {
   categories?: string[];
   isOnline?: boolean;
   distanceKm?: number;
+  /** Photos uploaded by the partner for their public profile (not yet backed by an upload flow). */
+  photos?: string[];
+  /** Written customer reviews (not yet backed by a review-collection flow). */
+  reviews?: PartnerReview[];
 }
 
 export interface ServiceMenuItem {
@@ -104,6 +115,8 @@ export interface PartnerProfile {
   serviceOuterRadiusKm: number;
   allowOutOfStation: boolean;
   referralCode?: string;
+  /** Photos the partner has uploaded for their public profile grid. */
+  photos?: string[];
 }
 
 export type PartnerReferralEarning = {

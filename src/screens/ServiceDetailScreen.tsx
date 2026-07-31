@@ -2,52 +2,34 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
 import { formatTelUrl } from '../utils/phone';
 import { catalogService } from '../services/catalogService';
+import { bookingService } from '../services/bookingService';
 import type { CatalogService, PartnerSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'ServiceDetail'>;
 
-const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function buildDateOptions(): { key: string; label: string; day: string; date: Date }[] {
-  const out: { key: string; label: string; day: string; date: Date }[] = [];
-  const today = new Date();
-  for (let i = 0; i < 7; i += 1) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    out.push({
-      key: d.toISOString().slice(0, 10),
-      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : String(d.getDate()),
-      day: WEEKDAY[d.getDay()],
-      date: d,
-    });
-  }
-  return out;
-}
-
 export function ServiceDetailScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
+  const { user } = useAuth();
   const [svc, setSvc] = useState<CatalogService | null>(null);
-  const [servicePartners, setServicePartners] = useState<PartnerSummary[]>([]);
   const [selectedPartner, setSelectedPartner] = useState<PartnerSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [partnerLoading, setPartnerLoading] = useState(true);
+  const [booking, setBooking] = useState(false);
 
-  const dateOptions = useMemo(() => buildDateOptions(), []);
-  const [selectedDateKey, setSelectedDateKey] = useState(dateOptions[0].key);
-
-  useEffect(() => {
+  React.useEffect(() => {
     (async () => {
       setLoading(true);
       setPartnerLoading(true);
@@ -59,7 +41,6 @@ export function ServiceDetailScreen() {
 
       setSvc(s);
       const partnerList = partners ?? [];
-      setServicePartners(partnerList);
       const selected =
         route.params.selectedPartnerId && partnerList.length
           ? partnerList.find((p) => p.id === route.params.selectedPartnerId) ?? partnerList[0]
@@ -87,6 +68,25 @@ export function ServiceDetailScreen() {
 
   const chatPartner = () => {
     Alert.alert('Chat', `Start a chat with ${selectedPartner?.name ?? 'your provider'} (coming soon).`);
+  };
+
+  const bookService = async () => {
+    if (!selectedPartner || booking) return;
+    setBooking(true);
+    try {
+      const b = await bookingService.createBooking({
+        serviceId: svc.id,
+        partnerId: selectedPartner.id,
+        distanceKm: partnerDistance,
+        address: user?.address ?? 'Rajahmundry, AP',
+        paymentMethod: 'Cash',
+      });
+      navigation.replace('BookingTracking', { bookingId: b.id });
+    } catch {
+      Alert.alert('Error', 'Could not book this service. Please try again.');
+    } finally {
+      setBooking(false);
+    }
   };
 
   return (
@@ -134,23 +134,6 @@ export function ServiceDetailScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Select a date</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateRow}>
-          {dateOptions.map((d) => {
-            const active = d.key === selectedDateKey;
-            return (
-              <Pressable
-                key={d.key}
-                style={[styles.dateChip, active && styles.dateChipOn]}
-                onPress={() => setSelectedDateKey(d.key)}
-              >
-                <Text style={[styles.dateChipDay, active && styles.dateChipTxtOn]}>{d.day}</Text>
-                <Text style={[styles.dateChipLabel, active && styles.dateChipTxtOn]}>{d.label}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
         {selectedPartner ? (
           <View style={styles.actions}>
             <Pressable style={styles.secondary} onPress={callPartner}>
@@ -163,23 +146,49 @@ export function ServiceDetailScreen() {
             </Pressable>
           </View>
         ) : null}
+
+        {selectedPartner ? (
+          <>
+            <Text style={styles.sectionTitle}>Gallery</Text>
+            {selectedPartner.photos && selectedPartner.photos.length > 0 ? (
+              <View style={styles.galleryGrid}>
+                {selectedPartner.photos.map((uri, i) => (
+                  <Image key={`${uri}-${i}`} source={{ uri }} style={styles.galleryImg} />
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.emptySectionText}>No photos uploaded by this partner yet.</Text>
+            )}
+
+            <Text style={styles.sectionTitle}>Ratings</Text>
+            {selectedPartner.reviews && selectedPartner.reviews.length > 0 ? (
+              <View style={styles.reviewList}>
+                {selectedPartner.reviews.map((r) => (
+                  <View key={r.id} style={styles.reviewRow}>
+                    <Text style={styles.reviewBullet}>•</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reviewAuthor}>
+                        {r.author} <Text style={styles.reviewStars}>★ {r.rating.toFixed(1)}</Text>
+                      </Text>
+                      <Text style={styles.reviewComment}>{r.comment}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.emptySectionText}>
+                {selectedPartner.reviewsCount ? `${selectedPartner.reviewsCount} reviews · details unavailable yet.` : 'No reviews yet.'}
+              </Text>
+            )}
+          </>
+        ) : null}
       </ScrollView>
       <View style={styles.footer}>
         <PrimaryButton
           title="Book service"
-          disabled={!selectedPartner}
-          onPress={() => {
-            const chosenDate = dateOptions.find((d) => d.key === selectedDateKey);
-            navigation.navigate('ConfirmBooking', {
-              serviceId: svc.id,
-              partnerId: selectedPartner?.id,
-              partnerName: selectedPartner?.name,
-              partnerPhone: selectedPartner?.phone,
-              partnerRating: selectedPartner?.rating,
-              distanceKm: partnerDistance,
-              customRequirements: chosenDate ? `Preferred date: ${chosenDate.day} ${chosenDate.label}` : undefined,
-            });
-          }}
+          disabled={!selectedPartner || booking}
+          loading={booking}
+          onPress={bookService}
         />
       </View>
     </View>
@@ -199,6 +208,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '800', flex: 1, textAlign: 'center' },
   body: { padding: spacing.lg },
   sectionTitle: { fontSize: 16, fontWeight: '800', marginTop: spacing.lg, marginBottom: spacing.sm, color: colors.charcoal },
+  emptySectionText: { color: colors.grey, fontSize: 13, fontStyle: 'italic' },
   partner: {
     padding: spacing.md,
     backgroundColor: colors.greyLight,
@@ -228,20 +238,6 @@ const styles = StyleSheet.create({
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },
   pSub: { color: colors.grey, marginTop: 4 },
   pPhone: { color: colors.navy, fontWeight: '700', marginTop: 6, fontSize: 14 },
-  dateRow: { gap: spacing.sm, paddingBottom: spacing.xs },
-  dateChip: {
-    width: 64,
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  dateChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  dateChipDay: { fontSize: 12, color: colors.grey, fontWeight: '600' },
-  dateChipLabel: { fontSize: 14, color: colors.charcoal, fontWeight: '800', marginTop: 2 },
-  dateChipTxtOn: { color: colors.white },
   actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   secondary: {
     flex: 1,
@@ -263,5 +259,18 @@ const styles = StyleSheet.create({
   },
   partnerEmptyTitle: { fontSize: 16, fontWeight: '700', marginBottom: spacing.xs },
   partnerEmptyText: { color: colors.grey, lineHeight: 20 },
+  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  galleryImg: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.md,
+    backgroundColor: colors.greyLight,
+  },
+  reviewList: { gap: spacing.md },
+  reviewRow: { flexDirection: 'row', gap: spacing.sm },
+  reviewBullet: { color: colors.primary, fontSize: 16, lineHeight: 20 },
+  reviewAuthor: { fontWeight: '700', color: colors.charcoal },
+  reviewStars: { color: colors.grey, fontWeight: '600', fontSize: 12 },
+  reviewComment: { color: colors.grey, marginTop: 2, lineHeight: 20 },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
 });

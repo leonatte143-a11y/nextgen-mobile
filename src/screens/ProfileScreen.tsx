@@ -151,24 +151,24 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
               <Text style={styles.avText}>{initials}</Text>
             )}
             <View style={styles.cameraBadge}>
-              <Ionicons name="camera" size={13} color={colors.white} />
+              <Ionicons name="camera" size={14} color={colors.white} />
             </View>
-          </Pressable>
-          <Pressable style={styles.editProfileBtn} onPress={() => navigation.navigate('EditProfile')}>
-            <Ionicons name="create-outline" size={16} color={colors.primary} />
-            <Text style={styles.editProfileTxt}>{t(language, 'editProfile')}</Text>
           </Pressable>
           <Text style={styles.name}>
             {user.firstName} {user.lastName}
           </Text>
-          <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.email}>{user.phone}</Text>
           <View style={styles.cardActions}>
+            <Pressable style={styles.pairBtn} onPress={() => navigation.navigate('EditProfile')}>
+              <Ionicons name="create-outline" size={16} color={colors.primary} />
+              <Text style={styles.pairBtnTxt}>{t(language, 'editProfile')}</Text>
+            </Pressable>
             <Pressable
-              style={styles.supportBtn}
+              style={styles.pairBtn}
               onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'NEXGEN Support' })}
             >
               <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
-              <Text style={styles.supportTxt}>Support</Text>
+              <Text style={styles.pairBtnTxt}>Support</Text>
             </Pressable>
           </View>
         </View>
@@ -287,9 +287,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
@@ -301,30 +301,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -2,
     bottom: -2,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: colors.navy,
     borderWidth: 2,
     borderColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  editProfileBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    marginBottom: spacing.sm,
-  },
-  editProfileTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
-  avText: { fontSize: 24, fontWeight: '800', color: colors.primary },
-  name: { fontSize: 20, fontWeight: '800', color: colors.charcoal },
-  email: { fontSize: 14, color: colors.grey, marginTop: 4 },
+  avText: { fontSize: 34, fontWeight: '800', color: colors.primary },
+  name: { fontSize: 20, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
+  email: { fontSize: 14, color: colors.grey, marginTop: 4, textAlign: 'center' },
   editBtn: {
     marginTop: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -335,19 +323,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   editTxt: { fontWeight: '700', color: colors.charcoal },
-  cardActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-  supportBtn: {
+  cardActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, alignSelf: 'stretch' },
+  pairBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.primary,
     backgroundColor: colors.orangeTint,
   },
-  supportTxt: { fontWeight: '700', color: colors.primary },
+  pairBtnTxt: { fontWeight: '700', color: colors.primary, fontSize: 13 },
   proBtn: { marginTop: spacing.sm, padding: spacing.sm },
   proTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   switchBtn: {

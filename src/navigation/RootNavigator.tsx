@@ -5,7 +5,6 @@ import { CategoryServicesScreen } from '../screens/CategoryServicesScreen';
 import { BookingTrackingScreen } from '../screens/BookingTrackingScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
 import { ChatScreen } from '../screens/ChatScreen';
-import { ConfirmBookingScreen } from '../screens/ConfirmBookingScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LanguageScreen } from '../screens/LanguageScreen';
@@ -65,7 +64,6 @@ export function RootNavigator() {
       <Stack.Screen name="ServiceList" component={ServiceListScreen} />
       <Stack.Screen name="ServiceProviders" component={ServiceProvidersScreen} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
-      <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
       <Stack.Screen name="BookingTracking" component={BookingTrackingScreen} />
       <Stack.Screen name="LiveBooking" component={LiveBookingScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />

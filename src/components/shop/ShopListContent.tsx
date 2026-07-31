@@ -127,30 +127,6 @@ export function ShopListContent() {
       </View>
 
       <FlatList
-        horizontal
-        data={[{ id: 'all', name: 'All' }, ...categories]}
-        keyExtractor={(c) => c.id}
-        style={styles.catRow}
-        contentContainerStyle={styles.catIn}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.catPill, (filterCat === item.id || (item.id === 'all' && !filterCat)) && styles.catPillOn]}
-            onPress={() => setFilterCat(item.id === 'all' ? null : item.id)}
-          >
-            <Text
-              style={[
-                styles.catPillTxt,
-                (filterCat === item.id || (item.id === 'all' && !filterCat)) && styles.catPillTxtOn,
-              ]}
-            >
-              {item.name}
-            </Text>
-          </Pressable>
-        )}
-      />
-
-      <FlatList
         data={displayItems}
         keyExtractor={(x) => x.id}
         contentContainerStyle={styles.list}
@@ -179,11 +155,16 @@ export function ShopListContent() {
         ListEmptyComponent={<Text style={styles.empty}>No shops found nearby. Try another search.</Text>}
         ListFooterComponent={
           <View style={styles.joinBlock}>
-            <Text style={styles.joinTitle}>Grow your business?</Text>
-            <Text style={styles.joinSub}>
-              Get more local leads from our users and service partners in Rajahmundry & Guntur.
-            </Text>
-            <PrimaryButton title="Join NEXGEN" onPress={() => navigation.navigate('ShopJoin')} />
+            <View style={styles.joinDisabled} pointerEvents="none">
+              <Text style={styles.joinTitle}>Grow your business?</Text>
+              <Text style={styles.joinSub}>
+                Get more local leads from our users and service partners in Rajahmundry & Guntur.
+              </Text>
+              <PrimaryButton title="Join NEXGEN" onPress={() => undefined} disabled />
+            </View>
+            <View style={styles.comingSoonOverlay}>
+              <Text style={styles.comingSoonTxt}>Coming Soon</Text>
+            </View>
           </View>
         }
       />
@@ -263,10 +244,34 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     backgroundColor: colors.orangeTint,
     borderRadius: radius.lg,
-    padding: spacing.lg,
     borderWidth: 2,
     borderColor: colors.primary,
+    overflow: 'hidden',
+    position: 'relative',
   },
+  joinDisabled: { padding: spacing.lg, opacity: 0.35 },
   joinTitle: { fontWeight: '800', fontSize: 17, color: colors.navy },
   joinSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.md, lineHeight: 20 },
+  comingSoonOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  comingSoonTxt: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.navy,
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    overflow: 'hidden',
+  },
 });

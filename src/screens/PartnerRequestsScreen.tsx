@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
@@ -11,31 +10,12 @@ type Props = { navigation: any };
 
 export function PartnerRequestsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { requests, acceptRequest, rejectRequest, refreshPartner, isLoading } = usePartner();
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const { requests, refreshPartner, isLoading } = usePartner();
 
   const visibleRequests = useMemo(
     () => requests.filter((request) => request.status !== 'rejected' && request.status !== 'cancelled'),
     [requests],
   );
-
-  const handleAccept = async (id: string) => {
-    setActionLoading(id);
-    try {
-      await acceptRequest(id);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    setActionLoading(id);
-    try {
-      await rejectRequest(id);
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   const renderItem = ({ item }: { item: PartnerRequest }) => {
     const badgeStyle = [
@@ -47,8 +27,8 @@ export function PartnerRequestsScreen({ navigation }: Props) {
           : styles.badgeComplete,
     ];
     const onPressCard = () => {
-      if (item.status === 'pending') {
-        navigation.navigate('PartnerActiveStatus', { requestId: item.id });
+      if (item.status === 'new') {
+        navigation.navigate('PartnerRequestStatus', { requestId: item.id });
         return;
       }
       navigation.navigate('PartnerRequestDetail', { requestId: item.id });
@@ -63,32 +43,6 @@ export function PartnerRequestsScreen({ navigation }: Props) {
         </View>
         <Text style={styles.requestMeta}>{item.customerName} · {item.address}</Text>
         <Text style={styles.requestMeta}>₹{item.partnerShare} take-home · {item.distanceKm} km</Text>
-        <View style={styles.requestActions}>
-          {item.status === 'new' ? (
-            <>
-              <Pressable style={styles.rejectButton} onPress={() => handleReject(item.id)} disabled={actionLoading === item.id}>
-                <Text style={styles.rejectLabel}>Reject</Text>
-              </Pressable>
-              <Pressable style={styles.acceptButton} onPress={() => handleAccept(item.id)} disabled={actionLoading === item.id}>
-                <Text style={styles.acceptLabel}>Accept</Text>
-              </Pressable>
-            </>
-          ) : item.status === 'pending' ? (
-            <Pressable
-              style={styles.actionButton}
-              onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}
-            >
-              <Text style={styles.actionLabel}>Mark Arrived</Text>
-            </Pressable>
-          ) : item.status === 'in_progress' ? (
-            <Pressable
-              style={styles.actionButton}
-              onPress={() => navigation.navigate('PartnerRequestDetail', { requestId: item.id })}
-            >
-              <Text style={styles.actionLabel}>Complete Job</Text>
-            </Pressable>
-          ) : null}
-        </View>
       </Pressable>
     );
   };
@@ -120,8 +74,8 @@ export function PartnerRequestsScreen({ navigation }: Props) {
       renderItem={renderItem}
       ListHeaderComponent={
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Incoming Requests</Text>
-          <Text style={styles.sub}>Tap a request to view full details</Text>
+          <Text style={styles.title}>Requests</Text>
+          <Text style={styles.sub}>Tap a request to view details</Text>
         </View>
       }
     />
@@ -139,16 +93,8 @@ const styles = StyleSheet.create({
   requestTitle: { fontSize: 16, fontWeight: '800' },
   statusBadge: { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: radius.sm },
   badgeNew: { backgroundColor: colors.primary },
-  badgePending: { backgroundColor: colors.orangeTint },
   badgeProgress: { backgroundColor: '#1E90FF' },
   badgeComplete: { backgroundColor: colors.success },
   badgeText: { color: colors.white, fontWeight: '700', fontSize: 12 },
   requestMeta: { color: colors.grey, marginTop: spacing.xs },
-  requestActions: { marginTop: spacing.md, flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.sm },
-  rejectButton: { backgroundColor: colors.greyLight, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.sm },
-  acceptButton: { backgroundColor: colors.primary, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.sm },
-  rejectLabel: { color: colors.charcoal, fontWeight: '700' },
-  acceptLabel: { color: colors.white, fontWeight: '700' },
-  actionButton: { backgroundColor: colors.primary, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.sm },
-  actionLabel: { color: colors.white, fontWeight: '700' },
 });

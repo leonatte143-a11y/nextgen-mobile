@@ -1,9 +1,9 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -17,8 +17,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'BookingTracking'>;
 
 const STATUS_LABEL: Record<string, string> = {
-  confirmed: 'Waiting for partner acceptance',
-  partner_assigned: 'Partner accepted your booking',
+  confirmed: 'Waiting for Partner Confirmation',
+  partner_assigned: 'Partner confirmed — heading your way',
   en_route: 'Partner is on the way',
   awaiting_otp: 'Partner Reached',
   in_progress: 'Service in progress',
@@ -54,10 +54,7 @@ export function BookingTrackingScreen() {
     };
   }, [route.params.bookingId]);
 
-  const accepted = useMemo(() => {
-    if (!booking) return false;
-    return booking.status !== 'confirmed';
-  }, [booking]);
+  const waitingForConfirmation = booking?.status === 'confirmed';
 
   const statusLabel = booking ? STATUS_LABEL[booking.status] ?? 'Booking status' : 'Booking status';
 
@@ -76,32 +73,43 @@ export function BookingTrackingScreen() {
         <Text style={styles.brandName}>NEXGEN</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.body}>
-        <View style={styles.partnerCard}>
-          <View style={styles.partnerAvatar}>
-            <Text style={styles.partnerAvatarTxt}>{booking.partnerName?.[0] ?? 'P'}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.partnerName}>{booking.partnerName}</Text>
-            <Text style={styles.partnerMeta}>★ {booking.partnerRating?.toFixed(1) ?? '—'}</Text>
-          </View>
-        </View>
-
-        <View style={styles.map}>
-          <Ionicons name="map-outline" size={32} color={colors.grey} />
-          <Text style={styles.mapLabel}>Map</Text>
-          <Text style={styles.mapSub}>
-            {booking.etaMins ? `Estimated arrival in ${booking.etaMins} mins` : 'Live location will appear here'}
+      {waitingForConfirmation ? (
+        <View style={styles.waitingBody}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.waitingTitle}>Waiting for Partner Confirmation</Text>
+          <Text style={styles.waitingSub}>
+            We've notified {booking.partnerName || 'your partner'}. This screen will update automatically once
+            they confirm your booking.
           </Text>
         </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.body}>
+          <View style={styles.partnerCard}>
+            <View style={styles.partnerAvatar}>
+              <Text style={styles.partnerAvatarTxt}>{booking.partnerName?.[0] ?? 'P'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.partnerName}>{booking.partnerName}</Text>
+              <Text style={styles.partnerMeta}>★ {booking.partnerRating?.toFixed(1) ?? '—'}</Text>
+            </View>
+          </View>
 
-        <LiveTrackingAdBanner />
+          <View style={styles.map}>
+            <Ionicons name="map-outline" size={32} color={colors.grey} />
+            <Text style={styles.mapLabel}>Map</Text>
+            <Text style={styles.mapSub}>
+              {booking.etaMins ? `Estimated arrival in ${booking.etaMins} mins` : 'Live location will appear here'}
+            </Text>
+          </View>
 
-        <View style={styles.statusCard}>
-          <View style={[styles.statusDot, accepted ? styles.statusDotOn : styles.statusDotWaiting]} />
-          <Text style={styles.statusTitle}>{statusLabel}</Text>
-        </View>
-      </ScrollView>
+          <LiveTrackingAdBanner />
+
+          <View style={styles.statusCard}>
+            <View style={[styles.statusDot, styles.statusDotOn]} />
+            <Text style={styles.statusTitle}>{statusLabel}</Text>
+          </View>
+        </ScrollView>
+      )}
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <PrimaryButton title="Close" variant="outline" onPress={goHome} />
@@ -131,6 +139,9 @@ const styles = StyleSheet.create({
   },
   logoN: { fontSize: 15, fontWeight: '900', color: colors.white },
   brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  waitingBody: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md },
+  waitingTitle: { fontSize: 18, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
+  waitingSub: { color: colors.grey, textAlign: 'center', lineHeight: 20 },
   body: { padding: spacing.md, paddingBottom: spacing.xl },
   partnerCard: {
     flexDirection: 'row',
