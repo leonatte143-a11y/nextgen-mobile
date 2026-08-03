@@ -113,7 +113,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       return;
     }
     if (!acceptedTerms) {
-      Alert.alert('Terms required', 'Please accept NEXGEN terms and conditions to continue.');
+      Alert.alert('Terms required', 'Please accept KAIRO terms and conditions to continue.');
       return;
     }
     if (!canProceed) {
@@ -140,7 +140,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
-        'NEXGEN Partner',
+        'KAIRO Partner',
         'Registration and payment complete. On the partner login screen, request an OTP to sign in.',
       );
       navigation.replace('PartnerLogin');
@@ -161,7 +161,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
           <Ionicons name="card-outline" size={40} color={colors.primary} />
           <Text style={styles.payTitle}>One-time registration fee</Text>
           <Text style={styles.paySub}>
-            To activate your NEXGEN Partner account and start receiving job requests, complete the
+            To activate your KAIRO Partner account and start receiving job requests, complete the
             one-time registration payment below.
           </Text>
           <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
@@ -262,7 +262,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
 
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
-        <Text style={styles.termsTxt}>Please accept NEXGEN terms and conditions to continue.</Text>
+        <Text style={styles.termsTxt}>Please accept KAIRO terms and conditions to continue.</Text>
       </Pressable>
 
       <PrimaryButton title="Next" onPress={onNext} disabled={!canProceed} />
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
     gap: spacing.sm,
   },
-  payTitle: { fontSize: 17, fontWeight: '800', color: colors.navy, marginTop: spacing.sm },
+  payTitle: { fontSize: 17, fontWeight: '800', color: colors.white, marginTop: spacing.sm },
   paySub: { color: colors.charcoal, textAlign: 'center', lineHeight: 20 },
   payAmount: { fontSize: 36, fontWeight: '900', color: colors.primary, marginTop: spacing.sm },
   modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.lg },

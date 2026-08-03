@@ -89,7 +89,7 @@ export function PartnerProfileScreen() {
   const shareReferralCode = async (code: string) => {
     try {
       await Share.share({
-        message: `Join NEXGEN as a service partner using my referral code ${code} and we both get rewarded!`,
+        message: `Join KAIRO as a service partner using my referral code ${code} and we both get rewarded!`,
       });
     } catch {
       // ignore share cancellation
@@ -126,9 +126,9 @@ export function PartnerProfileScreen() {
     >
       <View style={styles.appHeader}>
         <View style={styles.logoMark}>
-          <Text style={styles.logoN}>N</Text>
+          <Text style={styles.logoN}>K</Text>
         </View>
-        <Text style={styles.brandName}>NEXGEN</Text>
+        <Text style={styles.brandName}>KAIRO</Text>
       </View>
 
       <View style={styles.profileCard}>
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   appHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   logoMark: { width: 32, height: 32, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
-  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  brandName: { fontSize: 16, fontWeight: '900', color: colors.white },
   profileCard: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
   profileLetter: { color: colors.primary, fontSize: 40, fontWeight: '800' },
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  categoriesTitle: { fontSize: 15, color: colors.navy, fontWeight: '800', marginBottom: spacing.sm },
+  categoriesTitle: { fontSize: 15, color: colors.white, fontWeight: '800', marginBottom: spacing.sm },
   addCategoriesBtn: {
     flexDirection: 'row',
     alignItems: 'center',

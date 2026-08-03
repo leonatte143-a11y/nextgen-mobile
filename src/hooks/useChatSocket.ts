@@ -7,7 +7,7 @@ import type { ChatRole } from '../services/chatService';
 
 type MessageEvent<TMessage> = { conversationId: string; message: TMessage };
 
-/** Connects to the NEXGEN Socket.IO server so messages between two chat participants
+/** Connects to the KAIRO Socket.IO server so messages between two chat participants
  * sync in real time without polling. Generic over message shape so both the Support
  * Chat (User/Partner/Admin) and the P2P Marketplace chat can share this hook. */
 export function useChatSocket<TMessage = unknown>(

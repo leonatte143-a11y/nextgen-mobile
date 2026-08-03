@@ -55,7 +55,7 @@ export function PrimaryButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={isPrimary || isDanger ? colors.white : colors.primary}
+          color={isPrimary ? colors.background : '#FFFFFF'}
         />
       ) : (
         <Text
@@ -64,7 +64,7 @@ export function PrimaryButton({
             isPrimary && styles.textOnPrimary,
             variant === 'outline' && styles.textOutline,
             variant === 'ghost' && styles.textGhost,
-            isDanger && styles.textOnPrimary,
+            isDanger && styles.textOnDanger,
             isInverse && styles.textInverse,
           ]}
         >
@@ -96,7 +96,8 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.88 },
   text: { fontSize: 16, fontWeight: '700' },
-  textOnPrimary: { color: colors.white },
+  textOnPrimary: { color: colors.background },
+  textOnDanger: { color: '#FFFFFF' },
   textOutline: { color: colors.primary },
   textGhost: { color: colors.charcoal },
   textInverse: { color: colors.primary },

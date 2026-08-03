@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   thumb: { width: 36, height: 36, borderRadius: 6 },
   pill: {
-    backgroundColor: colors.charcoal,
+    backgroundColor: colors.bronze,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

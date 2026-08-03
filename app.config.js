@@ -19,21 +19,21 @@ module.exports = ({ config }) => {
 
   return {
     ...config,
-    name: 'NEXGEN',
+    name: 'KAIRO',
     slug: 'nexgen-mobile',
     version: '1.0.0',
     icon: './assets/icon.png',
     splash: {
       image: './assets/splash-icon.png',
       resizeMode: 'contain',
-      backgroundColor: '#FF8C00'
+      backgroundColor: '#0A192F'
     },
     android: {
       ...config.android,
       package: process.env.ANDROID_PACKAGE || 'com.nexgen.mobileapp',
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#FF8C00'
+        backgroundColor: '#0A192F'
       }
     },
     extra: {

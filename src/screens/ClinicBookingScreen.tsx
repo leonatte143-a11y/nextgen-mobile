@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { flex: 1, textAlign: 'center', color: colors.white, fontWeight: '800', fontSize: 17 },
   body: { padding: spacing.md, paddingBottom: spacing.xl },
-  section: { fontWeight: '800', color: colors.navy, marginTop: spacing.md, marginBottom: spacing.sm },
+  section: { fontWeight: '800', color: colors.white, marginTop: spacing.md, marginBottom: spacing.sm },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

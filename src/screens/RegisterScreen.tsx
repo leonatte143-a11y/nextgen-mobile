@@ -63,7 +63,7 @@ export function RegisterScreen({ navigation }: Props) {
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
         <Text style={styles.termsTxt}>
-          I agree to the NEXGEN{' '}
+          I agree to the KAIRO{' '}
           <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
             Terms and Conditions
           </Text>

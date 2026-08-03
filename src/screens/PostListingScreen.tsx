@@ -118,7 +118,7 @@ export function PostListingScreen() {
         latitude: coords?.latitude,
         longitude: coords?.longitude,
       });
-      Alert.alert('Posted!', 'Your listing is live on NEXGEN Market.', [
+      Alert.alert('Posted!', 'Your listing is live on KAIRO Market.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {

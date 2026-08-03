@@ -41,7 +41,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { language } = useAuth();
-  const [location] = useState('Danavaipeta, Rajahmundry');
+  const [location] = useState('Danavaipeta, Rajamahendravaram');
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
   const [catalog, setCatalog] = useState<CatalogService[]>([]);
@@ -148,10 +148,10 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
       <View style={styles.header}>
         <View style={styles.brandBlock}>
           <View style={styles.logoMark}>
-            <Text style={styles.logoN}>N</Text>
+            <Text style={styles.logoN}>K</Text>
           </View>
           <View style={styles.brandTextCol}>
-            <Text style={styles.brandName}>NEXGEN</Text>
+            <Text style={styles.brandName}>KAIRO</Text>
             <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
               <View style={styles.locRow}>
                 <Ionicons name="location" size={14} color={colors.primary} />
@@ -242,7 +242,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Text style={styles.footerBrand}>NEXGEN</Text>
+          <Text style={styles.footerBrand}>KAIRO</Text>
           <Text style={styles.footerTag}>Your trusted home services platform — Andhra Pradesh</Text>
           <Text style={styles.footerLink}>support@nexgen.com · +91 98765 43210</Text>
         </View>
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   logoN: { fontSize: 20, fontWeight: '900', color: colors.white },
   brandTextCol: { flex: 1 },
-  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  brandName: { fontSize: 16, fontWeight: '900', color: colors.white },
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   loc: { fontSize: 12, color: colors.grey, fontWeight: '600', maxWidth: 200 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.navy, letterSpacing: 0.2 },
+  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.white, letterSpacing: 0.2 },
   marketSub: { color: colors.grey, fontSize: 12, marginTop: 2 },
   rowTitle: {
     flexDirection: 'row',
@@ -395,14 +395,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
   },
-  h2: { fontSize: 18, fontWeight: '800', color: colors.navy, paddingHorizontal: spacing.md, marginTop: spacing.md },
+  h2: { fontSize: 18, fontWeight: '800', color: colors.white, paddingHorizontal: spacing.md, marginTop: spacing.md },
   seeAll: { color: colors.primary, fontWeight: '700' },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
   sectionTitle: {
     paddingHorizontal: spacing.md,
     fontSize: 18,
     fontWeight: '800',
-    color: colors.navy,
+    color: colors.white,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },

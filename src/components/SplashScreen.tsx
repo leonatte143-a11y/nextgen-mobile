@@ -65,7 +65,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
             },
           ]}
         >
-          <Text style={styles.logoLetter}>N</Text>
+          <Text style={styles.logoLetter}>K</Text>
         </Animated.View>
         <Animated.View
           style={{
@@ -74,7 +74,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
             alignItems: 'center',
           }}
         >
-          <Text style={styles.brand}>NEXGEN</Text>
+          <Text style={styles.brand}>KAIRO</Text>
           <Text style={styles.tagline}>Verified Professionals at Your Doorstep</Text>
         </Animated.View>
       </View>

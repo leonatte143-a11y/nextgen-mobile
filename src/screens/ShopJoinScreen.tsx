@@ -109,7 +109,7 @@ export function ShopJoinScreen() {
       return;
     }
     if (!acceptedTerms) {
-      Alert.alert('Terms required', 'Please accept the NEXGEN Terms and Conditions to continue.');
+      Alert.alert('Terms required', 'Please accept the KAIRO Terms and Conditions to continue.');
       return;
     }
     setLoading(true);
@@ -140,7 +140,7 @@ export function ShopJoinScreen() {
       });
       Alert.alert(
         'Application submitted',
-        'Our team will verify your shop and list you on NEXGEN Market.',
+        'Our team will verify your shop and list you on KAIRO Market.',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (e) {
@@ -159,7 +159,7 @@ export function ShopJoinScreen() {
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
-        <Text style={styles.headerTitle}>Join NEXGEN</Text>
+        <Text style={styles.headerTitle}>Join KAIRO</Text>
         <View style={{ width: 24 }} />
       </View>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
@@ -275,7 +275,7 @@ export function ShopJoinScreen() {
         <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
           <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
           <Text style={styles.termsTxt}>
-            I agree to the NEXGEN{' '}
+            I agree to the KAIRO{' '}
             <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
               Terms and Conditions
             </Text>

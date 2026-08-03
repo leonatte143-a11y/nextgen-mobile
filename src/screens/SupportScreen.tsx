@@ -27,7 +27,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 const FAQ = [
   { q: 'Booking Issues', a: 'Partner late, reschedule, or cancel before 2h for a full refund.' },
   { q: 'Payments & Refunds', a: 'Failed UPI, wallet credits, and settlement timelines.' },
-  { q: 'NEXGEN Wallet', a: 'Use reward points at checkout as a discount.' },
+  { q: 'KAIRO Wallet', a: 'Use reward points at checkout as a discount.' },
   { q: 'Safety & Quality', a: 'Report a partner directly from your booking details.' },
 ];
 

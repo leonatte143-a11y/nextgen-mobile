@@ -185,7 +185,7 @@ export function ServiceDetailScreen() {
       </ScrollView>
       <View style={styles.footer}>
         <PrimaryButton
-          title="Book service"
+          title="Find Expert Now"
           disabled={!selectedPartner || booking}
           loading={booking}
           onPress={bookService}
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   pTitle: { fontSize: 12, color: colors.grey },
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },
   pSub: { color: colors.grey, marginTop: 4 },
-  pPhone: { color: colors.navy, fontWeight: '700', marginTop: 6, fontSize: 14 },
+  pPhone: { color: colors.white, fontWeight: '700', marginTop: 6, fontSize: 14 },
   actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   secondary: {
     flex: 1,

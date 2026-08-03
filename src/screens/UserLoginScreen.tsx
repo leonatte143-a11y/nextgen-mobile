@@ -161,9 +161,9 @@ export function UserLoginScreen({ navigation }: Props) {
     >
       <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <View style={styles.logo}>
-        <Text style={styles.logoN}>N</Text>
+        <Text style={styles.logoN}>K</Text>
       </View>
-      <Text style={styles.title}>NEXGEN</Text>
+      <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Login</Text>
       <Text style={styles.sub}>Enter your mobile number. We will send a one-time code.</Text>
       <NexgenTextInput

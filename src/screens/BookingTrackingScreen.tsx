@@ -68,9 +68,9 @@ export function BookingTrackingScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <View style={styles.logoMark}>
-          <Text style={styles.logoN}>N</Text>
+          <Text style={styles.logoN}>K</Text>
         </View>
-        <Text style={styles.brandName}>NEXGEN</Text>
+        <Text style={styles.brandName}>KAIRO</Text>
       </View>
 
       {waitingForConfirmation ? (
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoN: { fontSize: 15, fontWeight: '900', color: colors.white },
-  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  brandName: { fontSize: 16, fontWeight: '900', color: colors.white },
   waitingBody: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md },
   waitingTitle: { fontSize: 18, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
   waitingSub: { color: colors.grey, textAlign: 'center', lineHeight: 20 },

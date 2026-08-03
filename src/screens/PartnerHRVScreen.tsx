@@ -12,7 +12,7 @@ const ROWS: { k: string; t: string; s: 'Pass' | 'Fail' }[] = [
   { k: 'addr', t: 'Address validation', s: 'Pass' },
   { k: 'bank', t: 'Bank verification', s: 'Pass' },
   { k: 'cert', t: 'Certification check', s: 'Fail' },
-  { k: 'quiz', t: 'NEXGEN Academy quiz (score 8/10, mock)', s: 'Pass' },
+  { k: 'quiz', t: 'KAIRO Academy quiz (score 8/10, mock)', s: 'Pass' },
 ];
 
 type Nav = NativeStackNavigationProp<PartnerStackParamList>;

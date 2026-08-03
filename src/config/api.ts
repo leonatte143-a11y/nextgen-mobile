@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 /**
- * NEXGEN Mobile App - Centralized API Configuration
+ * KAIRO Mobile App - Centralized API Configuration
  *
  * Handles URL selection for different environments:
  * - Physical devices on local Wi-Fi (LAN)
@@ -80,19 +80,19 @@ export const BASE_URL = EXPO_API_URL || (Platform.OS === 'android' ? DEFAULT_AND
  * Shows which API URL is being used and why.
  */
 if (__DEV__) {
-  console.log('[NEXGEN] API Configuration:');
-  console.log('[NEXGEN] BASE_URL =', BASE_URL);
-  console.log('[NEXGEN] Platform =', Platform.OS);
+  console.log('[KAIRO] API Configuration:');
+  console.log('[KAIRO] BASE_URL =', BASE_URL);
+  console.log('[KAIRO] Platform =', Platform.OS);
   if (!EXPO_API_URL) {
     console.log(
-      '[NEXGEN] ℹ️ Using default emulator/simulator URL (EXPO_PUBLIC_API_URL not set).',
-      '\n[NEXGEN] For physical device on Wi-Fi:',
-      '\n[NEXGEN]   1. Find your machine IP: ipconfig',
-      '\n[NEXGEN]   2. Set .env.local: EXPO_PUBLIC_API_URL=http://YOUR_IP:4000',
-      '\n[NEXGEN]   3. Restart: npx expo start --clear'
+      '[KAIRO] ℹ️ Using default emulator/simulator URL (EXPO_PUBLIC_API_URL not set).',
+      '\n[KAIRO] For physical device on Wi-Fi:',
+      '\n[KAIRO]   1. Find your machine IP: ipconfig',
+      '\n[KAIRO]   2. Set .env.local: EXPO_PUBLIC_API_URL=http://YOUR_IP:4000',
+      '\n[KAIRO]   3. Restart: npx expo start --clear'
     );
   } else {
-    console.log('[NEXGEN] ✓ Using environment API URL:', EXPO_API_URL);
+    console.log('[KAIRO] ✓ Using environment API URL:', EXPO_API_URL);
   }
 }
 

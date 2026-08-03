@@ -165,7 +165,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             </Pressable>
             <Pressable
               style={styles.pairBtn}
-              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'NEXGEN Support' })}
+              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'KAIRO Support' })}
             >
               <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
               <Text style={styles.pairBtnTxt}>Support</Text>

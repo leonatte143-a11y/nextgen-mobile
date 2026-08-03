@@ -90,7 +90,7 @@ export function ShopDetailScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.hero}>
           <Ionicons name="storefront" size={48} color={colors.primary} />
-          {shop.isFeatured ? <Text style={styles.verified}>NEXGEN Verified</Text> : null}
+          {shop.isFeatured ? <Text style={styles.verified}>KAIRO Verified</Text> : null}
         </View>
         <Text style={styles.name}>{shop.shopName}</Text>
         <Text style={styles.meta}>
@@ -99,7 +99,7 @@ export function ShopDetailScreen() {
         {shop.partnerNearby ? (
           <View style={styles.partnerBox}>
             <Text style={styles.partnerTxt}>
-              NEXGEN Partner nearby{shop.nearbyPartnerName ? ` — ${shop.nearbyPartnerName}` : ''}
+              KAIRO Partner nearby{shop.nearbyPartnerName ? ` — ${shop.nearbyPartnerName}` : ''}
             </Text>
             <Text style={styles.partnerHint}>Great time to buy materials while your expert is here.</Text>
           </View>
