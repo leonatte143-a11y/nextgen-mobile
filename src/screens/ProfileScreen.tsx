@@ -19,7 +19,14 @@ const PHOTO_KEY = 'kairo_user_photo';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuTarget = 'Settings' | 'Rewards' | 'Support' | 'Language' | 'MyFavorites' | 'SavedAddresses';
+type MenuTarget =
+  | 'Settings'
+  | 'Rewards'
+  | 'Support'
+  | 'Language'
+  | 'MyFavorites'
+  | 'SavedAddresses'
+  | 'AdvertiseBusiness';
 
 export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const insets = useSafeAreaInsets();
@@ -34,6 +41,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Support' },
     { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
+    { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
   ];
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);

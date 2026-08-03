@@ -65,7 +65,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
             },
           ]}
         >
-          <Text style={styles.logoLetter}>N</Text>
+          <Text style={styles.logoLetter}>K</Text>
         </Animated.View>
         <Animated.View
           style={{

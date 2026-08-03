@@ -126,7 +126,7 @@ export function PartnerProfileScreen() {
     >
       <View style={styles.appHeader}>
         <View style={styles.logoMark}>
-          <Text style={styles.logoN}>N</Text>
+          <Text style={styles.logoN}>K</Text>
         </View>
         <Text style={styles.brandName}>KAIRO</Text>
       </View>

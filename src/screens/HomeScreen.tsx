@@ -42,6 +42,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const navigation = useNavigation<Nav>();
   const { language } = useAuth();
   const [location] = useState('Danavaipeta, Rajahmundry');
+  const areaLabel = location.split(',')[0]?.trim() || location;
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
   const [catalog, setCatalog] = useState<CatalogService[]>([]);
@@ -146,21 +147,17 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
+        <View style={styles.headerSide} />
         <View style={styles.brandBlock}>
-          <View style={styles.logoMark}>
-            <Text style={styles.logoN}>N</Text>
-          </View>
-          <View style={styles.brandTextCol}>
-            <Text style={styles.brandName}>KAIRO</Text>
-            <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
-              <View style={styles.locRow}>
-                <Ionicons name="location" size={14} color={colors.primary} />
-                <Text style={styles.loc} numberOfLines={1}>{location}</Text>
-              </View>
-            </Pressable>
-          </View>
+          <Text style={styles.brandName}>KAIRO</Text>
+          <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
+            <View style={styles.locRow}>
+              <Ionicons name="location" size={14} color={colors.primary} />
+              <Text style={styles.loc} numberOfLines={1}>{areaLabel}</Text>
+            </View>
+          </Pressable>
         </View>
-        <View style={styles.headerActions}>
+        <View style={[styles.headerSide, styles.headerActions]}>
           <Pressable onPress={() => navigation.navigate('Notifications')} style={styles.bellWrap} hitSlop={8}>
             <Ionicons name="notifications-outline" size={24} color={colors.charcoal} />
             {unreadCount > 0 ? (
@@ -198,9 +195,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
 
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
-          <Pressable onPress={() => navigation.navigate('AllServices')}>
-            <Text style={styles.seeAll}>See all</Text>
-          </Pressable>
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
         <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
@@ -270,21 +264,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  brandBlock: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
-  logoMark: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoN: { fontSize: 20, fontWeight: '900', color: colors.white },
-  brandTextCol: { flex: 1 },
-  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
-  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  loc: { fontSize: 12, color: colors.grey, fontWeight: '600', maxWidth: 200 },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerSide: { flex: 1 },
+  brandBlock: { alignItems: 'center', justifyContent: 'center' },
+  brandName: { fontSize: 28, fontWeight: '900', color: colors.navy, letterSpacing: 1 },
+  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2, justifyContent: 'center' },
+  loc: { fontSize: 12, color: colors.grey, fontWeight: '600', maxWidth: 160 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing.sm },
   bellWrap: { padding: 4, position: 'relative' },
   badge: {
     position: 'absolute',
@@ -396,7 +381,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   h2: { fontSize: 18, fontWeight: '800', color: colors.navy, paddingHorizontal: spacing.md, marginTop: spacing.md },
-  seeAll: { color: colors.primary, fontWeight: '700' },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
   sectionTitle: {
     paddingHorizontal: spacing.md,

@@ -1,5 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import { AdSubscriptionCheckoutScreen } from '../screens/AdSubscriptionCheckoutScreen';
+import { AdvertiseBusinessScreen } from '../screens/AdvertiseBusinessScreen';
+import { AdvertisePlanScreen } from '../screens/AdvertisePlanScreen';
 import { AllServicesScreen } from '../screens/AllServicesScreen';
 import { CategoryServicesScreen } from '../screens/CategoryServicesScreen';
 import { BookingTrackingScreen } from '../screens/BookingTrackingScreen';
@@ -86,6 +89,9 @@ export function RootNavigator() {
       <Stack.Screen name="PostListing" component={PostListingScreen} />
       <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="MarketplaceChat" component={MarketplaceChatScreen} />
+      <Stack.Screen name="AdvertiseBusiness" component={AdvertiseBusinessScreen} />
+      <Stack.Screen name="AdvertisePlan" component={AdvertisePlanScreen} />
+      <Stack.Screen name="AdSubscriptionCheckout" component={AdSubscriptionCheckoutScreen} />
     </Stack.Navigator>
   );
 }

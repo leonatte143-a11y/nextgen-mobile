@@ -42,6 +42,21 @@ export type RootStackParamList = {
   PostListing: undefined;
   ListingDetail: { listingId: string };
   MarketplaceChat: { listingId: string; otherPartyName?: string };
+  AdvertiseBusiness: undefined;
+  AdvertisePlan: {
+    businessName: string;
+    businessAddress: string;
+    bannerUri?: string;
+    bannerType?: 'image' | 'video';
+    socialLink?: string;
+  };
+  AdSubscriptionCheckout: {
+    businessName: string;
+    planId: 'image' | 'video';
+    durationUnit: 'days' | 'months';
+    durationValue: number;
+    totalAmount: number;
+  };
 };
 
 export type MainTabParamList = {

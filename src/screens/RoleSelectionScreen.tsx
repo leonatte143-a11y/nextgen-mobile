@@ -11,7 +11,7 @@ export function RoleSelectionScreen({ navigation }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.logo}>
-        <Text style={styles.logoN}>N</Text>
+        <Text style={styles.logoN}>K</Text>
       </View>
       <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Welcome</Text>
