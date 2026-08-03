@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { User, UserRegistrationInput } from '../types/user';
 import { logAuth } from '../lib/devLog';
@@ -6,10 +6,10 @@ import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 
 const KEYS = {
-  userToken: 'nexgen_user_token',
-  partnerToken: 'nexgen_partner_token',
-  language: 'nexgen_lang',
-  languageDone: 'nexgen_language_onboarding',
+  userToken: 'kairo_user_token',
+  partnerToken: 'kairo_partner_token',
+  language: 'kairo_lang',
+  languageDone: 'kairo_language_onboarding',
 };
 
 type LangCode = 'en' | 'te' | 'hi';

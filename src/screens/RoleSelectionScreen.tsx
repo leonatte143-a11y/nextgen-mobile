@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
@@ -13,7 +13,7 @@ export function RoleSelectionScreen({ navigation }: Props) {
       <View style={styles.logo}>
         <Text style={styles.logoN}>N</Text>
       </View>
-      <Text style={styles.title}>NEXGEN</Text>
+      <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Welcome</Text>
       <Text style={styles.sub}>Choose your role to continue</Text>
       <View style={styles.buttonContainer}>

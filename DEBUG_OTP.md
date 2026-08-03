@@ -1,8 +1,8 @@
-# Debug OTP Testing Guide
+﻿# Debug OTP Testing Guide
 
 ## Overview
 
-The NEXGEN mobile app now displays debug OTP codes during staging/testing when the backend provides them. This is **only for internal QA testing** and can be disabled in production.
+The KAIRO mobile app now displays debug OTP codes during staging/testing when the backend provides them. This is **only for internal QA testing** and can be disabled in production.
 
 ---
 
@@ -133,9 +133,9 @@ File: `eas.json`
 
 6. Check console logs:
    ```
-   [NEXGEN-OTP] Requesting OTP {...}
-   [NEXGEN-OTP] OTP received {hasDebugOtp: true, expiresInSec: 300}
-   [NEXGEN-OTP] Displaying debug OTP {debugOtp: "123456"}
+   [KAIRO-OTP] Requesting OTP {...}
+   [KAIRO-OTP] OTP received {hasDebugOtp: true, expiresInSec: 300}
+   [KAIRO-OTP] Displaying debug OTP {debugOtp: "123456"}
    ```
 
 ---
@@ -213,9 +213,9 @@ When debug OTP is displayed, you'll see:
 Logs are printed to the console (visible in `expo start` output or `adb logcat`):
 
 ```
-[NEXGEN-OTP] Requesting OTP {phone: "9876543210"}
-[NEXGEN-OTP] OTP received {hasDebugOtp: true, expiresInSec: 300}
-[NEXGEN-OTP] Displaying debug OTP {debugOtp: "123456"}
+[KAIRO-OTP] Requesting OTP {phone: "9876543210"}
+[KAIRO-OTP] OTP received {hasDebugOtp: true, expiresInSec: 300}
+[KAIRO-OTP] Displaying debug OTP {debugOtp: "123456"}
 ```
 
 Logs are **only** printed when `__DEV__=true` (local development).
@@ -264,7 +264,7 @@ The mobile app correctly unwraps the backend response:
 - [ ] Check backend is running in non-production mode
 - [ ] Check `EXPO_PUBLIC_SHOW_DEBUG_OTP=1` in `.env.staging` or `eas.json`
 - [ ] Restart Expo: `npx expo start --clear`
-- [ ] Check console logs for `[NEXGEN-OTP]` messages
+- [ ] Check console logs for `[KAIRO-OTP]` messages
 - [ ] Verify backend response includes `debugOtp` field (check network tab in DevTools)
 
 ### OTP Showing in Production?

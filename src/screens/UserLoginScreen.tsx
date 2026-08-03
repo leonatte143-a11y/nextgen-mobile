@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, spacing } from '../constants/theme';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
@@ -163,10 +163,10 @@ export function UserLoginScreen({ navigation }: Props) {
       <View style={styles.logo}>
         <Text style={styles.logoN}>N</Text>
       </View>
-      <Text style={styles.title}>NEXGEN</Text>
+      <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Login</Text>
       <Text style={styles.sub}>Enter your mobile number. We will send a one-time code.</Text>
-      <NexgenTextInput
+      <KairoTextInput
         prefix="+91"
         placeholder="Enter 10-digit mobile number"
         keyboardType="number-pad"

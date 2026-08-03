@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,7 +15,7 @@ import { t } from '../i18n/strings';
 import type { RootStackParamList, MainTabScreenProps } from '../navigation/types';
 import { userService } from '../services/userService';
 
-const PHOTO_KEY = 'nexgen_user_photo';
+const PHOTO_KEY = 'kairo_user_photo';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -165,7 +165,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             </Pressable>
             <Pressable
               style={styles.pairBtn}
-              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'NEXGEN Support' })}
+              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'KAIRO Support' })}
             >
               <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
               <Text style={styles.pairBtnTxt}>Support</Text>

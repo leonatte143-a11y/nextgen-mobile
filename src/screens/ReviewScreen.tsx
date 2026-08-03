@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+﻿import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
@@ -39,7 +39,7 @@ export function ReviewScreen() {
     try {
       const reviewNote = tip > 0 ? `${note.trim()}${note.trim() ? ' · ' : ''}Tip: ₹${tip}` : note;
       await bookingService.submitReview(route.params.bookingId, stars, picked, reviewNote);
-      Alert.alert('Thank you!', 'Your feedback helps us improve NEXGEN.');
+      Alert.alert('Thank you!', 'Your feedback helps us improve KAIRO.');
       goHome();
     } catch (error) {
       Alert.alert('Unable to submit', String(error));

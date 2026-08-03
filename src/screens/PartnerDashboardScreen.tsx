@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,7 +35,7 @@ export function PartnerDashboardScreen(_props: Props) {
           <View style={styles.logoMark}>
             <Text style={styles.logoN}>N</Text>
           </View>
-          <Text style={styles.brandName}>NEXGEN</Text>
+          <Text style={styles.brandName}>KAIRO</Text>
         </View>
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>

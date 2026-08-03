@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { colors as lightColors, darkColors, spacing, radius, typography } from '../constants/theme';
 
-const KEY = 'nexgen_dark_mode';
+const KEY = 'kairo_dark_mode';
 
 export type AppColors = typeof lightColors | typeof darkColors;
 

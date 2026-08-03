@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../navigation/types';
@@ -43,16 +43,16 @@ export function RegisterScreen({ navigation }: Props) {
     <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Create account</Text>
       <Text style={styles.sub}>Save your profile, then sign in with the OTP sent to your mobile.</Text>
-      <NexgenTextInput label="First name" value={firstName} onChangeText={setFirstName} />
-      <NexgenTextInput label="Last name" value={lastName} onChangeText={setLastName} />
-      <NexgenTextInput
+      <KairoTextInput label="First name" value={firstName} onChangeText={setFirstName} />
+      <KairoTextInput label="Last name" value={lastName} onChangeText={setLastName} />
+      <KairoTextInput
         label="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <NexgenTextInput
+      <KairoTextInput
         label="Phone"
         prefix="+91"
         keyboardType="number-pad"
@@ -63,7 +63,7 @@ export function RegisterScreen({ navigation }: Props) {
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
         <Text style={styles.termsTxt}>
-          I agree to the NEXGEN{' '}
+          I agree to the KAIRO{' '}
           <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
             Terms and Conditions
           </Text>

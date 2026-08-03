@@ -1,7 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-const KEY = 'nexgen_fav_partners_v1';
+const KEY = 'kairo_fav_partners_v1';
 
 export type FavoritePartner = {
   partnerId: string;

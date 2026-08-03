@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -151,7 +151,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             <Text style={styles.logoN}>N</Text>
           </View>
           <View style={styles.brandTextCol}>
-            <Text style={styles.brandName}>NEXGEN</Text>
+            <Text style={styles.brandName}>KAIRO</Text>
             <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
               <View style={styles.locRow}>
                 <Ionicons name="location" size={14} color={colors.primary} />
@@ -242,9 +242,9 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Text style={styles.footerBrand}>NEXGEN</Text>
+          <Text style={styles.footerBrand}>KAIRO</Text>
           <Text style={styles.footerTag}>Your trusted home services platform — Andhra Pradesh</Text>
-          <Text style={styles.footerLink}>support@nexgen.com · +91 98765 43210</Text>
+          <Text style={styles.footerLink}>support@kairo.com · +91 98765 43210</Text>
         </View>
       </ScrollView>
 

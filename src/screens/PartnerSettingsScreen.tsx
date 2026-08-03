@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -37,7 +37,7 @@ export function PartnerSettingsScreen() {
       <NavRow icon="document-text-outline" label="Terms of Service" onPress={() => navigation.navigate('Terms')} />
       <NavRow icon="alert-circle-outline" label="Report an Issue" onPress={() => navigation.navigate('Support')} />
       <View style={styles.versionRow}>
-        <Text style={styles.versionTxt}>NEXGEN Partner v{APP_VERSION}</Text>
+        <Text style={styles.versionTxt}>KAIRO Partner v{APP_VERSION}</Text>
       </View>
 
       <Text style={styles.section}>Actions</Text>

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
@@ -18,17 +18,17 @@ export function PrivacyScreen() {
       <Text style={styles.h1}>Privacy Policy</Text>
       <Text style={styles.p}>
         We collect your name, email, phone, and location to fulfil bookings, connect you with Service Partners
-        and Shops, and improve your experience across NEXGEN.
+        and Shops, and improve your experience across KAIRO.
       </Text>
       <Text style={styles.h2}>Marketplace & Chat</Text>
       <Text style={styles.p}>
         For P2P Marketplace and Super-Chat features, your messages are shared with the relevant Buyer/Seller or
-        Service Partner, and with NEXGEN Admin for support and safety moderation. Personal phone numbers are kept
+        Service Partner, and with KAIRO Admin for support and safety moderation. Personal phone numbers are kept
         private in chat until you choose to share contact details.
       </Text>
       <Text style={styles.h2}>Your Choices</Text>
       <Text style={styles.p}>
-        You can manage notification preferences in Settings at any time. Contact privacy@nexgen.com for data
+        You can manage notification preferences in Settings at any time. Contact privacy@kairo.com for data
         access, correction, or deletion requests.
       </Text>
     </ScrollView>

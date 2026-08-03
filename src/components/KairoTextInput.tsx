@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { colors, radius, spacing } from '../constants/theme';
 
@@ -8,7 +8,7 @@ type Props = TextInputProps & {
   prefix?: string;
 };
 
-export function NexgenTextInput({ label, error, prefix, style, onFocus, onBlur, ...rest }: Props) {
+export function KairoTextInput({ label, error, prefix, style, onFocus, onBlur, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   return (
     <View style={styles.wrap}>

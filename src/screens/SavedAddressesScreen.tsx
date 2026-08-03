@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
 
-const STORAGE_KEY = 'nexgen_saved_addresses';
+const STORAGE_KEY = 'kairo_saved_addresses';
 
 type SavedAddress = { id: string; label: string; line: string };
 

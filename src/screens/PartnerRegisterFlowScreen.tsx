@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { authService } from '../services/authService';
@@ -113,7 +113,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       return;
     }
     if (!acceptedTerms) {
-      Alert.alert('Terms required', 'Please accept NEXGEN terms and conditions to continue.');
+      Alert.alert('Terms required', 'Please accept KAIRO terms and conditions to continue.');
       return;
     }
     if (!canProceed) {
@@ -140,7 +140,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
-        'NEXGEN Partner',
+        'KAIRO Partner',
         'Registration and payment complete. On the partner login screen, request an OTP to sign in.',
       );
       navigation.replace('PartnerLogin');
@@ -161,7 +161,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
           <Ionicons name="card-outline" size={40} color={colors.primary} />
           <Text style={styles.payTitle}>One-time registration fee</Text>
           <Text style={styles.paySub}>
-            To activate your NEXGEN Partner account and start receiving job requests, complete the
+            To activate your KAIRO Partner account and start receiving job requests, complete the
             one-time registration payment below.
           </Text>
           <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
@@ -182,9 +182,9 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Step 1 — Profile & KYC</Text>
 
-      <NexgenTextInput label="Full Name" value={name} onChangeText={setName} />
+      <KairoTextInput label="Full Name" value={name} onChangeText={setName} />
 
-      <NexgenTextInput
+      <KairoTextInput
         label="Mobile Number"
         prefix="+91"
         value={phone}
@@ -202,7 +202,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       {otpVisible ? (
         <View style={styles.otpRow}>
           <View style={{ flex: 1 }}>
-            <NexgenTextInput
+            <KairoTextInput
               label={`${otpLength}-digit OTP`}
               value={otpCode}
               keyboardType="number-pad"
@@ -244,9 +244,9 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         <Ionicons name="chevron-down" size={18} color={colors.grey} />
       </Pressable>
 
-      <NexgenTextInput label="Work Location" value={workLocation} onChangeText={setWorkLocation} />
+      <KairoTextInput label="Work Location" value={workLocation} onChangeText={setWorkLocation} />
 
-      <NexgenTextInput
+      <KairoTextInput
         label="Pincode"
         value={pincode}
         keyboardType="number-pad"
@@ -262,7 +262,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
 
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
-        <Text style={styles.termsTxt}>Please accept NEXGEN terms and conditions to continue.</Text>
+        <Text style={styles.termsTxt}>Please accept KAIRO terms and conditions to continue.</Text>
       </Pressable>
 
       <PrimaryButton title="Next" onPress={onNext} disabled={!canProceed} />

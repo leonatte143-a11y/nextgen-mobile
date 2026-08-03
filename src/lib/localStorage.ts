@@ -1,10 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const LOCAL_STORAGE_KEYS = {
-  notificationBookingUpdates: 'nexgen_notify_booking_updates',
-  notificationSpecialOffers: 'nexgen_notify_special_offers',
-  notificationAppUpdates: 'nexgen_notify_app_updates',
-  searchQueryCount: 'nexgen_search_query_count',
+  notificationBookingUpdates: 'kairo_notify_booking_updates',
+  notificationSpecialOffers: 'kairo_notify_special_offers',
+  notificationAppUpdates: 'kairo_notify_app_updates',
+  searchQueryCount: 'kairo_search_query_count',
 };
 
 export async function getBooleanSetting(key: string, defaultValue = false): Promise<boolean> {

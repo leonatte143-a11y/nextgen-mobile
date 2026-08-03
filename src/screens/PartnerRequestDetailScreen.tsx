@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -218,7 +218,7 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Price & Commission</Text>
         <Text style={styles.sectionText}>Customer paid ₹{request.amount}</Text>
-        <Text style={styles.sectionText}>NEXGEN commission ₹{request.commission}</Text>
+        <Text style={styles.sectionText}>KAIRO commission ₹{request.commission}</Text>
         <Text style={styles.sectionText}>Your share ₹{request.partnerShare}</Text>
       </View>
       {request.lineItems?.length ? (

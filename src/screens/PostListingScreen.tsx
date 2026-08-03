@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
@@ -118,7 +118,7 @@ export function PostListingScreen() {
         latitude: coords?.latitude,
         longitude: coords?.longitude,
       });
-      Alert.alert('Posted!', 'Your listing is live on NEXGEN Market.', [
+      Alert.alert('Posted!', 'Your listing is live on KAIRO Market.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
@@ -172,10 +172,10 @@ export function PostListingScreen() {
           ) : null}
         </View>
 
-        <NexgenTextInput label="Product Name" value={title} onChangeText={setTitle} placeholder="e.g. Hand-cutting machine" />
+        <KairoTextInput label="Product Name" value={title} onChangeText={setTitle} placeholder="e.g. Hand-cutting machine" />
 
         <Text style={styles.label}>Category</Text>
-        <NexgenTextInput
+        <KairoTextInput
           value={categoryQuery}
           onChangeText={(t) => {
             setCategoryQuery(t);
@@ -205,13 +205,13 @@ export function PostListingScreen() {
 
         {listingType === 'rent' ? (
           <>
-            <NexgenTextInput
+            <KairoTextInput
               label="Security Deposit Amount (₹)"
               value={depositAmount}
               onChangeText={(t) => setDepositAmount(t.replace(/\D/g, ''))}
               keyboardType="number-pad"
             />
-            <NexgenTextInput
+            <KairoTextInput
               label="Rent per day (₹, optional)"
               value={rentPricePerDay}
               onChangeText={(t) => setRentPricePerDay(t.replace(/\D/g, ''))}
@@ -222,7 +222,7 @@ export function PostListingScreen() {
             </Text>
           </>
         ) : (
-          <NexgenTextInput
+          <KairoTextInput
             label="Price (₹)"
             value={price}
             onChangeText={(t) => setPrice(t.replace(/\D/g, ''))}
@@ -230,8 +230,8 @@ export function PostListingScreen() {
           />
         )}
 
-        <NexgenTextInput label="Description" value={description} onChangeText={setDescription} multiline />
-        <NexgenTextInput label="City (optional)" value={city} onChangeText={setCity} />
+        <KairoTextInput label="Description" value={description} onChangeText={setDescription} multiline />
+        <KairoTextInput label="City (optional)" value={city} onChangeText={setCity} />
 
         <Pressable style={styles.locBtn} onPress={useMyLocation}>
           <Ionicons name="locate-outline" size={18} color={colors.primary} />

@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+﻿import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
@@ -70,7 +70,7 @@ export function BookingTrackingScreen() {
         <View style={styles.logoMark}>
           <Text style={styles.logoN}>N</Text>
         </View>
-        <Text style={styles.brandName}>NEXGEN</Text>
+        <Text style={styles.brandName}>KAIRO</Text>
       </View>
 
       {waitingForConfirmation ? (

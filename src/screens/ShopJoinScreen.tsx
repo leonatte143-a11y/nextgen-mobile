@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ANDHRA_PRADESH_CITIES, DEFAULT_AP_CITY } from '../constants/apCities';
 import { colors, radius, spacing } from '../constants/theme';
@@ -109,7 +109,7 @@ export function ShopJoinScreen() {
       return;
     }
     if (!acceptedTerms) {
-      Alert.alert('Terms required', 'Please accept the NEXGEN Terms and Conditions to continue.');
+      Alert.alert('Terms required', 'Please accept the KAIRO Terms and Conditions to continue.');
       return;
     }
     setLoading(true);
@@ -140,7 +140,7 @@ export function ShopJoinScreen() {
       });
       Alert.alert(
         'Application submitted',
-        'Our team will verify your shop and list you on NEXGEN Market.',
+        'Our team will verify your shop and list you on KAIRO Market.',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (e) {
@@ -159,7 +159,7 @@ export function ShopJoinScreen() {
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
-        <Text style={styles.headerTitle}>Join NEXGEN</Text>
+        <Text style={styles.headerTitle}>Join KAIRO</Text>
         <View style={{ width: 24 }} />
       </View>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
@@ -168,8 +168,8 @@ export function ShopJoinScreen() {
           Get more local leads from our 10,000+ users and service partners.
         </Text>
 
-        <NexgenTextInput label="Shop name" value={shopName} onChangeText={setShopName} />
-        <NexgenTextInput label="Owner name" value={ownerName} onChangeText={setOwnerName} />
+        <KairoTextInput label="Shop name" value={shopName} onChangeText={setShopName} />
+        <KairoTextInput label="Owner name" value={ownerName} onChangeText={setOwnerName} />
 
         <Text style={styles.label}>Shop photo (optional)</Text>
         <Text style={styles.hint}>A high-quality storefront or product banner helps you get more leads.</Text>
@@ -186,7 +186,7 @@ export function ShopJoinScreen() {
 
         <Text style={styles.label}>Business category</Text>
         <Text style={styles.hint}>Type to search or enter a new category — trending options appear below.</Text>
-        <NexgenTextInput
+        <KairoTextInput
           value={categoryQuery}
           onChangeText={(t) => {
             setCategoryQuery(t);
@@ -209,7 +209,7 @@ export function ShopJoinScreen() {
           </View>
         ) : null}
 
-        <NexgenTextInput
+        <KairoTextInput
           label="Phone"
           prefix="+91"
           keyboardType="number-pad"
@@ -217,7 +217,7 @@ export function ShopJoinScreen() {
           value={phone}
           onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
         />
-        <NexgenTextInput label="Address" value={address} onChangeText={setAddress} multiline />
+        <KairoTextInput label="Address" value={address} onChangeText={setAddress} multiline />
 
         <Text style={styles.label}>City (Andhra Pradesh)</Text>
         <Text style={styles.hint}>Auto-detected from GPS when available. Tap to change.</Text>
@@ -227,7 +227,7 @@ export function ShopJoinScreen() {
         </Pressable>
         {cityPickerOpen ? (
           <View style={styles.cityPicker}>
-            <NexgenTextInput
+            <KairoTextInput
               value={citySearch}
               onChangeText={setCitySearch}
               placeholder="Search AP cities"
@@ -250,7 +250,7 @@ export function ShopJoinScreen() {
           </View>
         ) : null}
 
-        <NexgenTextInput
+        <KairoTextInput
           label="GST / Trade license (optional)"
           value={gstOrLicense}
           onChangeText={setGstOrLicense}
@@ -275,7 +275,7 @@ export function ShopJoinScreen() {
         <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
           <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
           <Text style={styles.termsTxt}>
-            I agree to the NEXGEN{' '}
+            I agree to the KAIRO{' '}
             <Text style={styles.termsLink} onPress={() => navigation.navigate('Terms')}>
               Terms and Conditions
             </Text>

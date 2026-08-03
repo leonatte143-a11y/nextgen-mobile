@@ -1,5 +1,5 @@
-/**
- * NEXGEN brand — from product spec (Orange & White, AP focus).
+﻿/**
+ * KAIRO brand — from product spec (Orange & White, AP focus).
  */
 export const colors = {
   primary: '#FF8C00',

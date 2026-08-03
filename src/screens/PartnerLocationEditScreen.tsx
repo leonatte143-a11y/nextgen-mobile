@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { colors, radius, spacing } from '../constants/theme';
 import { usePartner } from '../context/PartnerContext';
 import type { PartnerLocationEditScreenProps } from '../navigation/PartnerStackTypes';
@@ -72,7 +72,7 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
         </View>
 
         <Text style={styles.label}>Primary city / area</Text>
-        <NexgenTextInput
+        <KairoTextInput
           value={city}
           onChangeText={setCity}
           placeholder="e.g. Rajahmundry, Danavaipeta"

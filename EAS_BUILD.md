@@ -1,4 +1,4 @@
-EAS Preview APK build
+﻿EAS Preview APK build
 =====================
 
 Quick steps to produce a Preview APK that connects to Railway staging backend.
@@ -40,10 +40,10 @@ TypeError: Cannot read properties of undefined (reading 'toLowerCase')
 
 ```
 🤖 Open this link on your Android devices (or scan the QR code) to install the app:
-https://expo.dev/accounts/YOUR_ORG/projects/nexgen-mobile/builds/BUILD_ID
+https://expo.dev/accounts/YOUR_ORG/projects/kairo-mobile/builds/BUILD_ID
 ```
 
-Download and install directly, or download from https://expo.dev → Your org → nexgen-mobile → Builds.
+Download and install directly, or download from https://expo.dev → Your org → kairo-mobile → Builds.
 
 Notes
 - For sensitive values you may prefer to set build-time secrets via `eas secret:create` and reference them in `eas.json`.

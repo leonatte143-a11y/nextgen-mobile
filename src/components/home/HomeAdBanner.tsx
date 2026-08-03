@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+﻿import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -55,7 +55,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
     return (
       <View style={styles.placeholder}>
         <Text style={styles.placeholderTitle}>Sponsored</Text>
-        <Text style={styles.placeholderSub}>Local offers from NEXGEN partners</Text>
+        <Text style={styles.placeholderSub}>Local offers from KAIRO partners</Text>
       </View>
     );
   }

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -145,7 +145,7 @@ export function ShopListContent() {
               </View>
             ) : null}
             {!search.trim() && !filterCat && featured.length > 0 ? (
-              <Text style={styles.sectionTitle}>NEXGEN Verified Shops</Text>
+              <Text style={styles.sectionTitle}>KAIRO Verified Shops</Text>
             ) : null}
           </>
         }
@@ -160,7 +160,7 @@ export function ShopListContent() {
               <Text style={styles.joinSub}>
                 Get more local leads from our users and service partners in Rajahmundry & Guntur.
               </Text>
-              <PrimaryButton title="Join NEXGEN" onPress={() => undefined} disabled />
+              <PrimaryButton title="Join KAIRO" onPress={() => undefined} disabled />
             </View>
             <View style={styles.comingSoonOverlay}>
               <Text style={styles.comingSoonTxt}>Coming Soon</Text>

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -25,7 +25,7 @@ export function ShopScreen(_props: RootStackScreenProps<'Shop'>) {
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>Shops & Materials</Text>
-          <Text style={styles.sub}>NEXGEN Market · nearby verified vendors</Text>
+          <Text style={styles.sub}>KAIRO Market · nearby verified vendors</Text>
         </View>
         <Pressable style={styles.menuBtn} onPress={() => setMenuOpen(true)} hitSlop={12}>
           <Ionicons name="ellipsis-vertical" size={22} color={colors.white} />
@@ -45,7 +45,7 @@ export function ShopScreen(_props: RootStackScreenProps<'Shop'>) {
               <Ionicons name="trending-up-outline" size={24} color={colors.primary} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.menuCardTitle}>Grow Your Business</Text>
-                <Text style={styles.menuCardSub}>List your shop on NEXGEN Market and get local leads.</Text>
+                <Text style={styles.menuCardSub}>List your shop on KAIRO Market and get local leads.</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.grey} />
             </Pressable>

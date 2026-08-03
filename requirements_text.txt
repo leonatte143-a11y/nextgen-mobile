@@ -1,7 +1,7 @@
-user
-               NEXGEN Customer Interface
+ï»¿user
+               KAIRO Customer Interface
 1 app profile photo > capital (N)
-2 app name > Nexgen
+2 app name > Kairo
 3 location ( current location)
 4 profile information> name
 
@@ -48,7 +48,7 @@ as icon , all services in grid model , show at least 9 icons to users ,
 
                    Transparent pricing with no hidden charges
 
-                             NEXGEN
+                             KAIRO
 
   Your trusted home services platform serving Andhra Pradesh
                                   Quick Links
@@ -67,10 +67,10 @@ as icon , all services in grid model , show at least 9 icons to users ,
 
                        Contact Us
 
-   support@nexgen.com
+   support@kairo.com
    +91 98765 43210
    Vijayawada, AP
-© 2026 NEXGEN Home Services. All rights reserved.
+ï¿½ 2026 KAIRO Home Services. All rights reserved.
 
 EXAMPLE of BOOKING a service
 
@@ -114,7 +114,7 @@ Service Provider
 
 Ramesh Kumar
 
- 4.5· 152 jobs
+ 4.5ï¿½ 152 jobs
 Review photos
 Login Page
 Add these specific details to your document to ensure the Orange & White theme is applied
@@ -122,7 +122,7 @@ correctly.
 
 1. Header (Branding)
 Profile Logo: Centered at the top.
-App Name: "NEXGEN" in Bold
+App Name: "KAIRO" in Bold
 Heading: "Login"
 Sub-text: "Enter your mobile number to get started."
 
@@ -143,17 +143,17 @@ Validation: The "Submit" button should be greyed out (disabled) until 10 digits 
 Auto-focus: When the OTP is sent, the cursor should automatically move to the first OTP box.
 Resend Timer: Add a "Resend OTP in 0:30" link in case the SMS is slow.
 User Dashboard
- NEXGEN User Dashboard Specification
+ KAIRO User Dashboard Specification
 
 1. The Header (Sticky Top Bar)
 
-     Top Left: NEXGEN Logo (Icon) with the App Name (Heading) directly underneath it in
+     Top Left: KAIRO Logo (Icon) with the App Name (Heading) directly underneath it in
          Bold Orange.
 
      Top Right: Notification (Bell Icon) positioned to the left of a circular Profile (User
          Icon).
 
-     Location Section (Below NEXGEN Logo Icon): A clickable row showing a "Map Pin"
+     Location Section (Below KAIRO Logo Icon): A clickable row showing a "Map Pin"
          icon + "Select Your Location."
                Action: Clicking opens a full-screen overlay with a "Use Current Location
                    (GPS)" button and a "Manual Search" input field.
@@ -167,7 +167,7 @@ Resend Timer: Add a "Resend OTP in 0:30" link in case the SMS is slow.
                Placeholder: "Search for 'Fan Repair' or 'Plumber'..."
                Right Side: Filter (Icon) to sort by price, distance, or partner rating.
 
- NEXGEN: Moderated service Category Script
+ KAIRO: Moderated service Category Script
 
 1. The Dynamic Header
 
@@ -280,11 +280,11 @@ buttons, active icons, and the "Book Now" triggers.
      Use White for the main background to keep the app looking clean and fast.
  Use Soft Shadows on cards to make the "Top Rated" section pop.
 User Profile
-  NEXGEN: User Profile & Account Specifications
+  KAIRO: User Profile & Account Specifications
 
     1. Header (Account Summary)
 
-     Background: Solid NEXGEN Orange (#FF8C00).
+     Background: Solid KAIRO Orange (#FF8C00).
      Title: "My Profile" (Large White Bold).
      Subtitle: "Manage your account" (Small White).
      Back Arrow: On the top left to return to the Home Dashboard.
@@ -300,13 +300,13 @@ A white card that floats slightly over the orange header.
                Email: small grey text.
 
      Action: "Edit Profile" button (White background, Grey border). It should under the Email.
-     Add join NEXGEN PRO TAG for (for special benefit updates! 18 rupes for month join
+     Add join KAIRO PRO TAG for (for special benefit updates! 18 rupes for month join
 
          pro (button )add have a question? And CHECK FAQS and terms
 
     3. Engagement Stats (The "Three-Column" Row)
 
-As seen in your image, this shows the user's history with NEXGEN:
+As seen in your image, this shows the user's history with KAIRO:
 
     1. Recent Bookings: Count of total services completed (e.g., "12").
     2. Queries: recently most searched services
@@ -348,7 +348,7 @@ This section allows users to control how the app interacts with them.
     Special Offers: A toggle for promotional push notifications.
     App Updates: A toggle to notify users about new features in
 
-       NEXGEN.
+       KAIRO.
     Style: Orange toggles for "On" and Grey for "Off."
 
     2. Payment Management
@@ -368,7 +368,7 @@ This page turns user loyalty into a currency (Points to Cash).
 
     1. Points Display
 
-    Main Banner: A large NEXGEN Orange card.
+    Main Banner: A large KAIRO Orange card.
     Balance: Display "850" (or current points) in large white font.
     Conversion: Show the actual value (e.g., 850 points = 85.00
 
@@ -386,12 +386,12 @@ A 3-step numbered guide with clean icons:
 
   Module 3: Refer & Earn
 
-This is your primary tool for growing NEXGEN through word-of-mouth.
+This is your primary tool for growing KAIRO through word-of-mouth.
 
     1. Referral Code Section
 
     Code Display: A light green box showing a unique code (e.g.,
-       NEXGEN2026).i need separate codes for all users
+       KAIRO2026).i need separate codes for all users
 
     Action: A "Copy" button immediately next to the code.
 
@@ -424,7 +424,7 @@ Crucial for building trust with your users in Andhra Pradesh.
  Usage: Used only for fulfilling bookings and improving user
    experience.
 
- Contact: Direct email link to privacy@nexgen.com for data
+ Contact: Direct email link to privacy@kairo.com for data
    deletion requests.
 Booking Flow
 1. The Header (Context)
@@ -460,7 +460,7 @@ A clean list at the bottom to avoid confusion:
      Visiting Fee: 30
      Taxes/GST: 15
      Amount Payable: 295 (Bold Deep Charcoal).
-     Promo: "Applied: NEXGEN2026 (-50)" if they used a referral.
+     Promo: "Applied: KAIRO2026 (-50)" if they used a referral.
 
 5. Payment Selection
 
@@ -473,7 +473,7 @@ A clean list at the bottom to avoid confusion:
      On full width button split one more button on bottom divide that box into 2 boxes one
 
          name is calling and another is chat
-     Color: Solid NEXGEN Orange (#FF8C00).
+     Color: Solid KAIRO Orange (#FF8C00).
      Text: "Book Now & Pay 295".
 The "Dynamic Surge Pricing
 The "Dynamic Surge Pricing" Script (Rain/Busy Hours)
@@ -489,7 +489,7 @@ Sankranti), demand for Drivers or Plumbers will explode.
 
         they earn more during busy times.
 Live Tracking & Job Verification Script
- NEXGEN: Booking History & Live Tracking
+ KAIRO: Booking History & Live Tracking
 
 Script
 
@@ -548,7 +548,7 @@ A vertical list of all previous services.
 
  Figma Design Instructions
 
-      Map Design: Use "Soft Map" colors (Greys and Whites) so the NEXGEN Orange route line and
+      Map Design: Use "Soft Map" colors (Greys and Whites) so the KAIRO Orange route line and
           icons pop out.
 
       OTP Visuals: Make the OTP numbers very large (24px+) so they are easy to read in bright
@@ -572,12 +572,12 @@ Re-book Feature  Clicking "Re-book" pre-fills the Category and Sub-category (Fan
 Cancellation Link If the status is "Active" and time is > 2hrs, show the "Cancel Booking" button
                               prominently.
 cancel booking
- NEXGEN: Official Cancellation Policy
+ KAIRO: Official Cancellation Policy
 
 1. The "Golden Window" (Full Refund)
 
      Rule: Users can cancel any booking up to 2 hours before the scheduled service time for
-         a 100% refund to their NEXGEN Wallet or original payment method.
+         a 100% refund to their KAIRO Wallet or original payment method.
 
      Logic: This gives the partner enough time to find another booking.
 
@@ -648,7 +648,7 @@ Partner is Late Check Current_Time vs             If > 20 mins late, bypass
 Refund       API call to Payment Gateway          Issue partial/full refund based
 Process      (Razorpay/PhonePe).                  on rules.
 smart operational notifications
- NEXGEN: Smart Operational Notifications
+ KAIRO: Smart Operational Notifications
 
 1. The Notification Layout (In-App Popup)
 
@@ -698,7 +698,7 @@ In the Profile > Settings section, allow users to toggle these specific categori
      Visual Distinction: Use Bold Orange text for "Action Items" (like the OTP or Amount)
          so the user sees the important data without reading the whole sentence.
 
-     Sound Logic: (For the Developer) Assign a "Unique NEXGEN Ping" sound for arrival
+     Sound Logic: (For the Developer) Assign a "Unique KAIRO Ping" sound for arrival
          alerts so the user knows it's the partner and not just a WhatsApp message.
 
      Buttons inside Notifications: For urgent alerts (like Partner Arrival), add a small "Call
@@ -718,7 +718,7 @@ RMP Consult IF doctor_assigned            Immediate Alert (High Priority)
 
 Low Wallet    IF balance < service_price  Action Alert (Top Banner)
 Service "Cart" or "Multi-Selection"
- NEXGEN: Service Cart & Multi-Selection Script
+ KAIRO: Service Cart & Multi-Selection Script
 
 1. The Header (Cart Status)
 
@@ -763,7 +763,7 @@ Since every house has different problems, provide a space for details:
                Estimated Total: 680
 
      The Action Button: Fixed full-width at the bottom.
-     Color: Solid NEXGEN Orange.
+     Color: Solid KAIRO Orange.
      Text: "Proceed to Booking (3 Services)".
  Figma Design Instructions
 
@@ -791,7 +791,7 @@ Group Discount (Optional) Logic to reduce the "Visiting Fee" if multiple service
 Media        Upload voice/photos to a temporary S3 bucket linked to the Booking_ID.
 Attachments
 Payments
- NEXGEN: Payment & Secure Checkout Script
+ KAIRO: Payment & Secure Checkout Script
 
 1. The Header (Trust & Safety)
      Background: Pure White (#FFFFFF).
@@ -833,7 +833,7 @@ C. Post-Service Payment
 4. The "Pay Now" Action
 
      Button Style: Fixed at the bottom of the screen.
-     Color: Solid NEXGEN Orange (#FF8C00).
+     Color: Solid KAIRO Orange (#FF8C00).
      Text: "Confirm & Pay 295".
      Success Animation: Once clicked, show a full-screen Orange Tick
 
@@ -845,7 +845,7 @@ C. Post-Service Payment
         Orange border to show it is "Active."
 
      Footer: Add a small text at the very bottom: "Your payment is 100%
-        safe with NEXGEN Secure."
+        safe with KAIRO Secure."
 
      Micro-interactions: If the user selects "Cash," the "Pay Now" button
         should change text to "Confirm Booking."
@@ -864,7 +864,7 @@ Split Payment (Super Admin Logic) Automatically calculate the 10%
                        Commission and the 90% Partner Share after the
                        transaction.
 Reviews & Ratings
- NEXGEN: Review & Rating Screen Script
+ KAIRO: Review & Rating Screen Script
 
 1. The Header (Gratitude)
 
@@ -878,7 +878,7 @@ Split Payment (Super Admin Logic) Automatically calculate the 10%
 2. The Star Rating (Interactive)
 
      Design: 5 Large hollow stars in the center of the screen.
-     Logic: As the user taps, the stars fill with NEXGEN Orange (#FF8C00).
+     Logic: As the user taps, the stars fill with KAIRO Orange (#FF8C00).
      Micro-interaction: When 5 stars are selected, show a small "Excellent!" text
 
          underneath.
@@ -907,7 +907,7 @@ Instead of making the user type a long paragraph, give them 4-6 "Quick Tags" to 
 6. The "Submit" Action
 
      Button Style: Full-width at the bottom.
-     Color: Solid NEXGEN Orange.
+     Color: Solid KAIRO Orange.
      Text: "Submit Review".
  Skip Link: A small grey "Skip for now" link at the very bottom.
 
@@ -933,7 +933,7 @@ Video Review If a video is uploaded, flag it for Admin Review before it goes liv
 Rewards      Trigger a +10 points entry in the User_Rewards table.
 Logic
 Notifications
-  NEXGEN: Notification Center Script
+  KAIRO: Notification Center Script
 
     1. The Header
 
@@ -983,7 +983,7 @@ If there are no notifications:
  Unread State: Give the background of unread notifications a very faint orange tint
     (#FFF5E6) to make them stand out from read ones.
 
- Icons: All icons should be inside a 40x40px circle. Use NEXGEN Orange for the icon
+ Icons: All icons should be inside a 40x40px circle. Use KAIRO Orange for the icon
     color.
 
  Swipe Actions: In your Figma prototype, show a "Swipe Left to Delete" interaction for
@@ -1009,11 +1009,11 @@ Proximity      "Partner is within 500m of your house."            Live Tracking 
 
 
 Support
-   NEXGEN: Help & Support Center Script
+   KAIRO: Help & Support Center Script
 
         1. The Header (Search First)
 
-     Background: Solid NEXGEN Orange (#FF8C00).
+     Background: Solid KAIRO Orange (#FF8C00).
      Title: "How can we help you?" (White, Bold).
      Search Bar: A prominent white bar with the placeholder: "Search for a problem (e.g.,
 
@@ -1025,7 +1025,7 @@ Three circular icons with text underneath for the fastest resolution:
 
     1. Chat with Us: Opens a live WhatsApp or In-App chat.
     2. Call Support: Direct "Click-to-Call" to your Rajahmundry office.
-    3. Email Us: Opens the mail app to support@nexgen.com.
+    3. Email Us: Opens the mail app to support@kairo.com.
 
         3. FAQ Categories (The "Moderated" List)
 
@@ -1033,7 +1033,7 @@ Group common issues into clean white cards with Orange icons:
 
      Booking Issues: "My partner hasn't arrived," "Change service time."
      Payments & Refunds: "Transaction failed," "When will I get my refund?"
-     NEXGEN Wallet: "How to use reward points," "Balance check."
+     KAIRO Wallet: "How to use reward points," "Balance check."
      Safety & Quality: "Reporting a partner," "Insurance details."
 
         4. Recent Bookings (Contextual Support)
@@ -1074,7 +1074,7 @@ Group common issues into clean white cards with Orange icons:
 
 
 Language selection
- NEXGEN: Language Selection (Localization) Script
+ KAIRO: Language Selection (Localization) Script
 
 1. The Entry Point (Placement)
 
@@ -1108,12 +1108,12 @@ Option B: Telugu (Regional Focus)
 4. The "Action" Button
 
      Style: Fixed full-width button at the bottom.
-     Color: Solid NEXGEN Orange (#FF8C00).
+     Color: Solid KAIRO Orange (#FF8C00).
      Text: "Continue / " (Dual-language text on the button).
 
  Figma Design Instructions
 
-     Visual Cue: Use the NEXGEN Orange for the selected state. The unselected cards
+     Visual Cue: Use the KAIRO Orange for the selected state. The unselected cards
          should have a very light grey border.
 
      Typography: Ensure the Telugu font (like Gidugu or NTR) is clear and high-contrast.
@@ -1134,14 +1134,14 @@ API Support  Ensure the search_logs table in your Admin Panel can read Telugu
 
 Currency     Keep the symbol  (Rupees) consistent across both languages.
 Loader
- NEXGEN: Splash & Loader Screen Script
+ KAIRO: Splash & Loader Screen Script
 
 1. The Visual Layout (Static)
 
      Background: Pure White (#FFFFFF) for a clean, modern feel.
-     Center Element: The NEXGEN Logo (The stylized 'N' icon you've established).
-     Logo Style: Solid NEXGEN Orange (#FF8C00).
-     Brand Name: "NEXGEN" in Bold Charcoal text directly under the icon.
+     Center Element: The KAIRO Logo (The stylized 'N' icon you've established).
+     Logo Style: Solid KAIRO Orange (#FF8C00).
+     Brand Name: "KAIRO" in Bold Charcoal text directly under the icon.
      Tagline: "Your Local Service Expert" (Small grey text at the bottom).
 
 2. The Animation (The "Loader")
@@ -1149,7 +1149,7 @@ Currency     Keep the symbol  (Rupees) consistent across both languages.
 Instead of a boring spinning circle, we will use a Brand-Specific Loader:
 
      Type: A horizontal "Progress Line" or a "Pulse" effect.
-     Color: NEXGEN Orange.
+     Color: KAIRO Orange.
      Motion: A smooth line that fills from left to right at the bottom of the logo, or the Logo
 
          itself "pulses" (scales up and down by 5%) every 1 second.
@@ -1200,13 +1200,13 @@ Check Version Is there a mandatory app update? (If yes, show "Update App" popup)
 
          
 onboarding
- NEXGEN: Service Partner App Roadmap
+ KAIRO: Service Partner App Roadmap
 
 1. Partner Onboarding & KYC (The Entry)
 
 Before Phani can see bookings, he must be verified by the Admin.
 
-     Splash Screen: Same as User App (NEXGEN Pulse).
+     Splash Screen: Same as User App (KAIRO Pulse).
      Login: Mobile OTP based.
      KYC Upload Page: * Passport Size Photo (Direct Camera capture).
 
@@ -1259,7 +1259,7 @@ A simple vertical list at the bottom:
      Item 2: "Switchboard Fix @ Danavaipeta" -- Completed (Green text).
 
  Figma Design Instructions
-     Color Balance: Use NEXGEN Orange (#FF8C00) for all active states and the "New
+     Color Balance: Use KAIRO Orange (#FF8C00) for all active states and the "New
          Bookings" card to create a sense of action.
 
      Typography: Use Bold for the numbers (3, 2, 45) so Phani can see his workload at a
@@ -1305,7 +1305,7 @@ This is the page Phani sees all day.
      My Profile: Manage categories (e.g., Phani can add "AC Repair" if he is trained).
      Training Videos: Small 1-minute clips on "How to behave with customers" and
 
-         "NEXGEN Safety Rules."
+         "KAIRO Safety Rules."
 
  Figma Design Instructions for Partner App
 
@@ -1328,11 +1328,11 @@ Distance Check Use the "Haversine Formula" to only show bookings within a 10km
                           radius of Phani.
 Commission  Logic: Partner_Wallet = (Service_Price * 0.90).
 
- NEXGEN: Partner Profile & Training Script
+ KAIRO: Partner Profile & Training Script
 
 1. The Header (Identity)
 
-     Background: Solid NEXGEN Orange (#FF8C00).
+     Background: Solid KAIRO Orange (#FF8C00).
      Profile Image: Large circular photo with an "Edit" icon.
      Badges: Display earned badges like "Top Rated," "500+ Jobs," or "Safety Certified."
      Status: "Profile Verified" with a Green Shield icon.
@@ -1347,7 +1347,7 @@ This is where Phani manages what services he can provide.
                Logic: If Phani wants to add "AC Repair," the app will prompt: "Please watch the
                    AC Repair Training Video and upload your certification to unlock this category."
 
-3. NEXGEN Academy (Training Videos)
+3. KAIRO Academy (Training Videos)
 
 A "Netflix-style" horizontal slider for 1-minute training clips:
 
@@ -1362,13 +1362,13 @@ A "Netflix-style" horizontal slider for 1-minute training clips:
 A simplified view of the Terms & Conditions:
      No Offline Payments: "Always pay through the app to stay insured."
      Behavior Policy: "Respect the customer's home and privacy."
-     Uniform Check: "Always wear your NEXGEN ID card during visits."
+     Uniform Check: "Always wear your KAIRO ID card during visits."
 
 5. Account Settings
 
      Language: Switch app between English and Telugu.
      Bank Details: View/Edit SBI bank account for Monday settlements.
-     Help & Support: Direct WhatsApp link to the NEXGEN Partner Support team.
+     Help & Support: Direct WhatsApp link to the KAIRO Partner Support team.
 The "Partner Performance
 The "Partner Performance & Penalty" Script
 
@@ -1380,7 +1380,7 @@ outside the app?
                3rd Cancel: Temporary 24-hour block.
                Bad Behavior: Permanent ban.
 
-     Logic: This ensures that only the best partners stay on NEXGEN, which protects your
+     Logic: This ensures that only the best partners stay on KAIRO, which protects your
          brand.
 job navigation
 4. Job Navigation & Execution (The "Work" Mode)
@@ -1402,7 +1402,7 @@ When a user books a "Fan Repair" in Rajahmundry, Phani gets a high-priority aler
      Details: * Service: Fan Repair.
 
                Distance: 2.4 KM.
-               Earning: 225 (After 10% NEXGEN Commission).
+               Earning: 225 (After 10% KAIRO Commission).
      Action: Large [ACCEPT] (Green) and [REJECT] (Grey) buttons.
                Timer: 60-second countdown to accept before it goes to another partner.
 extra work
@@ -1425,15 +1425,15 @@ Switchboard (+150).
      Current Balance: Total money earned but not yet sent to the bank.
      Breakdown: * User Paid: 250.
 
-               NEXGEN Comm (10%): -25.
+               KAIRO Comm (10%): -25.
                Your Share: 225.
      Withdrawal: "Settle to Bank" button (Active every Monday).
 Admin
- NEXGEN: Central Admin Control Panel
+ KAIRO: Central Admin Control Panel
 
 1. The Sidebar Navigation (Fixed Left)
 
-     Background: Solid NEXGEN Orange (#FF8C00).
+     Background: Solid KAIRO Orange (#FF8C00).
      Icons & Text (White):
 
        Dashboard Overview (Live Stats)
@@ -1533,7 +1533,7 @@ You control the "Base Price" for the whole city from here.
 Figma Design Instructions for Admin
 
     Layout: Use a Sidebar Navigation on the left and Data Tables on the right.
-    Colors: 90% White/Grey background. Use NEXGEN Orange only for "Action" buttons
+    Colors: 90% White/Grey background. Use KAIRO Orange only for "Action" buttons
 
         and "Revenue" numbers.
     Graphs: A simple Bar Chart showing "Bookings per Day" to see which days (like
@@ -1550,7 +1550,7 @@ You control the "Base Price" for the whole city from here.
 
          up.
 main service document
- PROJECT: NEXGEN Partner App
+ PROJECT: KAIRO Partner App
 
 (Service Module)
 
@@ -1875,5 +1875,5 @@ This is where you approve Phani before he can start earning.
      Buttons: [APPROVE] (Green) or [REJECT] (Red).
 
                Logic: Once you click Approve, Phani gets a notification: "Congratulations! You
-                   are now a NEXGEN Partner."
+                   are now a KAIRO Partner."
 

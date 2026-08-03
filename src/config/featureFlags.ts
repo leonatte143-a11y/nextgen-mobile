@@ -1,5 +1,5 @@
-/**
- * Runtime feature flags for NEXGEN mobile app.
+﻿/**
+ * Runtime feature flags for KAIRO mobile app.
  *
  * Controlled via EXPO_PUBLIC_ env variables for Expo/EAS.
  *

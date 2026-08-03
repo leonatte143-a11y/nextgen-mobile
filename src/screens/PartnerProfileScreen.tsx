@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
@@ -89,7 +89,7 @@ export function PartnerProfileScreen() {
   const shareReferralCode = async (code: string) => {
     try {
       await Share.share({
-        message: `Join NEXGEN as a service partner using my referral code ${code} and we both get rewarded!`,
+        message: `Join KAIRO as a service partner using my referral code ${code} and we both get rewarded!`,
       });
     } catch {
       // ignore share cancellation
@@ -128,7 +128,7 @@ export function PartnerProfileScreen() {
         <View style={styles.logoMark}>
           <Text style={styles.logoN}>N</Text>
         </View>
-        <Text style={styles.brandName}>NEXGEN</Text>
+        <Text style={styles.brandName}>KAIRO</Text>
       </View>
 
       <View style={styles.profileCard}>

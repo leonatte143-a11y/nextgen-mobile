@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,7 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
@@ -27,7 +27,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 const FAQ = [
   { q: 'Booking Issues', a: 'Partner late, reschedule, or cancel before 2h for a full refund.' },
   { q: 'Payments & Refunds', a: 'Failed UPI, wallet credits, and settlement timelines.' },
-  { q: 'NEXGEN Wallet', a: 'Use reward points at checkout as a discount.' },
+  { q: 'KAIRO Wallet', a: 'Use reward points at checkout as a discount.' },
   { q: 'Safety & Quality', a: 'Report a partner directly from your booking details.' },
 ];
 
@@ -96,7 +96,7 @@ export function SupportScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
         <Text style={styles.h1}>How can we help you?</Text>
-        <NexgenTextInput
+        <KairoTextInput
           placeholder="Search (e.g. refund, partner late)"
           style={styles.searchInner}
         />
@@ -105,13 +105,13 @@ export function SupportScreen() {
         <Quick
           icon="chatbubbles-outline"
           label="Chat"
-          onPress={() => Linking.openURL('mailto:support@nexgen.com?subject=Live%20chat%20support')}
+          onPress={() => Linking.openURL('mailto:support@kairo.com?subject=Live%20chat%20support')}
         />
         <Quick icon="call-outline" label="Call" onPress={() => Linking.openURL('tel:9876543210')} />
         <Quick
           icon="mail-outline"
           label="Email"
-          onPress={() => Linking.openURL('mailto:support@nexgen.com')}
+          onPress={() => Linking.openURL('mailto:support@kairo.com')}
         />
       </View>
       <Text style={styles.section}>FAQ</Text>
@@ -167,7 +167,7 @@ export function SupportScreen() {
         <Text style={styles.noBooking}>No recent bookings found. You can still submit a support request.</Text>
       )}
       <Text style={styles.label}>Subject</Text>
-      <NexgenTextInput
+      <KairoTextInput
         placeholder="Short summary (e.g. partner late, refund request)"
         value={subject}
         onChangeText={setSubject}

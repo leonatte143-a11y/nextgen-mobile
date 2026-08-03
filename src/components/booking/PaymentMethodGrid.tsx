@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
@@ -17,7 +17,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: 'upi', label: 'UPI', subtitle: 'GPay · PhonePe · Paytm', icon: 'phone-portrait-outline', brandColor: '#5F259F' },
   { id: 'card', label: 'Cards', subtitle: 'Debit / Credit', icon: 'card-outline', brandColor: '#1565C0' },
   { id: 'netbanking', label: 'Net Banking', subtitle: 'All major banks', icon: 'business-outline', brandColor: '#2E7D32' },
-  { id: 'wallet', label: 'Wallet', subtitle: 'NEXGEN Pay', icon: 'wallet-outline', brandColor: '#FF8C00' },
+  { id: 'wallet', label: 'Wallet', subtitle: 'KAIRO Pay', icon: 'wallet-outline', brandColor: '#FF8C00' },
   { id: 'cash', label: 'Cash', subtitle: 'Pay after service', icon: 'cash-outline', brandColor: '#757575' },
 ];
 

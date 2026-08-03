@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
-import { NexgenTextInput } from '../components/NexgenTextInput';
+import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
@@ -131,7 +131,7 @@ export function PartnerLoginScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Partner Login</Text>
       <Text style={styles.sub}>Request an OTP on your registered mobile, then enter the code.</Text>
-      <NexgenTextInput
+      <KairoTextInput
         prefix="+91"
         placeholder="10-digit mobile"
         keyboardType="number-pad"
@@ -141,7 +141,7 @@ export function PartnerLoginScreen({ navigation }: Props) {
         editable={!otpSent}
       />
       {otpSent ? (
-        <NexgenTextInput
+        <KairoTextInput
           label={`${otpLength}-digit code`}
           placeholder={`Enter ${otpLength}-digit OTP`}
           keyboardType="number-pad"

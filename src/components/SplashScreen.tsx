@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors, spacing } from '../constants/theme';
@@ -74,7 +74,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
             alignItems: 'center',
           }}
         >
-          <Text style={styles.brand}>NEXGEN</Text>
+          <Text style={styles.brand}>KAIRO</Text>
           <Text style={styles.tagline}>Verified Professionals at Your Doorstep</Text>
         </Animated.View>
       </View>

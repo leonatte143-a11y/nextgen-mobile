@@ -19,8 +19,8 @@ module.exports = ({ config }) => {
 
   return {
     ...config,
-    name: 'NEXGEN',
-    slug: 'nexgen-mobile',
+    name: 'KAIRO',
+    slug: 'kairo-mobile',
     version: '1.0.0',
     icon: './assets/icon.png',
     splash: {
@@ -30,7 +30,7 @@ module.exports = ({ config }) => {
     },
     android: {
       ...config.android,
-      package: process.env.ANDROID_PACKAGE || 'com.nexgen.mobileapp',
+      package: process.env.ANDROID_PACKAGE || 'com.kairo.mobileapp',
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#FF8C00'

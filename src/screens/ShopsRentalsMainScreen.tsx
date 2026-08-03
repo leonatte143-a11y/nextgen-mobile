@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +15,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Shops, Materials & Rentals</Text>
-        <Text style={styles.sub}>NEXGEN Market · nearby verified vendors</Text>
+        <Text style={styles.sub}>KAIRO Market · nearby verified vendors</Text>
       </View>
 
       <View style={styles.cardsRow}>
