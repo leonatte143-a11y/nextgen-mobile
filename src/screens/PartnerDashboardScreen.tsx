@@ -33,9 +33,9 @@ export function PartnerDashboardScreen(_props: Props) {
       >
         <View style={styles.brandRow}>
           <View style={styles.logoMark}>
-            <Text style={styles.logoN}>K</Text>
+            <Text style={styles.logoN}>N</Text>
           </View>
-          <Text style={styles.brandName}>KAIRO</Text>
+          <Text style={styles.brandName}>NEXGEN</Text>
         </View>
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoN: { fontSize: 14, fontWeight: '900', color: colors.white },
-  brandName: { fontSize: 15, fontWeight: '900', color: colors.white },
+  brandName: { fontSize: 15, fontWeight: '900', color: colors.navy },
   welcome: { color: colors.charcoal, fontSize: 20, fontWeight: '800' },
   welcomeSub: { color: colors.grey, marginTop: 4, marginBottom: 4, fontSize: 13, fontWeight: '600' },
   section: { marginTop: spacing.lg, fontSize: 16, fontWeight: '800' },

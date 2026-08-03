@@ -39,7 +39,7 @@ export function ReviewScreen() {
     try {
       const reviewNote = tip > 0 ? `${note.trim()}${note.trim() ? ' · ' : ''}Tip: ₹${tip}` : note;
       await bookingService.submitReview(route.params.bookingId, stars, picked, reviewNote);
-      Alert.alert('Thank you!', 'Your feedback helps us improve KAIRO.');
+      Alert.alert('Thank you!', 'Your feedback helps us improve NEXGEN.');
       goHome();
     } catch (error) {
       Alert.alert('Unable to submit', String(error));

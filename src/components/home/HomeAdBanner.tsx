@@ -55,7 +55,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
     return (
       <View style={styles.placeholder}>
         <Text style={styles.placeholderTitle}>Sponsored</Text>
-        <Text style={styles.placeholderSub}>Local offers from KAIRO partners</Text>
+        <Text style={styles.placeholderSub}>Local offers from NEXGEN partners</Text>
       </View>
     );
   }
@@ -145,6 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.md,
   },
-  placeholderTitle: { fontWeight: '800', color: colors.white, fontSize: 15 },
+  placeholderTitle: { fontWeight: '800', color: colors.navy, fontSize: 15 },
   placeholderSub: { color: colors.grey, fontSize: 12, marginTop: 4, textAlign: 'center' },
 });

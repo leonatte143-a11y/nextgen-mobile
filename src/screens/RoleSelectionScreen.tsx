@@ -11,9 +11,9 @@ export function RoleSelectionScreen({ navigation }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.logo}>
-        <Text style={styles.logoN}>K</Text>
+        <Text style={styles.logoN}>N</Text>
       </View>
-      <Text style={styles.title}>KAIRO</Text>
+      <Text style={styles.title}>NEXGEN</Text>
       <Text style={styles.h1}>Welcome</Text>
       <Text style={styles.sub}>Choose your role to continue</Text>
       <View style={styles.buttonContainer}>

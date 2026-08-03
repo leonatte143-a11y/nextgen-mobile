@@ -15,7 +15,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Shops, Materials & Rentals</Text>
-        <Text style={styles.sub}>KAIRO Market · nearby verified vendors</Text>
+        <Text style={styles.sub}>NEXGEN Market · nearby verified vendors</Text>
       </View>
 
       <View style={styles.cardsRow}>
@@ -54,7 +54,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
-  title: { fontSize: 20, fontWeight: '800', color: colors.white },
+  title: { fontSize: 20, fontWeight: '800', color: colors.navy },
   sub: { color: colors.grey, marginTop: 4, fontSize: 13 },
   cardsRow: { flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
   card: {
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     minHeight: 130,
   },
   cardOn: { backgroundColor: colors.primary },
-  cardTitle: { fontSize: 15, fontWeight: '800', color: colors.white, textAlign: 'center' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: colors.navy, textAlign: 'center' },
   cardTitleStacked: { lineHeight: 20 },
   cardTitleOn: { color: colors.white },
 });

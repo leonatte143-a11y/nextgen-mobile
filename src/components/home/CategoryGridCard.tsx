@@ -42,14 +42,14 @@ export const CategoryGridCard = memo(CategoryGridCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderRadius: radius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     marginBottom: spacing.sm,
-    borderWidth: 0.5,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,

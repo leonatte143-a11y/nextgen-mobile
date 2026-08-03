@@ -32,7 +32,7 @@ function PartnerTabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.grey,
-        tabBarStyle: { borderTopColor: colors.border, backgroundColor: colors.surface },
+        tabBarStyle: { borderTopColor: colors.border },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, string> = {
             Dashboard: 'speedometer-outline',

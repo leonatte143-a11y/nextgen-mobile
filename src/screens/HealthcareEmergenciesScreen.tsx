@@ -152,6 +152,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  cardTitle: { fontWeight: '800', color: colors.white, textAlign: 'center', fontSize: 13 },
+  cardTitle: { fontWeight: '800', color: colors.navy, textAlign: 'center', fontSize: 13 },
   cardSub: { color: colors.grey, fontSize: 11, marginTop: 4, textAlign: 'center' },
 });

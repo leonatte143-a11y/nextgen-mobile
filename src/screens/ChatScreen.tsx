@@ -106,13 +106,13 @@ export function ChatScreen() {
         keyExtractor={(m) => m.id}
         contentContainerStyle={styles.list}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-        ListEmptyComponent={<Text style={styles.empty}>Say hello — messages are shared with KAIRO support too.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>Say hello — messages are shared with NEXGEN support too.</Text>}
         renderItem={({ item }) => {
           const mine = item.senderType === role;
           return (
             <View style={[styles.bubbleRow, mine ? styles.bubbleRowMine : null]}>
               <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
-                {item.senderType === 'admin' ? <Text style={styles.adminTag}>KAIRO Support</Text> : null}
+                {item.senderType === 'admin' ? <Text style={styles.adminTag}>NEXGEN Support</Text> : null}
                 <Text style={[styles.bubbleText, mine && styles.bubbleTextMine]}>{item.message}</Text>
                 <Text style={[styles.bubbleTime, mine && styles.bubbleTimeMine]}>
                   {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

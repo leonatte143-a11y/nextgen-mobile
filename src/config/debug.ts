@@ -28,6 +28,6 @@ export const DEBUG_OTP_LOGS = __DEV__;
  */
 export function logOtpEvent(event: string, data?: Record<string, unknown>): void {
   if (DEBUG_OTP_LOGS) {
-    console.log(`[KAIRO-OTP] ${event}`, data || '');
+    console.log(`[NEXGEN-OTP] ${event}`, data || '');
   }
 }

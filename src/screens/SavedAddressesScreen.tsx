@@ -127,9 +127,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
-  cardLabel: { fontWeight: '800', color: colors.white },
+  cardLabel: { fontWeight: '800', color: colors.navy },
   cardLine: { color: colors.slate, marginTop: 4, fontSize: 14 },
-  section: { fontWeight: '800', color: colors.white, marginTop: spacing.lg, marginBottom: spacing.sm },
+  section: { fontWeight: '800', color: colors.navy, marginTop: spacing.lg, marginBottom: spacing.sm },
   input: {
     backgroundColor: colors.white,
     borderRadius: radius.sm,

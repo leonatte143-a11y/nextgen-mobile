@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { flex: 1, textAlign: 'center', color: colors.white, fontWeight: '800', fontSize: 17 },
   body: { flex: 1, padding: spacing.lg, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '800', color: colors.white, marginTop: spacing.lg, textAlign: 'center' },
+  title: { fontSize: 22, fontWeight: '800', color: colors.navy, marginTop: spacing.lg, textAlign: 'center' },
   sub: { color: colors.slate, textAlign: 'center', marginTop: spacing.md, lineHeight: 22 },
   sosBtn: {
     marginTop: spacing.xl,

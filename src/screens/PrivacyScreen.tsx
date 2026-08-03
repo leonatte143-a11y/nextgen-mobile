@@ -18,12 +18,12 @@ export function PrivacyScreen() {
       <Text style={styles.h1}>Privacy Policy</Text>
       <Text style={styles.p}>
         We collect your name, email, phone, and location to fulfil bookings, connect you with Service Partners
-        and Shops, and improve your experience across KAIRO.
+        and Shops, and improve your experience across NEXGEN.
       </Text>
       <Text style={styles.h2}>Marketplace & Chat</Text>
       <Text style={styles.p}>
         For P2P Marketplace and Super-Chat features, your messages are shared with the relevant Buyer/Seller or
-        Service Partner, and with KAIRO Admin for support and safety moderation. Personal phone numbers are kept
+        Service Partner, and with NEXGEN Admin for support and safety moderation. Personal phone numbers are kept
         private in chat until you choose to share contact details.
       </Text>
       <Text style={styles.h2}>Your Choices</Text>

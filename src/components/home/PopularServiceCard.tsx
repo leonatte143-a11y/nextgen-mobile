@@ -37,12 +37,12 @@ export const PopularServiceCard = memo(PopularServiceCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderRadius: radius.md,
     padding: spacing.sm,
     marginBottom: spacing.sm,
-    borderWidth: 0.5,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.07,

@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: spacing.md,
   },
-  title: { fontSize: 20, fontWeight: '800', color: colors.white, marginBottom: spacing.md },
+  title: { fontSize: 20, fontWeight: '800', color: colors.navy, marginBottom: spacing.md },
   label: { fontSize: 14, fontWeight: '700', color: colors.slate, marginTop: spacing.sm, marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {

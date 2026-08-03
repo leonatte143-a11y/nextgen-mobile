@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   infoCol: { justifyContent: 'center' },
-  verifiedPro: { color: colors.white, fontSize: 14, fontWeight: '800' },
+  verifiedPro: { color: colors.navy, fontSize: 14, fontWeight: '800' },
   starRow: { flexDirection: 'row', gap: 2, marginTop: 4 },
   ratingText: { color: colors.charcoal, fontWeight: '700', marginTop: 4, fontSize: 13 },
   star: { fontSize: 13 },

@@ -20,7 +20,7 @@ export async function requestLocationPermission(): Promise<boolean> {
   if (!mod) {
     Alert.alert(
       'Location required',
-      'KAIRO needs location access for hyperlocal services. Enable it in device settings.',
+      'NEXGEN needs location access for hyperlocal services. Enable it in device settings.',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Open Settings', onPress: () => Linking.openSettings() },

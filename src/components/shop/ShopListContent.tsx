@@ -145,7 +145,7 @@ export function ShopListContent() {
               </View>
             ) : null}
             {!search.trim() && !filterCat && featured.length > 0 ? (
-              <Text style={styles.sectionTitle}>KAIRO Verified Shops</Text>
+              <Text style={styles.sectionTitle}>NEXGEN Verified Shops</Text>
             ) : null}
           </>
         }
@@ -160,7 +160,7 @@ export function ShopListContent() {
               <Text style={styles.joinSub}>
                 Get more local leads from our users and service partners in Rajahmundry & Guntur.
               </Text>
-              <PrimaryButton title="Join KAIRO" onPress={() => undefined} disabled />
+              <PrimaryButton title="Join NEXGEN" onPress={() => undefined} disabled />
             </View>
             <View style={styles.comingSoonOverlay}>
               <Text style={styles.comingSoonTxt}>Coming Soon</Text>
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   catPillTxtOn: { color: colors.white },
   list: { padding: spacing.md, paddingBottom: spacing.xl },
   section: { marginBottom: spacing.md },
-  sectionTitle: { fontWeight: '800', fontSize: 16, color: colors.white, marginBottom: spacing.sm },
+  sectionTitle: { fontWeight: '800', fontSize: 16, color: colors.navy, marginBottom: spacing.sm },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   joinDisabled: { padding: spacing.lg, opacity: 0.35 },
-  joinTitle: { fontWeight: '800', fontSize: 17, color: colors.white },
+  joinTitle: { fontWeight: '800', fontSize: 17, color: colors.navy },
   joinSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.md, lineHeight: 20 },
   comingSoonOverlay: {
     position: 'absolute',
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   comingSoonTxt: {
     fontSize: 18,
     fontWeight: '900',
-    color: colors.white,
+    color: colors.navy,
     backgroundColor: colors.white,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
