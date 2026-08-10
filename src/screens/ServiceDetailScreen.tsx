@@ -105,7 +105,11 @@ export function ServiceDetailScreen() {
           <View style={styles.partner}>
             <View style={styles.pRow}>
               <View style={styles.pPhoto}>
-                <Text style={styles.pPhotoTxt}>{selectedPartner.name[0]}</Text>
+                {selectedPartner.photoUrl ? (
+                  <Image source={{ uri: selectedPartner.photoUrl }} style={styles.pPhotoImg} />
+                ) : (
+                  <Text style={styles.pPhotoTxt}>{selectedPartner.name[0]}</Text>
+                )}
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.pTitle}>Selected Provider</Text>
@@ -232,7 +236,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  pPhotoImg: { width: '100%', height: '100%' },
   pPhotoTxt: { fontSize: 20, fontWeight: '800', color: colors.primary },
   pTitle: { fontSize: 12, color: colors.grey },
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },

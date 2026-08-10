@@ -47,6 +47,10 @@ export function AdvertisePlanScreen() {
     if (!canPay) return;
     navigation.navigate('AdSubscriptionCheckout', {
       businessName: params.businessName,
+      businessAddress: params.businessAddress,
+      bannerUri: params.bannerUri,
+      bannerBase64: params.bannerBase64,
+      socialLink: params.socialLink,
       planId,
       durationUnit,
       durationValue: parsedDuration,

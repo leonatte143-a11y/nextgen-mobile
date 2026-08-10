@@ -1,11 +1,17 @@
+import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { getCoordsIfPermitted } from '../services/locationService';
 import { isPointInPolygon } from '../utils/geoFence';
 import type { AdvertisementBanner } from '../types/banner';
 
-/** Rotate through queued ads one at a time (15s per doc 8). */
-export function useSequentialAdIndex(count: number, durationMs = 15_000): number {
+/** Rotate through queued ads one at a time (9s per doc 8), exposing the setter so callers can
+ * also drive the same index from manual interaction (e.g. a swipeable carousel) without the
+ * auto-advance timer fighting the manual change — both read/write the same state. */
+export function useSequentialAdIndexState(
+  count: number,
+  durationMs = 9_000,
+): [number, Dispatch<SetStateAction<number>>] {
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
@@ -20,6 +26,12 @@ export function useSequentialAdIndex(count: number, durationMs = 15_000): number
     return () => clearInterval(timer);
   }, [count, durationMs]);
 
+  return [idx, setIdx];
+}
+
+/** Rotate through queued ads one at a time (9s per doc 8). */
+export function useSequentialAdIndex(count: number, durationMs = 9_000): number {
+  const [idx] = useSequentialAdIndexState(count, durationMs);
   return idx;
 }
 

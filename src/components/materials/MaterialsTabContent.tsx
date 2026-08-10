@@ -42,7 +42,7 @@ function ListingCard({ item, onPress }: { item: MarketplaceListing; onPress: () 
   );
 }
 
-export function MaterialsTabContent() {
+export function MaterialsTabContent({ header }: { header?: React.ReactNode }) {
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<MarketplaceCategory[]>([]);
@@ -80,24 +80,6 @@ export function MaterialsTabContent() {
 
   return (
     <View style={styles.root}>
-      <View style={styles.searchRow}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color={colors.grey} />
-          <TextInput
-            style={styles.searchIn}
-            placeholder="Search materials, tools, rentals…"
-            placeholderTextColor={colors.grey}
-            value={search}
-            onChangeText={setSearch}
-            onSubmitEditing={() => load()}
-            returnKeyType="search"
-          />
-        </View>
-        <Pressable style={styles.filterBtn} onPress={() => setFilterOpen(true)}>
-          <Ionicons name="options-outline" size={20} color={colors.white} />
-        </Pressable>
-      </View>
-
       <FlatList
         data={listings}
         keyExtractor={(l) => l.id}
@@ -106,6 +88,28 @@ export function MaterialsTabContent() {
         contentContainerStyle={styles.grid}
         refreshing={loading}
         onRefresh={load}
+        ListHeaderComponent={
+          <>
+            {header}
+            <View style={styles.searchRow}>
+              <View style={styles.searchBar}>
+                <Ionicons name="search-outline" size={18} color={colors.grey} />
+                <TextInput
+                  style={styles.searchIn}
+                  placeholder="Search materials, tools, rentals…"
+                  placeholderTextColor={colors.grey}
+                  value={search}
+                  onChangeText={setSearch}
+                  onSubmitEditing={() => load()}
+                  returnKeyType="search"
+                />
+              </View>
+              <Pressable style={styles.filterBtn} onPress={() => setFilterOpen(true)}>
+                <Ionicons name="options-outline" size={20} color={colors.white} />
+              </Pressable>
+            </View>
+          </>
+        }
         ListEmptyComponent={
           !loading ? <Text style={styles.empty}>No listings yet. Be the first to post one nearby.</Text> : null
         }

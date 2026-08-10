@@ -92,7 +92,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!partnerToken) return;
-    const pollMs = profile?.isOnline ? 5000 : 15000;
+    const pollMs = profile?.isOnline ? 3000 : 15000;
     const timer = setInterval(() => {
       refreshPartner({ background: true }).catch(() => undefined);
     }, pollMs);

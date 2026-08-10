@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import type { RootStackParamList } from '../navigation/types';
+import { bannerService } from '../services/bannerService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Route = RouteProp<RootStackParamList, 'AdSubscriptionCheckout'>;
@@ -27,21 +28,42 @@ export function AdSubscriptionCheckoutScreen() {
     params.durationValue === 1 ? '' : 's'
   }`;
 
-  const onContinue = () => {
+  const onContinue = async () => {
+    if (!params.bannerBase64) {
+      Alert.alert('Image required', 'Please go back and upload an image banner (video ads are not yet supported for submission).');
+      return;
+    }
     setSubmitting(true);
-    Alert.alert(
-      'Subscription activated',
-      `Your ${PLAN_LABELS[params.planId]} campaign for ${params.businessName} is now live for ${durationLabel}.`,
-      [
+    try {
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      if (params.durationUnit === 'months') {
+        endDate.setMonth(endDate.getMonth() + params.durationValue);
+      } else {
+        endDate.setDate(endDate.getDate() + params.durationValue);
+      }
+
+      await bannerService.submitAdRequest({
+        businessName: params.businessName,
+        businessAddress: params.businessAddress,
+        imageUrl: params.bannerBase64,
+        mediaType: 'image',
+        redirectValue: params.socialLink,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+
+      Alert.alert('Ad submitted for approval', `Your ${PLAN_LABELS[params.planId]} campaign for ${params.businessName} has been sent to KAIRO for review.`, [
         {
           text: 'OK',
-          onPress: () => {
-            setSubmitting(false);
-            navigation.popToTop();
-          },
+          onPress: () => navigation.popToTop(),
         },
-      ],
-    );
+      ]);
+    } catch (e) {
+      Alert.alert('Submission failed', e instanceof Error ? e.message : 'Please try again later.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

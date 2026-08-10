@@ -11,8 +11,8 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<'shops' | 'materials'>('shops');
 
-  return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+  const header = (
+    <View>
       <View style={styles.header}>
         <Text style={styles.title}>Shops, Materials & Rentals</Text>
         <Text style={styles.sub}>KAIRO Market · nearby verified vendors</Text>
@@ -25,7 +25,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
         >
           <Ionicons
             name="storefront-outline"
-            size={34}
+            size={26}
             color={activeTab === 'shops' ? colors.white : colors.primary}
           />
           <Text style={[styles.cardTitle, activeTab === 'shops' && styles.cardTitleOn]}>Shops</Text>
@@ -37,7 +37,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
         >
           <Ionicons
             name="cube-outline"
-            size={34}
+            size={26}
             color={activeTab === 'materials' ? colors.white : colors.primary}
           />
           <Text style={[styles.cardTitle, styles.cardTitleStacked, activeTab === 'materials' && styles.cardTitleOn]}>
@@ -45,8 +45,16 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
           </Text>
         </Pressable>
       </View>
+    </View>
+  );
 
-      {activeTab === 'materials' ? <MaterialsTabContent /> : <ShopListContent />}
+  return (
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      {activeTab === 'materials' ? (
+        <MaterialsTabContent header={header} />
+      ) : (
+        <ShopListContent header={header} />
+      )}
     </View>
   );
 }
@@ -61,17 +69,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
     borderWidth: 2,
     borderColor: colors.primary,
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.lg,
     paddingHorizontal: spacing.sm,
-    minHeight: 130,
+    minHeight: 104,
   },
   cardOn: { backgroundColor: colors.primary },
-  cardTitle: { fontSize: 15, fontWeight: '800', color: colors.navy, textAlign: 'center' },
-  cardTitleStacked: { lineHeight: 20 },
+  cardTitle: { fontSize: 14, fontWeight: '800', color: colors.navy, textAlign: 'center' },
+  cardTitleStacked: { lineHeight: 18 },
   cardTitleOn: { color: colors.white },
 });

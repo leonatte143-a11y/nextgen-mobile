@@ -58,7 +58,7 @@ export function ServiceListScreen() {
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
         </Pressable>
-        <Text style={styles.title}>{title ?? 'Services'}</Text>
+        <Text style={styles.title} numberOfLines={1}>{title ?? 'Services'}</Text>
         <View style={{ width: 24 }} />
       </View>
       {loading ? (
@@ -99,6 +99,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  title: { fontSize: 18, fontWeight: '800' },
+  title: { flex: 1, textAlign: 'center', fontSize: 18, fontWeight: '800', paddingHorizontal: spacing.sm },
   list: { padding: spacing.md, paddingBottom: spacing.xl },
 });

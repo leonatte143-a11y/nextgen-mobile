@@ -20,7 +20,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://nexgen-backend-production.up.railway.app",
+        "EXPO_PUBLIC_API_URL": "https://nexgen-backend-production-a6ab.up.railway.app",
         "EXPO_PUBLIC_SHOW_DEBUG_OTP": "1"
       }
     },

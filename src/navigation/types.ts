@@ -47,11 +47,16 @@ export type RootStackParamList = {
     businessName: string;
     businessAddress: string;
     bannerUri?: string;
+    bannerBase64?: string;
     bannerType?: 'image' | 'video';
     socialLink?: string;
   };
   AdSubscriptionCheckout: {
     businessName: string;
+    businessAddress?: string;
+    bannerUri?: string;
+    bannerBase64?: string;
+    socialLink?: string;
     planId: 'image' | 'video';
     durationUnit: 'days' | 'months';
     durationValue: number;

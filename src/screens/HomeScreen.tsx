@@ -42,7 +42,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const navigation = useNavigation<Nav>();
   const { language } = useAuth();
   const [location] = useState('Danavaipeta, Rajahmundry');
-  const areaLabel = location.split(',')[0]?.trim() || location;
   const [search, setSearch] = useState('');
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
   const [catalog, setCatalog] = useState<CatalogService[]>([]);
@@ -150,12 +149,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <View style={styles.headerSide} />
         <View style={styles.brandBlock}>
           <Text style={styles.brandName}>KAIRO</Text>
-          <Pressable onPress={() => Alert.alert('Location', 'GPS location picker coming soon.')}>
-            <View style={styles.locRow}>
-              <Ionicons name="location" size={14} color={colors.primary} />
-              <Text style={styles.loc} numberOfLines={1}>{areaLabel}</Text>
-            </View>
-          </Pressable>
         </View>
         <View style={[styles.headerSide, styles.headerActions]}>
           <Pressable onPress={() => navigation.navigate('Notifications')} style={styles.bellWrap} hitSlop={8}>
@@ -170,8 +163,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <HomeAdBanner locationLabel={location} />
-
         <View style={styles.searchRow}>
           <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={20} color={colors.grey} />
@@ -193,26 +184,37 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           </Pressable>
         </View>
 
+        <View style={styles.bannerWrap}>
+          <HomeAdBanner locationLabel={location} />
+        </View>
+
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
         <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
 
-        <Pressable
-          style={styles.marketCard}
-          onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
-        >
-          <View style={styles.marketAccent} />
-          <View style={styles.marketIcon}>
-            <Ionicons name="storefront-outline" size={28} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.marketTitle}>{t(language, 'shopsMaterialsRentals')}</Text>
-            <Text style={styles.marketSub}>Nearby hardware, electrical & building supplies</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={22} color={colors.primary} />
-        </Pressable>
+        <View style={styles.shopExoRow}>
+          <Pressable
+            style={styles.shopExoCard}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
+          >
+            <View style={styles.marketIcon}>
+              <Ionicons name="storefront-outline" size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.marketTitle}>Shop</Text>
+          </Pressable>
+          <Pressable
+            style={styles.shopExoCard}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
+          >
+            <View style={styles.marketIcon}>
+              <Ionicons name="swap-horizontal-outline" size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.marketTitle}>EXO</Text>
+            <Text style={styles.marketSub}>Buy or Sell</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.sectionTitle}>Popular services</Text>
         <PopularServicesGrid catalog={catalog} onItemPress={onPopularPress} />
@@ -267,8 +269,6 @@ const styles = StyleSheet.create({
   headerSide: { flex: 1 },
   brandBlock: { alignItems: 'center', justifyContent: 'center' },
   brandName: { fontSize: 28, fontWeight: '900', color: colors.navy, letterSpacing: 1 },
-  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2, justifyContent: 'center' },
-  loc: { fontSize: 12, color: colors.grey, fontWeight: '600', maxWidth: 160 },
   headerActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing.sm },
   bellWrap: { padding: 4, position: 'relative' },
   badge: {
@@ -309,8 +309,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: spacing.md,
+    marginTop: spacing.md,
     marginBottom: spacing.md,
     gap: 10,
+  },
+  bannerWrap: {
+    marginBottom: spacing.md,
   },
   searchBar: {
     flex: 1,
@@ -335,33 +339,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marketCard: {
+  shopExoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.md,
     marginHorizontal: spacing.md,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
+  },
+  shopExoCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
     padding: spacing.md,
-    paddingLeft: spacing.lg,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
-  },
-  marketAccent: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 5,
-    backgroundColor: colors.primary,
   },
   marketIcon: {
     width: 52,

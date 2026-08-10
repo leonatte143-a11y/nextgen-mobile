@@ -47,14 +47,20 @@ export function BookingTrackingScreen() {
       bookingService.getBooking(route.params.bookingId).then((b) => {
         if (active) setBooking(b);
       }).catch(() => undefined);
-    }, 15000);
+    }, 5000);
     return () => {
       active = false;
       clearInterval(timer);
     };
   }, [route.params.bookingId]);
 
-  const waitingForConfirmation = booking?.status === 'confirmed';
+  // `status` (userStatus) never transitions to 'confirmed' on the backend — only
+  // `partnerStatus` changes when the partner accepts/rejects (new -> pending/rejected).
+  // partnerStatus is included in the booking payload alongside the typed fields
+  // (see bookingController.js#bookingWithLineItems); cast narrowly since the
+  // shared Booking type doesn't declare it.
+  const partnerStatus = (booking as unknown as { partnerStatus?: string } | null)?.partnerStatus;
+  const waitingForConfirmation = partnerStatus === 'new';
 
   const statusLabel = booking ? STATUS_LABEL[booking.status] ?? 'Booking status' : 'Booking status';
 

@@ -38,7 +38,7 @@ function ShopCard({ item, onPress }: { item: ShopSummary; onPress: () => void })
   );
 }
 
-export function ShopListContent() {
+export function ShopListContent({ header }: { header?: React.ReactNode }) {
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<ShopCategory[]>([]);
@@ -107,31 +107,37 @@ export function ShopListContent() {
     return merged;
   }, [featured, items, search, filterCat]);
 
-  if (loading && items.length === 0) return <ScreenLoader />;
+  if (loading && items.length === 0) {
+    return (
+      <>
+        {header}
+        <ScreenLoader />
+      </>
+    );
+  }
 
   return (
-    <>
-      <View style={styles.searchRow}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color={colors.grey} />
-          <TextInput
-            style={styles.searchIn}
-            placeholder="Search paints, cables, PVC pipes…"
-            placeholderTextColor={colors.grey}
-            value={search}
-            onChangeText={setSearch}
-            onSubmitEditing={() => load()}
-            returnKeyType="search"
-          />
-        </View>
-      </View>
-
-      <FlatList
+    <FlatList
         data={displayItems}
         keyExtractor={(x) => x.id}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
+            {header}
+            <View style={styles.searchRow}>
+              <View style={styles.searchBar}>
+                <Ionicons name="search-outline" size={18} color={colors.grey} />
+                <TextInput
+                  style={styles.searchIn}
+                  placeholder="Search paints, cables, PVC pipes…"
+                  placeholderTextColor={colors.grey}
+                  value={search}
+                  onChangeText={setSearch}
+                  onSubmitEditing={() => load()}
+                  returnKeyType="search"
+                />
+              </View>
+            </View>
             {recommendedForJob && recommended.length > 0 ? (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Recommended for your current job</Text>
@@ -168,7 +174,6 @@ export function ShopListContent() {
           </View>
         }
       />
-    </>
   );
 }
 

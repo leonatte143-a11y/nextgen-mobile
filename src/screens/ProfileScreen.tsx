@@ -4,10 +4,12 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
+import { REFERRAL_SHARE_MESSAGE } from '../constants/referral';
 import { getSearchQueryCount } from '../lib/localStorage';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/bookingService';
@@ -34,10 +36,25 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const { user, partnerToken, refreshProfile, logoutUser, language } = useAuth();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
 
-  const MENU: { label: string; icon: keyof typeof Ionicons.glyphMap; target: MenuTarget }[] = [
+  const MENU: {
+    label: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    target?: MenuTarget;
+    comingSoon?: boolean;
+    onPress?: () => void;
+  }[] = [
     { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
     { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
-    { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
+    { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards', comingSoon: true },
+    {
+      label: 'Refer & Earn',
+      icon: 'share-social-outline',
+      onPress: () => {
+        Share.share({ message: REFERRAL_SHARE_MESSAGE() }).catch(() => {
+          // ignore share cancellation
+        });
+      },
+    },
     { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Support' },
     { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
@@ -166,6 +183,10 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             {user.firstName} {user.lastName}
           </Text>
           <Text style={styles.email}>{user.phone}</Text>
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={14} color={colors.grey} />
+            <Text style={styles.locationTxt}>Danavaipeta, Rajahmundry</Text>
+          </View>
           <View style={styles.cardActions}>
             <Pressable style={styles.pairBtn} onPress={() => navigation.navigate('EditProfile')}>
               <Ionicons name="create-outline" size={16} color={colors.primary} />
@@ -212,9 +233,22 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
       </View>
       <View style={styles.menu}>
         {MENU.map((m) => (
-          <Pressable key={m.label} style={styles.menuRow} onPress={() => navigation.navigate(m.target)}>
+          <Pressable
+            key={m.label}
+            style={[styles.menuRow, m.comingSoon && styles.menuRowDisabled]}
+            onPress={
+              m.comingSoon
+                ? undefined
+                : m.onPress ?? (() => m.target && navigation.navigate(m.target))
+            }
+          >
             <Ionicons name={m.icon} size={22} color={colors.primary} />
             <Text style={styles.menuTxt}>{m.label}</Text>
+            {m.comingSoon ? (
+              <View style={styles.comingSoonPill}>
+                <Text style={styles.comingSoonTxt}>Coming Soon</Text>
+              </View>
+            ) : null}
             <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </Pressable>
         ))}
@@ -246,16 +280,15 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
           <Ionicons name="trash-outline" size={16} color={colors.error} />
           <Text style={styles.deleteTxt}>Delete Account</Text>
         </Pressable>
-        <Pressable
-          style={styles.logout}
+        <PrimaryButton
+          title="Logout"
+          variant="outline"
+          style={styles.logoutButton}
           onPress={async () => {
             await logoutUser();
             navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
           }}
-        >
-          <Ionicons name="log-out-outline" size={22} color={colors.error} />
-          <Text style={styles.logoutTxt}>Logout</Text>
-        </Pressable>
+        />
       </View>
     </ScrollView>
   );
@@ -307,8 +340,8 @@ const styles = StyleSheet.create({
   avatarImage: { width: '100%', height: '100%' },
   cameraBadge: {
     position: 'absolute',
-    right: -2,
-    bottom: -2,
+    right: 0,
+    bottom: 0,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -317,10 +350,14 @@ const styles = StyleSheet.create({
     borderColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 10,
+    elevation: 10,
   },
   avText: { fontSize: 34, fontWeight: '800', color: colors.primary },
   name: { fontSize: 20, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
   email: { fontSize: 14, color: colors.grey, marginTop: 4, textAlign: 'center' },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  locationTxt: { fontSize: 13, color: colors.grey },
   editBtn: {
     marginTop: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -413,16 +450,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   menuTxt: { flex: 1, fontWeight: '600', color: colors.charcoal },
-  logout: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.lg,
-    marginTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  menuRowDisabled: { opacity: 0.55 },
+  comingSoonPill: {
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    marginRight: spacing.sm,
   },
-  logoutTxt: { color: colors.error, fontWeight: '800', fontSize: 16 },
+  comingSoonTxt: { fontSize: 10, fontWeight: '700', color: colors.grey },
+  logoutButton: { marginTop: spacing.md, borderColor: colors.error },
   deleteTxt: { color: colors.error, fontWeight: '700', fontSize: 13 },
   errTitle: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   errSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg },

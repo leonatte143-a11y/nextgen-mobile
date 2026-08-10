@@ -21,6 +21,10 @@ export type PartnerOnboardingPayload = {
   bankAccount?: string;
   trainingProgress?: number;
   referralCode?: string;
+  idType?: string;
+  idNumber?: string;
+  pincode?: string;
+  customCategory?: string;
 };
 
 function unwrapPricingList(data: PartnerPricingListResponse | PartnerPricingRow[]): PartnerPricingListResponse {

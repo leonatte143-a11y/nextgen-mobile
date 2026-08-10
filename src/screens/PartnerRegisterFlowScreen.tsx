@@ -3,7 +3,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -45,10 +47,11 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [workLocation, setWorkLocation] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
   const [pincode, setPincode] = useState('');
   const [idType, setIdType] = useState<IdType | null>(null);
   const [idTypeOpen, setIdTypeOpen] = useState(false);
+  const [idNumber, setIdNumber] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [devOtpHint, setDevOtpHint] = useState('');
 
@@ -102,9 +105,9 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     phone.length === 10 &&
     otpVerified &&
     selectedCategories.length > 0 &&
-    workLocation.trim().length > 1 &&
     pincode.trim().length >= 6 &&
     !!idType &&
+    idNumber.trim().length > 3 &&
     acceptedTerms;
 
   const onNext = () => {
@@ -135,8 +138,11 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         name: name.trim(),
         serviceCategory: selectedCategories[0],
         categories: selectedCategories,
-        workLocation: workLocation.trim(),
-        skills: [...selectedCategories, `pin:${pincode.trim()}`, `idType:${idType}`],
+        skills: [...selectedCategories],
+        idType: idType ?? undefined,
+        idNumber: idNumber.trim(),
+        pincode: pincode.trim(),
+        customCategory: customCategory.trim() || undefined,
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
       Alert.alert(
@@ -155,31 +161,34 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
 
   if (step === 'payment') {
     return (
-      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-        <Text style={styles.h1}>Complete Registration</Text>
-        <View style={styles.payCard}>
-          <Ionicons name="card-outline" size={40} color={colors.primary} />
-          <Text style={styles.payTitle}>One-time registration fee</Text>
-          <Text style={styles.paySub}>
-            To activate your KAIRO Partner account and start receiving job requests, complete the
-            one-time registration payment below.
-          </Text>
-          <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
-        </View>
-        <PrimaryButton
-          title={paying ? 'Processing payment…' : `Pay ₹${REGISTRATION_FEE} to complete registration`}
-          onPress={completeRegistration}
-          loading={paying}
-        />
-        <Pressable onPress={() => setStep('details')} style={styles.back} disabled={paying}>
-          <Text style={styles.backTxt}>Back</Text>
-        </Pressable>
-      </ScrollView>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
+          <Text style={styles.h1}>Complete Registration</Text>
+          <View style={styles.payCard}>
+            <Ionicons name="card-outline" size={40} color={colors.primary} />
+            <Text style={styles.payTitle}>One-time registration fee</Text>
+            <Text style={styles.paySub}>
+              To activate your KAIRO Partner account and start receiving job requests, complete the
+              one-time registration payment below.
+            </Text>
+            <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
+          </View>
+          <PrimaryButton
+            title={paying ? 'Processing payment…' : `Pay ₹${REGISTRATION_FEE} to complete registration`}
+            onPress={completeRegistration}
+            loading={paying}
+          />
+          <Pressable onPress={() => setStep('details')} style={styles.back} disabled={paying}>
+            <Text style={styles.backTxt}>Back</Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Step 1 — Profile & KYC</Text>
 
       <KairoTextInput label="Full Name" value={name} onChangeText={setName} />
@@ -244,7 +253,11 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         <Ionicons name="chevron-down" size={18} color={colors.grey} />
       </Pressable>
 
-      <KairoTextInput label="Work Location" value={workLocation} onChangeText={setWorkLocation} />
+      <KairoTextInput
+        label="Other / Custom Category"
+        value={customCategory}
+        onChangeText={setCustomCategory}
+      />
 
       <KairoTextInput
         label="Pincode"
@@ -259,6 +272,14 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         <Text style={styles.dropdownTxt}>{idType ?? 'Select an ID type'}</Text>
         <Ionicons name="chevron-down" size={18} color={colors.grey} />
       </Pressable>
+
+      {idType ? (
+        <KairoTextInput
+          label={`Enter ${idType} Number`}
+          value={idNumber}
+          onChangeText={setIdNumber}
+        />
+      ) : null}
 
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons name={acceptedTerms ? 'checkbox' : 'square-outline'} size={22} color={colors.primary} />
@@ -319,11 +340,13 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: colors.white },
   root: { padding: spacing.lg, paddingTop: 40, backgroundColor: colors.white, flexGrow: 1 },
   h1: { fontSize: 20, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.lg },
   lab: { fontSize: 14, fontWeight: '600', color: colors.grey, marginTop: spacing.md, marginBottom: 8 },

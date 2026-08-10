@@ -26,14 +26,16 @@ export function PartnerGalleryScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.6,
       base64: true,
+      allowsMultipleSelection: true,
     });
-    if (result.canceled || !result.assets?.[0]?.base64) return;
-    const asset = result.assets[0];
-    const mime = asset.mimeType || 'image/jpeg';
-    const uri = `data:${mime};base64,${asset.base64}`;
+    if (result.canceled || !result.assets?.length) return;
+    const newUris = result.assets
+      .filter((asset) => !!asset.base64)
+      .map((asset) => `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`);
+    if (!newUris.length) return;
     setSaving(true);
     try {
-      await updateProfile({ photos: [...photos, uri] });
+      await updateProfile({ photos: [...photos, ...newUris] });
     } finally {
       setSaving(false);
     }

@@ -20,7 +20,7 @@ module.exports = ({ config }) => {
   return {
     ...config,
     name: 'KAIRO',
-    slug: 'kairo-mobile',
+    slug: 'nexgen-mobile',
     version: '1.0.0',
     icon: './assets/icon.png',
     splash: {

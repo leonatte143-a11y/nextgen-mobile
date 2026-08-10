@@ -23,9 +23,23 @@ export function parseCityFromLocation(location: string): string | undefined {
   return parts[parts.length - 1];
 }
 
+export type SubmitAdRequestPayload = {
+  businessName: string;
+  businessAddress?: string;
+  imageUrl: string;
+  mediaType?: 'image' | 'video';
+  redirectValue?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
 export const bannerService = {
   clearCache() {
     cache = null;
+  },
+
+  async submitAdRequest(payload: SubmitAdRequestPayload): Promise<AdvertisementBanner> {
+    return apiService.post<AdvertisementBanner>('/api/v1/partners/ads', payload, 'partner');
   },
 
   async getHomeBanners(

@@ -29,6 +29,7 @@ export function AdvertiseBusinessScreen() {
   const [businessAddress, setBusinessAddress] = useState('');
   const [socialLink, setSocialLink] = useState('');
   const [bannerUri, setBannerUri] = useState<string | null>(null);
+  const [bannerBase64, setBannerBase64] = useState<string | null>(null);
   const [bannerType, setBannerType] = useState<'image' | 'video' | null>(null);
 
   const pickBanner = async () => {
@@ -42,11 +43,16 @@ export function AdvertiseBusinessScreen() {
       quality: 0.6,
       allowsEditing: true,
       aspect: [16, 9],
+      base64: true,
     });
     if (result.canceled || !result.assets?.[0]?.uri) return;
     const asset = result.assets[0];
+    const isVideo = asset.type === 'video';
     setBannerUri(asset.uri);
-    setBannerType(asset.type === 'video' ? 'video' : 'image');
+    setBannerType(isVideo ? 'video' : 'image');
+    // Video assets are not base64-encoded here (impractically large over JSON) — the submission
+    // step only sends an image data URI for now; video ad requests still need a real upload flow.
+    setBannerBase64(!isVideo && asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : null);
   };
 
   const submit = () => {
@@ -66,6 +72,7 @@ export function AdvertiseBusinessScreen() {
       businessName: businessName.trim(),
       businessAddress: businessAddress.trim(),
       bannerUri,
+      bannerBase64: bannerBase64 || undefined,
       bannerType: bannerType || 'image',
       socialLink: socialLink.trim() || undefined,
     });
