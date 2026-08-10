@@ -24,7 +24,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type MenuTarget =
   | 'Settings'
   | 'Rewards'
-  | 'Support'
+  | 'Conversations'
   | 'Language'
   | 'MyFavorites'
   | 'SavedAddresses'
@@ -55,7 +55,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
         });
       },
     },
-    { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Support' },
+    { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Conversations' },
     { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
     { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
@@ -163,7 +163,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
           <Text style={styles.h1}>My Profile</Text>
           <Text style={styles.sub}>Manage your account</Text>
         </View>
-        <Pressable onPress={() => navigation.navigate('Support')} hitSlop={12}>
+        <Pressable onPress={() => navigation.navigate('Conversations', { role: 'user' })} hitSlop={12}>
           <Ionicons name="help-circle-outline" size={26} color={colors.white} />
         </Pressable>
       </View>
@@ -194,7 +194,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             </Pressable>
             <Pressable
               style={styles.pairBtn}
-              onPress={() => navigation.navigate('Chat', { role: 'user', otherPartyName: 'KAIRO Support' })}
+              onPress={() => navigation.navigate('Conversations', { role: 'user' })}
             >
               <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
               <Text style={styles.pairBtnTxt}>Support</Text>

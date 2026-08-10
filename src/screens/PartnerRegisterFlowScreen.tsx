@@ -1,6 +1,6 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -22,7 +22,7 @@ import { logAuth } from '../lib/devLog';
 import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { RootStackParamList } from '../navigation/types';
 
-const ALL_PARTNER_SERVICES = Array.from(
+const STATIC_PARTNER_SERVICES = Array.from(
   new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
 );
 
@@ -54,8 +54,38 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [idNumber, setIdNumber] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [devOtpHint, setDevOtpHint] = useState('');
+  const [extraCategories, setExtraCategories] = useState<string[]>([]);
 
   const [paying, setPaying] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const backendCategories = await partnerService.getCategories();
+        if (cancelled) return;
+        setExtraCategories(backendCategories.map((c) => c.nameEn).filter(Boolean));
+      } catch {
+        if (!cancelled) setExtraCategories([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const allPartnerServices = React.useMemo(() => {
+    const seen = new Set(STATIC_PARTNER_SERVICES.map((s) => s.toLowerCase()));
+    const merged = [...STATIC_PARTNER_SERVICES];
+    for (const name of extraCategories) {
+      const key = name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(name);
+      }
+    }
+    return merged;
+  }, [extraCategories]);
 
   const sendOtp = async () => {
     const digits = phone.replace(/\D/g, '').slice(0, 10);
@@ -294,7 +324,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
             <Text style={styles.modalTitle}>Select service categories</Text>
             <ScrollView style={styles.modalScroll}>
               <View style={styles.chips}>
-                {ALL_PARTNER_SERVICES.map((option) => {
+                {allPartnerServices.map((option) => {
                   const selected = selectedCategories.includes(option);
                   return (
                     <Pressable

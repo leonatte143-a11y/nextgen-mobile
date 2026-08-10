@@ -56,7 +56,7 @@ export function AdSubscriptionCheckoutScreen() {
       Alert.alert('Ad submitted for approval', `Your ${PLAN_LABELS[params.planId]} campaign for ${params.businessName} has been sent to KAIRO for review.`, [
         {
           text: 'OK',
-          onPress: () => navigation.popToTop(),
+          onPress: () => navigation.replace('MyAds'),
         },
       ]);
     } catch (e) {

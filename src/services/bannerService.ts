@@ -33,6 +33,14 @@ export type SubmitAdRequestPayload = {
   endDate?: string;
 };
 
+/** A partner's own submitted ad, as returned by GET /api/v1/partners/ads. Adds the
+ * approval-status fields that aren't on the shared AdvertisementBanner type (which
+ * describes admin/home-feed banners) — kept local to avoid touching that shared type. */
+export type MyAdRequest = AdvertisementBanner & {
+  status: 'pending' | 'approved' | 'rejected';
+  partnerId?: string | null;
+};
+
 export const bannerService = {
   clearCache() {
     cache = null;
@@ -40,6 +48,11 @@ export const bannerService = {
 
   async submitAdRequest(payload: SubmitAdRequestPayload): Promise<AdvertisementBanner> {
     return apiService.post<AdvertisementBanner>('/api/v1/partners/ads', payload, 'partner');
+  },
+
+  async listMyAds(): Promise<MyAdRequest[]> {
+    const data = await apiService.get<MyAdRequest[]>('/api/v1/partners/ads', 'partner');
+    return Array.isArray(data) ? data : [];
   },
 
   async getHomeBanners(

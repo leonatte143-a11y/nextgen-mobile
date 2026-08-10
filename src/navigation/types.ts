@@ -62,6 +62,8 @@ export type RootStackParamList = {
     durationValue: number;
     totalAmount: number;
   };
+  MyAds: undefined;
+  Conversations: { role: 'user' | 'partner' } | undefined;
 };
 
 export type MainTabParamList = {

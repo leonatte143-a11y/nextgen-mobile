@@ -55,7 +55,7 @@ export function SettingsScreen() {
       <Text style={styles.section}>Support</Text>
       <NavRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => navigation.navigate('Privacy')} />
       <NavRow icon="document-text-outline" label="Terms of Service" onPress={() => navigation.navigate('Terms')} />
-      <NavRow icon="alert-circle-outline" label="Report an Issue" onPress={() => navigation.navigate('Support')} />
+      <NavRow icon="alert-circle-outline" label="Report an Issue" onPress={() => navigation.navigate('Conversations', { role: 'user' })} />
       <View style={styles.versionRow}>
         <Text style={styles.versionTxt}>KAIRO v{APP_VERSION}</Text>
       </View>

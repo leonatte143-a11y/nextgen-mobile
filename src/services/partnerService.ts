@@ -37,9 +37,20 @@ function unwrapPricingList(data: PartnerPricingListResponse | PartnerPricingRow[
   };
 }
 
+export type PublicCategory = {
+  id: string;
+  nameEn: string;
+  emoji?: string | null;
+  iconUrl?: string | null;
+};
+
 export const partnerService = {
   async applyOnboarding(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
     return apiService.post('/api/v1/partners/onboarding', payload);
+  },
+
+  async getCategories(): Promise<PublicCategory[]> {
+    return apiService.get('/api/v1/catalog/categories');
   },
 
   async registerPartner(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {

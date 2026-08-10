@@ -15,7 +15,9 @@ import { LiveBookingScreen } from '../screens/LiveBookingScreen';
 import { PostListingScreen } from '../screens/PostListingScreen';
 import { ListingDetailScreen } from '../screens/ListingDetailScreen';
 import { MarketplaceChatScreen } from '../screens/MarketplaceChatScreen';
+import { MyAdsScreen } from '../screens/MyAdsScreen';
 import { MyFavoritesScreen } from '../screens/MyFavoritesScreen';
+import { ConversationsScreen } from '../screens/ConversationsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
 import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
@@ -86,12 +88,14 @@ export function RootNavigator() {
       <Stack.Screen name="ShopDetail" component={ShopDetailScreen} />
       <Stack.Screen name="ShopJoin" component={ShopJoinScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="Conversations" component={ConversationsScreen} />
       <Stack.Screen name="PostListing" component={PostListingScreen} />
       <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="MarketplaceChat" component={MarketplaceChatScreen} />
       <Stack.Screen name="AdvertiseBusiness" component={AdvertiseBusinessScreen} />
       <Stack.Screen name="AdvertisePlan" component={AdvertisePlanScreen} />
       <Stack.Screen name="AdSubscriptionCheckout" component={AdSubscriptionCheckoutScreen} />
+      <Stack.Screen name="MyAds" component={MyAdsScreen} />
     </Stack.Navigator>
   );
 }
