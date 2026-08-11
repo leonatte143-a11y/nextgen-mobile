@@ -7,9 +7,10 @@ import { MaterialsTabContent } from '../components/materials/MaterialsTabContent
 import { ShopListContent } from '../components/shop/ShopListContent';
 import type { MainTabScreenProps } from '../navigation/types';
 
-export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
+export function ShopsRentalsMainScreen(props: MainTabScreenProps<'Store'>) {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<'shops' | 'materials'>('shops');
+  const { route } = props;
+  const [activeTab, setActiveTab] = useState<'shops' | 'materials'>(route.params?.initialTab ?? 'shops');
 
   const header = (
     <View>

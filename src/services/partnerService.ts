@@ -44,6 +44,15 @@ export type PublicCategory = {
   iconUrl?: string | null;
 };
 
+export type PartnerEnquiry = {
+  id: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+  payload: { viewerName?: string; viewerPhone?: string | null; viewerLocation?: string | null } | null;
+};
+
 export const partnerService = {
   async applyOnboarding(payload: PartnerOnboardingPayload): Promise<PartnerProfile> {
     return apiService.post('/api/v1/partners/onboarding', payload);
@@ -75,6 +84,10 @@ export const partnerService = {
 
   async getReferralEarnings(): Promise<PartnerReferralSummary> {
     return apiService.get('/api/v1/partners/referrals/earnings', 'partner');
+  },
+
+  async getEnquiries(): Promise<PartnerEnquiry[]> {
+    return apiService.get('/api/v1/partners/enquiries', 'partner');
   },
 
   async deleteAccount(): Promise<void> {

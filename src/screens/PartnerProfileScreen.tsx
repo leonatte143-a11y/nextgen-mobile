@@ -2,7 +2,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,8 +11,14 @@ import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { partnerService } from '../services/partnerService';
+import type { PublicCategory } from '../services/partnerService';
 import type { PartnerReferralSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
+import { MAIN_CATEGORIES } from '../data/serviceCatalog';
+
+const STATIC_PARTNER_CATEGORIES = Array.from(
+  new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
+).filter((name) => !/^other/i.test(name.trim()));
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
@@ -28,6 +34,10 @@ export function PartnerProfileScreen() {
   const [phoneDraft, setPhoneDraft] = useState('');
   const [referrals, setReferrals] = useState<PartnerReferralSummary | null>(null);
   const [referralsLoading, setReferralsLoading] = useState(true);
+  const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
+  const [extraCategories, setExtraCategories] = useState<PublicCategory[]>([]);
+  const [newCategorySelections, setNewCategorySelections] = useState<string[]>([]);
+  const [savingCategories, setSavingCategories] = useState(false);
 
   useEffect(() => {
     partnerService
@@ -37,6 +47,29 @@ export function PartnerProfileScreen() {
       .finally(() => setReferralsLoading(false));
   }, []);
 
+  useEffect(() => {
+    partnerService
+      .getCategories()
+      .then(setExtraCategories)
+      .catch(() => setExtraCategories([]));
+  }, []);
+
+  const allCategoryOptions = React.useMemo(() => {
+    const seen = new Set(STATIC_PARTNER_CATEGORIES.map((s) => s.toLowerCase()));
+    const merged = [...STATIC_PARTNER_CATEGORIES];
+    for (const cat of extraCategories) {
+      const name = cat.nameEn;
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (key === 'other' || key === 'others' || /^other/i.test(key)) continue;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(name);
+      }
+    }
+    return merged;
+  }, [extraCategories]);
+
   if (isLoading || !profile) {
     return null;
   }
@@ -45,6 +78,12 @@ export function PartnerProfileScreen() {
     setNameDraft(profile.name);
     setPhoneDraft(profile.phone);
     setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setNameDraft(profile.name);
+    setPhoneDraft(profile.phone);
+    setEditing(false);
   };
 
   const handleSave = async () => {
@@ -99,6 +138,40 @@ export function PartnerProfileScreen() {
     }
   };
 
+  const openCategoriesModal = () => {
+    setNewCategorySelections([]);
+    setCategoriesModalOpen(true);
+  };
+
+  const closeCategoriesModal = () => {
+    setNewCategorySelections([]);
+    setCategoriesModalOpen(false);
+  };
+
+  const toggleNewCategory = (option: string) => {
+    setNewCategorySelections((prev) =>
+      prev.includes(option) ? prev.filter((c) => c !== option) : [...prev, option],
+    );
+  };
+
+  const saveCategories = async () => {
+    if (newCategorySelections.length === 0) {
+      closeCategoriesModal();
+      return;
+    }
+    setSavingCategories(true);
+    try {
+      const merged = Array.from(new Set([...profile.categories, ...newCategorySelections]));
+      await updateProfile({ categories: merged });
+      closeCategoriesModal();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not update categories.';
+      Alert.alert('Update failed', msg);
+    } finally {
+      setSavingCategories(false);
+    }
+  };
+
   const confirmDeleteAccount = () => {
     Alert.alert(
       'Delete account?',
@@ -146,12 +219,13 @@ export function PartnerProfileScreen() {
             <>
               <TextInput style={styles.editInput} value={nameDraft} onChangeText={setNameDraft} placeholder="Name" placeholderTextColor={colors.orangeTint} />
               <TextInput
-                style={styles.editInput}
+                style={[styles.editInput, styles.editInputDisabled]}
                 value={phoneDraft}
                 onChangeText={setPhoneDraft}
                 placeholder="Phone"
                 placeholderTextColor={colors.orangeTint}
                 keyboardType="phone-pad"
+                editable={false}
               />
             </>
           ) : (
@@ -172,7 +246,21 @@ export function PartnerProfileScreen() {
       </View>
 
       {editing ? (
-        <PrimaryButton title={loading ? 'Saving…' : 'Save'} onPress={handleSave} loading={loading} style={styles.editSaveBtn} />
+        <View style={styles.editActionsRow}>
+          <PrimaryButton
+            title={loading ? 'Saving…' : 'Save'}
+            onPress={handleSave}
+            loading={loading}
+            style={[styles.editSaveBtn, styles.editActionBtn]}
+          />
+          <PrimaryButton
+            title="Cancel"
+            variant="outline"
+            onPress={cancelEdit}
+            disabled={loading}
+            style={[styles.editSaveBtn, styles.editActionBtn]}
+          />
+        </View>
       ) : (
         <Pressable style={styles.editProfileBtn} onPress={startEdit}>
           <Ionicons name="create-outline" size={18} color={colors.primary} />
@@ -223,6 +311,25 @@ export function PartnerProfileScreen() {
         )}
       </View>
 
+      <View style={styles.categoriesSection}>
+        <Text style={styles.categoriesTitle}>Manage Categories</Text>
+        <View style={styles.tagsRow}>
+          {profile.categories.length > 0 ? (
+            profile.categories.map((cat) => (
+              <View key={cat} style={styles.tag}>
+                <Text style={styles.tagText}>{cat}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.sectionText}>No categories added yet.</Text>
+          )}
+        </View>
+        <Pressable style={styles.addCategoriesBtn} onPress={openCategoriesModal}>
+          <Ionicons name="add-circle-outline" size={18} color={colors.white} />
+          <Text style={styles.addCategoriesTxt}>Add Categories</Text>
+        </Pressable>
+      </View>
+
       <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerSettings')}>
         <Ionicons name="settings-outline" size={20} color={colors.primary} />
         <Text style={styles.menuTxt}>Settings</Text>
@@ -254,6 +361,43 @@ export function PartnerProfileScreen() {
         <Ionicons name="trash-outline" size={20} color={colors.error} />
         <Text style={styles.deleteTxt}>Delete Account</Text>
       </Pressable>
+
+      <Modal visible={categoriesModalOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Add service categories</Text>
+            <ScrollView style={styles.modalScroll}>
+              <View style={styles.tagsRow}>
+                {allCategoryOptions
+                  .filter((option) => !profile.categories.includes(option))
+                  .map((option) => {
+                    const selected = newCategorySelections.includes(option);
+                    return (
+                      <Pressable
+                        key={option}
+                        style={[styles.chip, selected && styles.chipOn]}
+                        onPress={() => toggleNewCategory(option)}
+                      >
+                        <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+                      </Pressable>
+                    );
+                  })}
+              </View>
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <PrimaryButton
+                title={savingCategories ? 'Saving…' : 'Done'}
+                onPress={saveCategories}
+                loading={savingCategories}
+                style={{ flex: 1 }}
+              />
+              <Pressable style={styles.modalCancel} onPress={closeCategoriesModal} disabled={savingCategories}>
+                <Text style={styles.modalCancelTxt}>Cancel</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -304,6 +448,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     fontWeight: '700',
   },
+  editInputDisabled: { opacity: 0.6 },
+  editActionsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  editActionBtn: { flex: 1, marginTop: 0 },
   editSaveBtn: { marginTop: spacing.md },
   editProfileBtn: {
     flexDirection: 'row',

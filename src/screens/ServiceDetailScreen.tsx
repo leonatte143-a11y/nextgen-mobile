@@ -28,6 +28,7 @@ export function ServiceDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const loggedPartnerIdRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     (async () => {
@@ -50,6 +51,13 @@ export function ServiceDetailScreen() {
       setLoading(false);
     })();
   }, [route.params.serviceId, route.params.selectedPartnerId]);
+
+  React.useEffect(() => {
+    if (!selectedPartner?.id) return;
+    if (loggedPartnerIdRef.current === selectedPartner.id) return;
+    loggedPartnerIdRef.current = selectedPartner.id;
+    catalogService.logProfileView(selectedPartner.id).catch(() => {});
+  }, [selectedPartner?.id]);
 
   const partnerDistance = selectedPartner?.distanceKm ?? svc?.distanceKm ?? 0;
 

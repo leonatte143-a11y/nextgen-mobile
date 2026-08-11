@@ -56,10 +56,14 @@ export function PostListingScreen() {
     marketplaceService.getCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
+  const OTHERS_CATEGORY: MarketplaceCategory = { id: '', name: 'Others' };
+
   const filteredSuggestions = useMemo(() => {
     const q = categoryQuery.trim().toLowerCase();
-    if (!q) return categories.slice(0, 8);
-    return categories.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 8);
+    const matches = !q
+      ? categories.slice(0, 8)
+      : categories.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 8);
+    return [...matches, OTHERS_CATEGORY];
   }, [categoryQuery, categories]);
 
   const pickPhoto = async () => {
@@ -189,9 +193,14 @@ export function PostListingScreen() {
           <View style={styles.suggestBox}>
             {filteredSuggestions.map((c) => (
               <Pressable
-                key={c.id}
+                key={c.id || 'others'}
                 style={styles.suggestRow}
                 onPress={() => {
+                  if (c === OTHERS_CATEGORY) {
+                    setCategoryId('');
+                    setShowSuggestions(false);
+                    return;
+                  }
                   setCategoryId(c.id);
                   setCategoryQuery(c.name);
                   setShowSuggestions(false);

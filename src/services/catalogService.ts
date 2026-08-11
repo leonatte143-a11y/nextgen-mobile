@@ -43,4 +43,8 @@ export const catalogService = {
     const q = encodeURIComponent(String(distanceKm));
     return apiService.get(`/api/v1/catalog/visiting-charge?distanceKm=${q}`);
   },
+
+  async logProfileView(partnerId: string): Promise<boolean> {
+    return apiService.post(`/api/v1/catalog/partners/${partnerId}/view`, undefined, 'user');
+  },
 };

@@ -129,21 +129,6 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <View style={styles.brandRow}>
-            <View style={styles.brandLetterWrap}>
-              <View style={styles.brandHalfSun} />
-              <Text style={styles.brandLetter}>K</Text>
-            </View>
-            <Text style={styles.brandLetter}>A</Text>
-            <Text style={styles.brandLetter}>I</Text>
-            <Text style={styles.brandLetter}>R</Text>
-            <View style={styles.brandLetterWrap}>
-              <Text style={styles.brandLetter}>O</Text>
-              <View style={styles.brandClockDot}>
-                <Ionicons name="time-outline" size={9} color={colors.primary} />
-              </View>
-            </View>
-          </View>
           <Text style={styles.h1}>My Profile</Text>
           <Text style={styles.sub}>Manage your account</Text>
         </View>
@@ -296,31 +281,6 @@ const styles = StyleSheet.create({
   },
   h1: { fontSize: 26, fontWeight: '800', color: colors.white },
   sub: { color: colors.orangeTint, marginTop: 4 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
-  brandLetterWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
-  brandLetter: { fontSize: 15, fontWeight: '900', color: colors.white, letterSpacing: 1 },
-  brandHalfSun: {
-    position: 'absolute',
-    top: -5,
-    width: 14,
-    height: 7,
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
-    backgroundColor: colors.orangeTint,
-    overflow: 'hidden',
-    zIndex: -1,
-  },
-  brandClockDot: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   cardWrap: { marginTop: -20, paddingHorizontal: spacing.md },
   card: {
     backgroundColor: colors.white,

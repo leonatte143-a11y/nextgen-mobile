@@ -24,7 +24,7 @@ import type { RootStackParamList } from '../navigation/types';
 
 const STATIC_PARTNER_SERVICES = Array.from(
   new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
-);
+).filter((name) => !/^other/i.test(name.trim()));
 
 const ID_TYPES = ['Aadhaar', 'PAN', 'Driving License', 'Voter ID'] as const;
 type IdType = (typeof ID_TYPES)[number];
@@ -47,6 +47,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [pincode, setPincode] = useState('');
   const [idType, setIdType] = useState<IdType | null>(null);
@@ -79,6 +80,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     const merged = [...STATIC_PARTNER_SERVICES];
     for (const name of extraCategories) {
       const key = name.toLowerCase();
+      if (/^other/i.test(key.trim())) continue;
       if (!seen.has(key)) {
         seen.add(key);
         merged.push(name);
@@ -276,7 +278,13 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       ) : null}
 
       <Text style={styles.lab}>Service Categories</Text>
-      <Pressable style={styles.dropdown} onPress={() => setCategoriesOpen(true)}>
+      <Pressable
+        style={styles.dropdown}
+        onPress={() => {
+          setCategorySearch('');
+          setCategoriesOpen(true);
+        }}
+      >
         <Text style={styles.dropdownTxt} numberOfLines={1}>
           {selectedCategories.length > 0 ? selectedCategories.join(', ') : 'Select the services you offer'}
         </Text>
@@ -322,27 +330,40 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Select service categories</Text>
+            <KairoTextInput
+              placeholder="Search categories..."
+              value={categorySearch}
+              onChangeText={setCategorySearch}
+            />
             <ScrollView style={styles.modalScroll}>
               <View style={styles.chips}>
-                {allPartnerServices.map((option) => {
-                  const selected = selectedCategories.includes(option);
-                  return (
-                    <Pressable
-                      key={option}
-                      style={[styles.chip, selected && styles.chipOn]}
-                      onPress={() =>
-                        setSelectedCategories((prev) =>
-                          prev.includes(option) ? prev.filter((c) => c !== option) : [...prev, option],
-                        )
-                      }
-                    >
-                      <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
-                    </Pressable>
-                  );
-                })}
+                {allPartnerServices
+                  .filter((o) => o.toLowerCase().includes(categorySearch.toLowerCase()))
+                  .map((option) => {
+                    const selected = selectedCategories.includes(option);
+                    return (
+                      <Pressable
+                        key={option}
+                        style={[styles.chip, selected && styles.chipOn]}
+                        onPress={() =>
+                          setSelectedCategories((prev) =>
+                            prev.includes(option) ? prev.filter((c) => c !== option) : [...prev, option],
+                          )
+                        }
+                      >
+                        <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+                      </Pressable>
+                    );
+                  })}
               </View>
             </ScrollView>
-            <PrimaryButton title="Done" onPress={() => setCategoriesOpen(false)} />
+            <PrimaryButton
+              title="Done"
+              onPress={() => {
+                setCategorySearch('');
+                setCategoriesOpen(false);
+              }}
+            />
           </View>
         </View>
       </Modal>

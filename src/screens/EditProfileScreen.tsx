@@ -21,7 +21,6 @@ export function EditProfileScreen() {
   const { refreshProfile } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -77,7 +76,6 @@ export function EditProfileScreen() {
         if (cancelled) return;
         setFirstName(p.firstName);
         setLastName(p.lastName);
-        setEmail(p.email);
         setPhone(p.phone);
         setAddress(p.address);
       } catch (e: unknown) {
@@ -97,7 +95,7 @@ export function EditProfileScreen() {
   const save = async () => {
     setLoading(true);
     try {
-      await userService.updateProfile({ firstName, lastName, email, address });
+      await userService.updateProfile({ firstName, lastName, address });
       await refreshProfile();
       navigation.goBack();
     } catch (e: unknown) {
@@ -130,7 +128,6 @@ export function EditProfileScreen() {
               const p = await userService.getProfile();
               setFirstName(p.firstName);
               setLastName(p.lastName);
-              setEmail(p.email);
               setPhone(p.phone);
               setAddress(p.address);
             } catch (e: unknown) {
@@ -156,27 +153,22 @@ export function EditProfileScreen() {
         <View style={{ width: 24 }} />
       </View>
       <View style={styles.avatarWrap}>
-        <Pressable style={styles.avatar} onPress={choosePhoto}>
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.avatarImage} />
-          ) : (
-            <Text style={styles.avText}>{`${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'N'}</Text>
-          )}
+        <Pressable style={styles.avatarOuter} onPress={choosePhoto}>
+          <View style={styles.avatar}>
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avText}>{`${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'N'}</Text>
+            )}
+          </View>
           <View style={styles.cameraBadge}>
-            <Ionicons name="camera" size={14} color={colors.white} />
+            <Ionicons name="camera" size={16} color={colors.white} />
           </View>
         </Pressable>
       </View>
       <KairoTextInput label="First name" value={firstName} onChangeText={setFirstName} />
       <KairoTextInput label="Last name" value={lastName} onChangeText={setLastName} />
-      <KairoTextInput
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <KairoTextInput label="Phone (OTP login)" value={phone} editable={false} />
+      <KairoTextInput label="Phone" value={phone} editable={false} />
       <KairoTextInput label="Address" value={address} onChangeText={setAddress} multiline />
       <PrimaryButton title="Save changes" onPress={save} loading={loading} />
     </ScrollView>
@@ -192,6 +184,10 @@ const styles = StyleSheet.create({
   muted: { color: colors.grey, textAlign: 'center', marginTop: spacing.sm },
   errorTitle: { fontSize: 18, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.sm },
   avatarWrap: { alignItems: 'center', marginBottom: spacing.lg },
+  avatarOuter: {
+    width: 104,
+    height: 104,
+  },
   avatar: {
     width: 104,
     height: 104,
@@ -205,11 +201,11 @@ const styles = StyleSheet.create({
   avText: { fontSize: 34, fontWeight: '800', color: colors.primary },
   cameraBadge: {
     position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    right: -6,
+    bottom: -6,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.navy,
     borderWidth: 2,
     borderColor: colors.white,

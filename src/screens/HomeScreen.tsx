@@ -144,10 +144,12 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   }
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: insets.top + spacing.xs }]}>
       <View style={styles.header}>
-        <View style={styles.headerSide} />
-        <View style={styles.brandBlock}>
+        <View style={styles.appHeader}>
+          <View style={styles.logoMark}>
+            <Text style={styles.logoN}>K</Text>
+          </View>
           <Text style={styles.brandName}>KAIRO</Text>
         </View>
         <View style={[styles.headerSide, styles.headerActions]}>
@@ -188,28 +190,29 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
           <HomeAdBanner locationLabel={location} />
         </View>
 
-        <View style={styles.rowTitle}>
-          <Text style={styles.h2}>{t(language, 'chooseService')}</Text>
+        <View style={[styles.rowTitle, styles.chooseServiceRowTitle]}>
+          <Text style={[styles.h2, styles.chooseServiceH2]}>{t(language, 'chooseService')}</Text>
         </View>
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
         <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
 
+        <Text style={styles.h2}>KAIRO Store</Text>
         <View style={styles.shopExoRow}>
           <Pressable
             style={styles.shopExoCard}
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="storefront-outline" size={22} color={colors.primary} />
+              <Ionicons name="storefront-outline" size={18} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>Shop</Text>
           </Pressable>
           <Pressable
             style={styles.shopExoCard}
-            onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Store', params: { initialTab: 'materials' } })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="swap-horizontal-outline" size={22} color={colors.primary} />
+              <Ionicons name="swap-horizontal-outline" size={18} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>EXO</Text>
             <Text style={styles.marketSub}>Buy or Sell</Text>
@@ -267,8 +270,11 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerSide: { flex: 1 },
+  appHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  logoMark: { width: 32, height: 32, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
   brandBlock: { alignItems: 'center', justifyContent: 'center' },
-  brandName: { fontSize: 28, fontWeight: '900', color: colors.navy, letterSpacing: 1 },
+  brandName: { fontSize: 18, fontWeight: '900', color: colors.navy, letterSpacing: 1 },
   headerActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing.sm },
   bellWrap: { padding: 4, position: 'relative' },
   badge: {
@@ -314,7 +320,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   bannerWrap: {
-    marginBottom: spacing.md,
+    marginBottom: 10,
   },
   searchBar: {
     flex: 1,
@@ -351,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    paddingVertical: spacing.sm,
+    paddingVertical: 6,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
@@ -364,8 +370,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   marketIcon: {
-    width: 38,
-    height: 38,
+    width: 31,
+    height: 31,
     borderRadius: radius.md,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
@@ -380,7 +386,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
   },
+  chooseServiceRowTitle: { marginTop: 5 },
   h2: { fontSize: 18, fontWeight: '800', color: colors.navy, paddingHorizontal: spacing.md, marginTop: spacing.md },
+  chooseServiceH2: { marginTop: 10 },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
   sectionTitle: {
     paddingHorizontal: spacing.md,
