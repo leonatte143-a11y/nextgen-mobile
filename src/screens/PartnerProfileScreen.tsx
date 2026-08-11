@@ -57,6 +57,9 @@ export function PartnerProfileScreen() {
         categories: profile.categories,
       });
       setEditing(false);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not save profile.';
+      Alert.alert('Update failed', msg);
     } finally {
       setLoading(false);
     }

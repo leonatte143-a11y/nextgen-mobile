@@ -41,7 +41,7 @@ const SERVICES: ServiceTile[] = [
     subtitle: 'Doctor appointments',
     icon: 'business-outline',
     accent: colors.trustTeal,
-    onPress: (nav) => nav.navigate('ClinicBooking'),
+    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Clinics & Doctors', searchQuery: 'doctor clinic hospital RMP PMP consultation' }),
   },
   {
     id: 'nurse',
@@ -81,7 +81,7 @@ const SERVICES: ServiceTile[] = [
     subtitle: '1-tap SOS dispatch',
     icon: 'medkit',
     accent: colors.emergency,
-    onPress: (nav) => nav.navigate('AmbulanceSos'),
+    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Ambulance', searchQuery: 'ambulance emergency transport driver' }),
   },
 ];
 

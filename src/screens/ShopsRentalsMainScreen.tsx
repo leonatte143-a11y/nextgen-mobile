@@ -14,7 +14,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
   const header = (
     <View>
       <View style={styles.header}>
-        <Text style={styles.title}>Shops, Materials & Rentals</Text>
+        <Text style={styles.title}>KAIRO Store</Text>
         <Text style={styles.sub}>KAIRO Market · nearby verified vendors</Text>
       </View>
 
@@ -28,7 +28,7 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
             size={26}
             color={activeTab === 'shops' ? colors.white : colors.primary}
           />
-          <Text style={[styles.cardTitle, activeTab === 'shops' && styles.cardTitleOn]}>Shops</Text>
+          <Text style={[styles.cardTitle, activeTab === 'shops' && styles.cardTitleOn]}>Shop</Text>
         </Pressable>
 
         <Pressable
@@ -40,8 +40,8 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
             size={26}
             color={activeTab === 'materials' ? colors.white : colors.primary}
           />
-          <Text style={[styles.cardTitle, styles.cardTitleStacked, activeTab === 'materials' && styles.cardTitleOn]}>
-            Sell{'\n'}or{'\n'}Rental
+          <Text style={[styles.cardTitle, activeTab === 'materials' && styles.cardTitleOn]}>
+            Buy or Sell
           </Text>
         </Pressable>
       </View>

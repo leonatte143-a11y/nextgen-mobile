@@ -1,7 +1,6 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -44,8 +43,9 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     onPress?: () => void;
   }[] = [
     { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
+    { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
     { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
-    { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards', comingSoon: true },
+    { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
     {
       label: 'Refer & Earn',
       icon: 'share-social-outline',
@@ -58,50 +58,19 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Conversations' },
     { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
-    { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
   ];
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  useEffect(() => {
-    AsyncStorage.getItem(PHOTO_KEY).then((v) => {
-      if (v) setPhotoUri(v);
-    });
-  }, []);
-
-  const pickFrom = async (source: 'camera' | 'library') => {
-    const perm =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', `Allow ${source === 'camera' ? 'camera' : 'photo library'} access to update your profile photo.`);
-      return;
-    }
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: true, aspect: [1, 1] })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 0.6,
-            allowsEditing: true,
-            aspect: [1, 1],
-          });
-    if (result.canceled || !result.assets?.[0]?.uri) return;
-    const uri = result.assets[0].uri;
-    setPhotoUri(uri);
-    await AsyncStorage.setItem(PHOTO_KEY, uri);
-  };
-
-  const choosePhoto = () => {
-    Alert.alert('Update profile photo', undefined, [
-      { text: 'Take Photo', onPress: () => void pickFrom('camera') },
-      { text: 'Choose from Gallery', onPress: () => void pickFrom('library') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem(PHOTO_KEY).then((v) => {
+        setPhotoUri(v ?? null);
+      });
+    }, []),
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -160,6 +129,21 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
         <View style={{ flex: 1, alignItems: 'center' }}>
+          <View style={styles.brandRow}>
+            <View style={styles.brandLetterWrap}>
+              <View style={styles.brandHalfSun} />
+              <Text style={styles.brandLetter}>K</Text>
+            </View>
+            <Text style={styles.brandLetter}>A</Text>
+            <Text style={styles.brandLetter}>I</Text>
+            <Text style={styles.brandLetter}>R</Text>
+            <View style={styles.brandLetterWrap}>
+              <Text style={styles.brandLetter}>O</Text>
+              <View style={styles.brandClockDot}>
+                <Ionicons name="time-outline" size={9} color={colors.primary} />
+              </View>
+            </View>
+          </View>
           <Text style={styles.h1}>My Profile</Text>
           <Text style={styles.sub}>Manage your account</Text>
         </View>
@@ -169,16 +153,13 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
       </View>
       <View style={styles.cardWrap}>
         <View style={styles.card}>
-          <Pressable style={styles.avatar} onPress={choosePhoto}>
+          <View style={styles.avatar}>
             {photoUri ? (
               <Image source={{ uri: photoUri }} style={styles.avatarImage} />
             ) : (
               <Text style={styles.avText}>{initials}</Text>
             )}
-            <View style={styles.cameraBadge}>
-              <Ionicons name="camera" size={14} color={colors.white} />
-            </View>
-          </Pressable>
+          </View>
           <Text style={styles.name}>
             {user.firstName} {user.lastName}
           </Text>
@@ -315,6 +296,31 @@ const styles = StyleSheet.create({
   },
   h1: { fontSize: 26, fontWeight: '800', color: colors.white },
   sub: { color: colors.orangeTint, marginTop: 4 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
+  brandLetterWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
+  brandLetter: { fontSize: 15, fontWeight: '900', color: colors.white, letterSpacing: 1 },
+  brandHalfSun: {
+    position: 'absolute',
+    top: -5,
+    width: 14,
+    height: 7,
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
+    backgroundColor: colors.orangeTint,
+    overflow: 'hidden',
+    zIndex: -1,
+  },
+  brandClockDot: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardWrap: { marginTop: -20, paddingHorizontal: spacing.md },
   card: {
     backgroundColor: colors.white,
@@ -338,21 +344,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarImage: { width: '100%', height: '100%' },
-  cameraBadge: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.navy,
-    borderWidth: 2,
-    borderColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-    elevation: 10,
-  },
   avText: { fontSize: 34, fontWeight: '800', color: colors.primary },
   name: { fontSize: 20, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
   email: { fontSize: 14, color: colors.grey, marginTop: 4, textAlign: 'center' },

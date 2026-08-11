@@ -200,7 +200,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="storefront-outline" size={28} color={colors.primary} />
+              <Ionicons name="storefront-outline" size={22} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>Shop</Text>
           </Pressable>
@@ -209,7 +209,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="swap-horizontal-outline" size={28} color={colors.primary} />
+              <Ionicons name="swap-horizontal-outline" size={22} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>EXO</Text>
             <Text style={styles.marketSub}>Buy or Sell</Text>
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -304,12 +304,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   profileInitials: { color: colors.white, fontWeight: '800', fontSize: 13 },
-  scroll: { paddingBottom: spacing.xl, paddingTop: spacing.xs },
+  scroll: { paddingBottom: spacing.xl, paddingTop: 0 },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: spacing.md,
-    marginTop: spacing.md,
+    marginTop: spacing.xs,
     marginBottom: spacing.md,
     gap: 10,
   },
@@ -343,15 +343,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     marginHorizontal: spacing.md,
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
     marginBottom: spacing.md,
   },
   shopExoCard: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -363,8 +364,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   marketIcon: {
-    width: 52,
-    height: 52,
+    width: 38,
+    height: 38,
     borderRadius: radius.md,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
