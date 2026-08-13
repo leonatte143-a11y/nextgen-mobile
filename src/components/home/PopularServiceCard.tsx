@@ -26,9 +26,6 @@ function PopularServiceCardComponent({ slot, service, onPress }: Props) {
       <Text style={styles.name} numberOfLines={1}>
         {service?.name ?? slot.name}
       </Text>
-      <Text style={styles.sub} numberOfLines={1}>
-        {service?.subtext ?? slot.subtitle}
-      </Text>
     </Pressable>
   );
 }
@@ -61,7 +58,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   name: { fontSize: 12, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
-  sub: { fontSize: 9, color: colors.grey, textAlign: 'center', marginTop: 2 },
   meta: { marginTop: spacing.xs },
   rate: { fontSize: 10, fontWeight: '600', color: colors.grey },
   price: { fontSize: 11, fontWeight: '800', color: colors.primary, marginTop: 2 },

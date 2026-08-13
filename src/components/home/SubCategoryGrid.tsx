@@ -31,9 +31,6 @@ function SubCategoryGridComponent({ items, onItemPress }: Props) {
           <Text style={styles.title} numberOfLines={2}>
             {item.title}
           </Text>
-          <Text style={styles.sub} numberOfLines={1}>
-            {item.subtitle}
-          </Text>
         </Pressable>
       );
     },
@@ -62,7 +59,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
     borderRadius: radius.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     borderWidth: 1,
@@ -84,5 +81,4 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   title: { fontSize: 11, fontWeight: '700', color: colors.charcoal, textAlign: 'center' },
-  sub: { fontSize: 9, color: colors.grey, textAlign: 'center', marginTop: 2 },
 });

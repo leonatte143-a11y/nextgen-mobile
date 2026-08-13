@@ -17,6 +17,28 @@ import type { RootStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'ServiceList'>;
 
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+/**
+ * Lenient, token-based match mirroring the backend's tokenOverlapMatch in
+ * catalogController.js — a word matches if it equals, contains, or is
+ * contained by a candidate word (e.g. "purohith" overlaps "purohit"). Kept as
+ * a defense-in-depth layer after the bucket fallback; the backend's search()
+ * now does the real lenient matching so this should rarely need to reject
+ * anything the bucket fetch returned.
+ */
+function tokenOverlapMatch(candidateText: string, queryText: string): boolean {
+  const candidateTokens = tokenize(candidateText);
+  const queryTokens = tokenize(queryText);
+  if (!candidateTokens.length || !queryTokens.length) return false;
+  return queryTokens.some((q) => candidateTokens.some((c) => c === q || c.includes(q) || q.includes(c)));
+}
+
 export function ServiceListScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
@@ -38,10 +60,10 @@ export function ServiceListScreen() {
           }
           if (data.length === 0) {
             const bucketData = await catalogService.getServicesByBucket(bucketId ?? null);
-            const q = searchQuery.trim().toLowerCase();
+            const q = searchQuery.trim();
             data = bucketData.filter((s) => {
-              const hay = `${s.name} ${s.subtext} ${s.categoryLabel}`.toLowerCase();
-              return hay.includes(q);
+              const hay = `${s.name} ${s.subtext} ${s.categoryLabel}`;
+              return tokenOverlapMatch(hay, q);
             });
           }
         } else {

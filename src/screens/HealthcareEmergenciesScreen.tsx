@@ -105,7 +105,6 @@ export function HealthcareEmergenciesScreen() {
               <Ionicons name={s.icon} size={28} color={s.accent} />
             </View>
             <Text style={styles.cardTitle}>{s.title}</Text>
-            <Text style={styles.cardSub}>{s.subtitle}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -135,7 +134,8 @@ const styles = StyleSheet.create({
     width: '47%',
     backgroundColor: colors.white,
     borderRadius: radius.lg,
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
@@ -153,5 +153,4 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   cardTitle: { fontWeight: '800', color: colors.navy, textAlign: 'center', fontSize: 13 },
-  cardSub: { color: colors.grey, fontSize: 11, marginTop: 4, textAlign: 'center' },
 });
