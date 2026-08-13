@@ -17,28 +17,6 @@ import type { RootStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'ServiceList'>;
 
-function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-}
-
-/**
- * Lenient, token-based match mirroring the backend's tokenOverlapMatch in
- * catalogController.js — a word matches if it equals, contains, or is
- * contained by a candidate word (e.g. "purohith" overlaps "purohit"). Kept as
- * a defense-in-depth layer after the bucket fallback; the backend's search()
- * now does the real lenient matching so this should rarely need to reject
- * anything the bucket fetch returned.
- */
-function tokenOverlapMatch(candidateText: string, queryText: string): boolean {
-  const candidateTokens = tokenize(candidateText);
-  const queryTokens = tokenize(queryText);
-  if (!candidateTokens.length || !queryTokens.length) return false;
-  return queryTokens.some((q) => candidateTokens.some((c) => c === q || c.includes(q) || q.includes(c)));
-}
-
 export function ServiceListScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
@@ -59,12 +37,13 @@ export function ServiceListScreen() {
             data = data.filter((s) => s.bucketId === bucketId);
           }
           if (data.length === 0) {
-            const bucketData = await catalogService.getServicesByBucket(bucketId ?? null);
-            const q = searchQuery.trim();
-            data = bucketData.filter((s) => {
-              const hay = `${s.name} ${s.subtext} ${s.categoryLabel}`;
-              return tokenOverlapMatch(hay, q);
-            });
+            // Pass the specific sub-icon term through so the backend can match
+            // it against a partner's own registered categories/skills (the
+            // precise signal for "which sub-category", not just the broad
+            // bucket) — trust that result directly rather than re-applying a
+            // second, cruder text filter here that could re-exclude a
+            // partner the backend already correctly matched.
+            data = await catalogService.getServicesByBucket(bucketId ?? null, searchQuery.trim());
           }
         } else {
           data = await catalogService.getServicesByBucket(bucketId ?? null);

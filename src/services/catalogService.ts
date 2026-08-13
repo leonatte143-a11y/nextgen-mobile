@@ -10,9 +10,11 @@ export const catalogService = {
     return apiService.get('/api/v1/catalog/services');
   },
 
-  async getServicesByBucket(bucketId: BucketId | null): Promise<CatalogService[]> {
+  async getServicesByBucket(bucketId: BucketId | null, searchQuery?: string): Promise<CatalogService[]> {
     if (!bucketId) return apiService.get('/api/v1/catalog/services');
-    return apiService.get(`/api/v1/catalog/buckets/${bucketId}/services`);
+    const q = searchQuery?.trim();
+    const suffix = q ? `?q=${encodeURIComponent(q)}` : '';
+    return apiService.get(`/api/v1/catalog/buckets/${bucketId}/services${suffix}`);
   },
 
   async getServiceById(id: string): Promise<CatalogService | null> {
