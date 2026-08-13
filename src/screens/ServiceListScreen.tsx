@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceCard } from '../components/ServiceCard';
 import { EmptyState } from '../components/EmptyState';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -19,6 +20,7 @@ type R = RouteProp<RootStackParamList, 'ServiceList'>;
 export function ServiceListScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
+  const insets = useSafeAreaInsets();
   const { bucketId, title, searchQuery } = route.params ?? {};
   const { isFavorite, favorites } = useFavorites();
   const [items, setItems] = useState<CatalogService[]>([]);
@@ -53,7 +55,7 @@ export function ServiceListScreen() {
   }, [bucketId, searchQuery, isFavorite, favorites]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />

@@ -28,6 +28,7 @@ export function ServiceDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const loggedPartnerIdRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
@@ -81,6 +82,7 @@ export function ServiceDetailScreen() {
   const bookService = async () => {
     if (!selectedPartner || booking) return;
     setBooking(true);
+    setRequestSent(true);
     try {
       const b = await bookingService.createBooking({
         serviceId: svc.id,
@@ -91,6 +93,7 @@ export function ServiceDetailScreen() {
       });
       navigation.replace('BookingTracking', { bookingId: b.id });
     } catch {
+      setRequestSent(false);
       Alert.alert('Error', 'Could not book this service. Please try again.');
     } finally {
       setBooking(false);
@@ -99,7 +102,7 @@ export function ServiceDetailScreen() {
 
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
-      <View style={styles.top}>
+      <View style={[styles.top, { paddingTop: spacing.md + insets.top }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
         </Pressable>
@@ -146,6 +149,10 @@ export function ServiceDetailScreen() {
           </View>
         )}
 
+        {selectedPartner?.description ? (
+          <Text style={styles.description}>{selectedPartner.description}</Text>
+        ) : null}
+
         {selectedPartner ? (
           <View style={styles.actions}>
             <Pressable style={styles.secondary} onPress={callPartner}>
@@ -160,48 +167,54 @@ export function ServiceDetailScreen() {
         ) : null}
 
         {selectedPartner ? (
-          <>
-            <Text style={styles.sectionTitle}>Gallery</Text>
-            {selectedPartner.photos && selectedPartner.photos.length > 0 ? (
-              <View style={styles.galleryGrid}>
-                {selectedPartner.photos.map((uri, i) => (
-                  <Image key={`${uri}-${i}`} source={{ uri }} style={styles.galleryImg} />
-                ))}
-              </View>
-            ) : (
-              <Text style={styles.emptySectionText}>No photos uploaded by this partner yet.</Text>
-            )}
-
-            <Text style={styles.sectionTitle}>Ratings</Text>
-            {selectedPartner.reviews && selectedPartner.reviews.length > 0 ? (
-              <View style={styles.reviewList}>
-                {selectedPartner.reviews.map((r) => (
-                  <View key={r.id} style={styles.reviewRow}>
-                    <Text style={styles.reviewBullet}>•</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.reviewAuthor}>
-                        {r.author} <Text style={styles.reviewStars}>★ {r.rating.toFixed(1)}</Text>
-                      </Text>
-                      <Text style={styles.reviewComment}>{r.comment}</Text>
+          <View style={styles.splitRow}>
+            <View style={styles.splitCol}>
+              <Text style={styles.sectionTitle}>Gallery</Text>
+              {selectedPartner.photos && selectedPartner.photos.length > 0 ? (
+                <View style={styles.galleryGrid}>
+                  {selectedPartner.photos.map((uri, i) => (
+                    <Image key={`${uri}-${i}`} source={{ uri }} style={styles.galleryImg} />
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.emptySectionText}>No photos uploaded by this partner yet.</Text>
+              )}
+            </View>
+            <View style={styles.splitCol}>
+              <Text style={styles.sectionTitle}>Ratings</Text>
+              {selectedPartner.reviews && selectedPartner.reviews.length > 0 ? (
+                <View style={styles.reviewList}>
+                  {selectedPartner.reviews.map((r) => (
+                    <View key={r.id} style={styles.reviewRow}>
+                      <Text style={styles.reviewBullet}>•</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.reviewAuthor}>
+                          {r.author} <Text style={styles.reviewStars}>★ {r.rating.toFixed(1)}</Text>
+                        </Text>
+                        <Text style={styles.reviewComment}>{r.comment}</Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <Text style={styles.emptySectionText}>
-                {selectedPartner.reviewsCount ? `${selectedPartner.reviewsCount} reviews · details unavailable yet.` : 'No reviews yet.'}
-              </Text>
-            )}
-          </>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.emptySectionText}>
+                  {selectedPartner.reviewsCount ? `${selectedPartner.reviewsCount} reviews · details unavailable yet.` : 'No reviews yet.'}
+                </Text>
+              )}
+            </View>
+          </View>
         ) : null}
       </ScrollView>
       <View style={styles.footer}>
-        <PrimaryButton
-          title="Book service"
-          disabled={!selectedPartner || booking}
-          loading={booking}
-          onPress={bookService}
-        />
+        {requestSent ? (
+          <Text style={styles.requestSentText}>Request sent — connecting you to a partner…</Text>
+        ) : (
+          <PrimaryButton
+            title="Book service"
+            disabled={!selectedPartner || booking}
+            onPress={bookService}
+          />
+        )}
       </View>
     </View>
   );
@@ -221,6 +234,10 @@ const styles = StyleSheet.create({
   body: { padding: spacing.lg },
   sectionTitle: { fontSize: 16, fontWeight: '800', marginTop: spacing.lg, marginBottom: spacing.sm, color: colors.charcoal },
   emptySectionText: { color: colors.grey, fontSize: 13, fontStyle: 'italic' },
+  description: { color: colors.charcoal, fontSize: 14, lineHeight: 20, marginTop: spacing.lg },
+  splitRow: { flexDirection: 'row', gap: spacing.md },
+  splitCol: { flex: 1, minWidth: 0 },
+  requestSentText: { textAlign: 'center', color: colors.primary, fontWeight: '700', paddingVertical: spacing.sm },
   partner: {
     padding: spacing.md,
     backgroundColor: colors.greyLight,
@@ -273,10 +290,10 @@ const styles = StyleSheet.create({
   },
   partnerEmptyTitle: { fontSize: 16, fontWeight: '700', marginBottom: spacing.xs },
   partnerEmptyText: { color: colors.grey, lineHeight: 20 },
-  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   galleryImg: {
-    width: 96,
-    height: 96,
+    width: 64,
+    height: 64,
     borderRadius: radius.md,
     backgroundColor: colors.greyLight,
   },

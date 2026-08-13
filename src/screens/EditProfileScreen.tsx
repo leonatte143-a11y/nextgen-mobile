@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ImageCropModal } from '../components/ImageCropModal';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, spacing } from '../constants/theme';
@@ -27,6 +28,8 @@ export function EditProfileScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [cropVisible, setCropVisible] = useState(false);
+  const [pendingUri, setPendingUri] = useState<string | null>(null);
 
   useEffect(() => {
     AsyncStorage.getItem(PHOTO_KEY).then((v) => {
@@ -45,17 +48,27 @@ export function EditProfileScreen() {
     }
     const result =
       source === 'camera'
-        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: true, aspect: [1, 1] })
+        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: false })
         : await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 0.6,
-            allowsEditing: true,
-            aspect: [1, 1],
+            allowsEditing: false,
           });
     if (result.canceled || !result.assets?.[0]?.uri) return;
-    const uri = result.assets[0].uri;
-    setPhotoUri(uri);
-    await AsyncStorage.setItem(PHOTO_KEY, uri);
+    setPendingUri(result.assets[0].uri);
+    setCropVisible(true);
+  };
+
+  const handleCropSave = async (finalUri: string) => {
+    setCropVisible(false);
+    setPendingUri(null);
+    setPhotoUri(finalUri);
+    await AsyncStorage.setItem(PHOTO_KEY, finalUri);
+  };
+
+  const handleCropCancel = () => {
+    setCropVisible(false);
+    setPendingUri(null);
   };
 
   const choosePhoto = () => {
@@ -171,6 +184,12 @@ export function EditProfileScreen() {
       <KairoTextInput label="Phone" value={phone} editable={false} />
       <KairoTextInput label="Address" value={address} onChangeText={setAddress} multiline />
       <PrimaryButton title="Save changes" onPress={save} loading={loading} />
+      <ImageCropModal
+        visible={cropVisible}
+        imageUri={pendingUri}
+        onSave={(finalUri) => void handleCropSave(finalUri)}
+        onCancel={handleCropCancel}
+      />
     </ScrollView>
   );
 }

@@ -5,9 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
-import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../navigation/types';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
@@ -17,7 +15,6 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function PartnerSettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { logoutPartner } = useAuth();
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.body, { paddingTop: insets.top + spacing.md }]}>
@@ -29,26 +26,13 @@ export function PartnerSettingsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <Text style={styles.section}>Preferences</Text>
-      <NavRow icon="globe-outline" label="Language" onPress={() => navigation.navigate('Language')} />
-
       <Text style={styles.section}>Support</Text>
       <NavRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => navigation.navigate('Privacy')} />
       <NavRow icon="document-text-outline" label="Terms of Service" onPress={() => navigation.navigate('Terms')} />
-      <NavRow icon="alert-circle-outline" label="Report an Issue" onPress={() => navigation.navigate('Conversations', { role: 'partner' })} />
+      <NavRow icon="alert-circle-outline" label="Raise a Ticket" onPress={() => navigation.navigate('Conversations', { role: 'partner' })} />
       <View style={styles.versionRow}>
         <Text style={styles.versionTxt}>KAIRO Partner v{APP_VERSION}</Text>
       </View>
-
-      <Text style={styles.section}>Actions</Text>
-      <PrimaryButton
-        title="Logout"
-        variant="danger"
-        onPress={async () => {
-          await logoutPartner();
-          navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
-        }}
-      />
     </ScrollView>
   );
 }

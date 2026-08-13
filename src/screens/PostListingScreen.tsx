@@ -76,15 +76,22 @@ export function PostListingScreen() {
       Alert.alert('Permission needed', 'Allow photo library access to add listing photos.');
       return;
     }
+    const remaining = MAX_PHOTOS - photos.length;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.5,
       base64: true,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
     });
-    if (result.canceled || !result.assets?.[0]?.base64) return;
-    const asset = result.assets[0];
-    const mime = asset.mimeType || 'image/jpeg';
-    setPhotos((prev) => [...prev, `data:${mime};base64,${asset.base64}`]);
+    if (result.canceled || !result.assets?.length) return;
+    const picked = result.assets.filter((a) => a.base64);
+    const toAdd = picked.slice(0, remaining);
+    const newUris = toAdd.map((asset) => `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`);
+    setPhotos((prev) => [...prev, ...newUris]);
+    if (picked.length > remaining) {
+      Alert.alert('Limit reached', `Only ${remaining} photo${remaining === 1 ? '' : 's'} added — you can have up to ${MAX_PHOTOS} photos.`);
+    }
   };
 
   const useMyLocation = async () => {

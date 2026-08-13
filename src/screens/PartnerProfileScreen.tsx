@@ -1,8 +1,20 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
-import React, { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,7 +39,7 @@ export function PartnerProfileScreen() {
   const navigation = useNavigation<NavigationProps>();
   const { userToken, logoutPartner } = useAuth();
   const { profile, updateProfile, isLoading } = usePartner();
-  const [bio, setBio] = useState('Trusted expert for home electrical and repair services.');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -38,6 +50,8 @@ export function PartnerProfileScreen() {
   const [extraCategories, setExtraCategories] = useState<PublicCategory[]>([]);
   const [newCategorySelections, setNewCategorySelections] = useState<string[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
+  const [showCopiedToast, setShowCopiedToast] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     partnerService
@@ -52,6 +66,20 @@ export function PartnerProfileScreen() {
       .getCategories()
       .then(setExtraCategories)
       .catch(() => setExtraCategories([]));
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setDescription(profile.description ?? '');
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
   }, []);
 
   const allCategoryOptions = React.useMemo(() => {
@@ -77,12 +105,14 @@ export function PartnerProfileScreen() {
   const startEdit = () => {
     setNameDraft(profile.name);
     setPhoneDraft(profile.phone);
+    setDescription(profile.description ?? '');
     setEditing(true);
   };
 
   const cancelEdit = () => {
     setNameDraft(profile.name);
     setPhoneDraft(profile.phone);
+    setDescription(profile.description ?? '');
     setEditing(false);
   };
 
@@ -94,6 +124,7 @@ export function PartnerProfileScreen() {
         phone: phoneDraft.trim() || profile.phone,
         skills: profile.skills,
         categories: profile.categories,
+        description: description.trim(),
       });
       setEditing(false);
     } catch (e: unknown) {
@@ -196,15 +227,13 @@ export function PartnerProfileScreen() {
   };
 
   return (
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView
       style={styles.root}
       contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
     >
-      <View style={styles.appHeader}>
-        <View style={styles.logoMark}>
-          <Text style={styles.logoN}>K</Text>
-        </View>
-        <Text style={styles.brandName}>KAIRO</Text>
+      <View style={styles.profileTitleRow}>
+        <Text style={styles.profileTitle}>My Profile</Text>
       </View>
 
       <View style={styles.profileCard}>
@@ -269,15 +298,16 @@ export function PartnerProfileScreen() {
       )}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Bio</Text>
+        <Text style={styles.sectionTitle}>Description</Text>
         <TextInput
-          value={bio}
-          onChangeText={setBio}
-          style={styles.bioInput}
+          value={description}
+          onChangeText={setDescription}
+          style={[styles.bioInput, !editing && styles.editInputDisabled]}
           multiline
           numberOfLines={2}
           placeholder="Write a short description of who you are and what you do"
           placeholderTextColor={colors.grey}
+          editable={editing}
         />
       </View>
 
@@ -293,7 +323,9 @@ export function PartnerProfileScreen() {
                 style={styles.referralActionBtn}
                 onPress={async () => {
                   await Clipboard.setStringAsync(referrals.referralCode);
-                  Alert.alert('Copied', 'Referral code copied to clipboard.');
+                  if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                  setShowCopiedToast(true);
+                  toastTimerRef.current = setTimeout(() => setShowCopiedToast(false), 1000);
                 }}
               >
                 <Ionicons name="copy-outline" size={16} color={colors.primary} />
@@ -335,12 +367,6 @@ export function PartnerProfileScreen() {
         <Text style={styles.menuTxt}>Settings</Text>
         <Ionicons name="chevron-forward" size={20} color={colors.grey} />
       </Pressable>
-      <Pressable style={styles.menuRow} onPress={() => navigation.navigate('Language')}>
-        <Ionicons name="globe-outline" size={20} color={colors.primary} />
-        <Text style={styles.menuTxt}>Languages</Text>
-        <Ionicons name="chevron-forward" size={20} color={colors.grey} />
-      </Pressable>
-
       <Pressable
         style={styles.switchModeBtn}
         onPress={() => {
@@ -358,7 +384,7 @@ export function PartnerProfileScreen() {
       <PrimaryButton title="Logout" variant="outline" onPress={handleLogout} style={styles.logoutButton} />
 
       <Pressable style={styles.deleteBtn} onPress={confirmDeleteAccount}>
-        <Ionicons name="trash-outline" size={20} color={colors.error} />
+        <Ionicons name="trash-outline" size={15} color={colors.error} />
         <Text style={styles.deleteTxt}>Delete Account</Text>
       </Pressable>
 
@@ -399,16 +425,21 @@ export function PartnerProfileScreen() {
         </View>
       </Modal>
     </ScrollView>
+    {showCopiedToast ? (
+      <View style={styles.copiedToast} pointerEvents="none">
+        <Text style={styles.copiedToastTxt}>Copied</Text>
+      </View>
+    ) : null}
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.greyLight },
   content: { padding: spacing.lg, paddingBottom: spacing.xl },
-  appHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
-  logoMark: { width: 32, height: 32, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
-  brandName: { fontSize: 16, fontWeight: '900', color: colors.navy },
+  profileTitleRow: { alignItems: 'center', marginBottom: spacing.md },
+  profileTitle: { fontSize: 20, fontWeight: '800', color: colors.navy },
   profileCard: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
   profileLetter: { color: colors.primary, fontSize: 40, fontWeight: '800' },
@@ -523,11 +554,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     marginTop: spacing.md,
-    padding: spacing.lg,
+    padding: spacing.sm,
   },
-  deleteTxt: { color: colors.error, fontWeight: '800', fontSize: 16 },
+  deleteTxt: { color: colors.error, fontWeight: '700', fontSize: 13, opacity: 0.85 },
   switchModeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -557,4 +588,14 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   modalCancel: { padding: spacing.md },
   modalCancelTxt: { color: colors.grey, fontWeight: '700' },
+  copiedToast: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+  },
+  copiedToastTxt: { color: colors.white, fontWeight: '700' },
 });

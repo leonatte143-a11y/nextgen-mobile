@@ -1,6 +1,15 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
 import { KairoTextInput } from '../components/KairoTextInput';
@@ -40,7 +49,11 @@ export function RegisterScreen({ navigation }: Props) {
   const ok = firstName.length > 1 && phone.replace(/\D/g, '').length === 10 && acceptedTerms;
 
   return (
-    <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
       <Text style={styles.h1}>Create account</Text>
       <Text style={styles.sub}>Save your profile, then sign in with the OTP sent to your mobile.</Text>
       <KairoTextInput label="First name" value={firstName} onChangeText={setFirstName} />
@@ -70,11 +83,13 @@ export function RegisterScreen({ navigation }: Props) {
         </Text>
       </Pressable>
       <PrimaryButton title="Save & go to Login" onPress={save} disabled={!ok} loading={loading} />
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { padding: spacing.lg, paddingTop: 48, backgroundColor: colors.white, flexGrow: 1 },
   h1: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   sub: { color: colors.grey, marginBottom: spacing.lg, marginTop: spacing.sm },

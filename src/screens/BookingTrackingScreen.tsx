@@ -32,6 +32,11 @@ export function BookingTrackingScreen() {
   const route = useRoute<R>();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [confirmedNavigate, setConfirmedNavigate] = useState(false);
+
+  useEffect(() => {
+    setConfirmedNavigate(false);
+  }, [route.params.bookingId]);
 
   useEffect(() => {
     let active = true;
@@ -61,10 +66,13 @@ export function BookingTrackingScreen() {
   // shared Booking type doesn't declare it.
   const partnerStatus = (booking as unknown as { partnerStatus?: string } | null)?.partnerStatus;
   const waitingForConfirmation = partnerStatus === 'new';
+  const rejected = partnerStatus === 'rejected';
+  const acceptedAwaitingNavigate = partnerStatus === 'pending' && !confirmedNavigate;
 
   const statusLabel = booking ? STATUS_LABEL[booking.status] ?? 'Booking status' : 'Booking status';
 
   const goHome = () => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+  const backToServiceList = () => navigation.goBack();
 
   if (loading || !booking) {
     return <ScreenLoader />;
@@ -86,6 +94,23 @@ export function BookingTrackingScreen() {
           <Text style={styles.waitingSub}>
             We've notified {booking.partnerName || 'your partner'}. This screen will update automatically once
             they confirm your booking.
+          </Text>
+        </View>
+      ) : rejected ? (
+        <View style={styles.waitingBody}>
+          <Ionicons name="star" size={44} color={colors.error} />
+          <Text style={styles.waitingTitle}>Rejected</Text>
+          <Text style={styles.waitingSub}>
+            {booking.partnerName || 'Your partner'} was unable to accept this booking. Please choose another
+            provider.
+          </Text>
+        </View>
+      ) : acceptedAwaitingNavigate ? (
+        <View style={styles.waitingBody}>
+          <Ionicons name="star" size={44} color={colors.success} />
+          <Text style={styles.waitingTitle}>Accepted</Text>
+          <Text style={styles.waitingSub}>
+            {booking.partnerName || 'Your partner'} has accepted your booking and will be on the way shortly.
           </Text>
         </View>
       ) : (
@@ -118,7 +143,17 @@ export function BookingTrackingScreen() {
       )}
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
-        <PrimaryButton title="Close" variant="outline" onPress={goHome} />
+        {acceptedAwaitingNavigate ? (
+          <>
+            <PrimaryButton title="Navigate" onPress={() => setConfirmedNavigate(true)} />
+            <View style={{ height: spacing.sm }} />
+            <PrimaryButton title="Close" variant="outline" onPress={goHome} />
+          </>
+        ) : rejected ? (
+          <PrimaryButton title="Close" variant="outline" onPress={backToServiceList} />
+        ) : (
+          <PrimaryButton title="Close" variant="outline" onPress={goHome} />
+        )}
       </View>
     </View>
   );

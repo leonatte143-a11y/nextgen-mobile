@@ -8,6 +8,8 @@ import {
   Dimensions,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -78,6 +80,10 @@ export function ListingDetailScreen() {
           <Ionicons name="flag-outline" size={22} color={colors.error} />
         </Pressable>
       </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView contentContainerStyle={styles.body}>
         {listing.photos.length > 0 ? (
           <FlatList
@@ -122,6 +128,7 @@ export function ListingDetailScreen() {
           </View>
         ) : null}
       </ScrollView>
+      </KeyboardAvoidingView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.sm }]}>
         <PrimaryButton
           title="Chat with Seller"
@@ -133,6 +140,7 @@ export function ListingDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.white },
   top: {
     flexDirection: 'row',

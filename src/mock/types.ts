@@ -35,6 +35,7 @@ export interface PartnerSummary {
   photos?: string[];
   /** Written customer reviews (not yet backed by a review-collection flow). */
   reviews?: PartnerReview[];
+  description?: string;
 }
 
 export interface ServiceMenuItem {
@@ -117,6 +118,8 @@ export interface PartnerProfile {
   referralCode?: string;
   /** Photos the partner has uploaded for their public profile grid. */
   photos?: string[];
+  /** Partner-authored description shown to Users on their profile. */
+  description?: string;
 }
 
 export type PartnerReferralEarning = {

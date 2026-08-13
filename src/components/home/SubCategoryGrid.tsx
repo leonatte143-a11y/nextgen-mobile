@@ -26,7 +26,7 @@ function SubCategoryGridComponent({ items, onItemPress }: Props) {
           style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
         >
           <View style={styles.iconWrap}>
-            <Ionicons name={item.icon} size={24} color={colors.primary} />
+            <Ionicons name={item.icon} size={19} color={colors.primary} />
           </View>
           <Text style={styles.title} numberOfLines={2}>
             {item.title}
@@ -75,9 +75,9 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.9, borderColor: colors.primary, backgroundColor: colors.orangeTint },
   iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',

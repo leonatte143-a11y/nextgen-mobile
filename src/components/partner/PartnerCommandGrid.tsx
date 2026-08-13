@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import type { PartnerStackParamList } from '../../navigation/PartnerStackTypes';
+import { partnerService } from '../../services/partnerService';
 
 const ORANGE = '#FF8C00';
 
@@ -22,6 +23,25 @@ export function PartnerCommandGrid({
 }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<PartnerStackParamList>>();
   const pulse = useRef(new Animated.Value(1)).current;
+  const [unreadEnquiries, setUnreadEnquiries] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const rows = await partnerService.getEnquiries();
+          if (!cancelled) setUnreadEnquiries(rows.filter((r) => r.read === false).length);
+        } catch {
+          // best-effort; leave previous badge state
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []),
+  );
+
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
@@ -57,6 +77,7 @@ export function PartnerCommandGrid({
         <Pressable style={styles.card} onPress={() => (navigation as any).navigate('PartnerEnquiry')}>
           <Ionicons name="help-buoy-outline" size={22} color={ORANGE} />
           <Text style={styles.lab}>Enquiry</Text>
+          {unreadEnquiries > 0 ? <View style={styles.unreadDot} /> : null}
         </Pressable>
         <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
           <Ionicons name="chatbubbles-outline" size={22} color={ORANGE} />
@@ -96,6 +117,16 @@ const styles = StyleSheet.create({
     minHeight: 100,
     borderWidth: 1,
     borderColor: colors.border,
+    position: 'relative',
+  },
+  unreadDot: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.error,
   },
   galleryBtn: {
     flexDirection: 'row',

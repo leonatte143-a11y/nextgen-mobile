@@ -90,6 +90,10 @@ export const partnerService = {
     return apiService.get('/api/v1/partners/enquiries', 'partner');
   },
 
+  async markEnquiriesRead(): Promise<void> {
+    await apiService.post('/api/v1/partners/enquiries/read-all', {}, 'partner');
+  },
+
   async deleteAccount(): Promise<void> {
     await apiService.delete('/api/v1/partners/me', 'partner');
   },

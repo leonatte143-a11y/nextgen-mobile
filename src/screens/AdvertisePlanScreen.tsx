@@ -3,7 +3,15 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -67,6 +75,10 @@ export function AdvertisePlanScreen() {
         <Text style={styles.headerTitle}>Choose a Plan</Text>
         <View style={{ width: 24 }} />
       </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={styles.label}>Plan</Text>
         <View style={styles.planRow}>
@@ -121,6 +133,7 @@ export function AdvertisePlanScreen() {
           disabled={!canPay}
         />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

@@ -83,9 +83,7 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
                 <Text style={styles.name}>{item.serviceName}</Text>
                 <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
               </View>
-              <Text style={styles.partner}>
-                {item.partnerName} · ₹{item.totalAmount}
-              </Text>
+              <Text style={styles.partner}>{item.partnerName}</Text>
               {item.lineItems && item.lineItems.length > 0 ? (
                 <Text style={styles.lineItems} numberOfLines={2}>
                   {item.lineItems.map((li) => li.title).join(', ')}

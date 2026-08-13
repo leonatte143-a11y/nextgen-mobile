@@ -16,4 +16,8 @@ export const userService = {
   async deleteAccount(): Promise<void> {
     await apiService.delete('/api/v1/users/me', 'user');
   },
+
+  async toggleFreeze(): Promise<{ isFrozen: boolean }> {
+    return apiService.post<{ isFrozen: boolean }>('/api/v1/users/me/freeze', undefined, 'user');
+  },
 };

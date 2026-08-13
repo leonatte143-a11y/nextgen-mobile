@@ -2,7 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
@@ -53,6 +63,10 @@ export function ClinicBookingScreen() {
         <Text style={styles.headerTitle}>Clinics & Consultations</Text>
         <View style={{ width: 24 }} />
       </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={styles.section}>Select services</Text>
         {CLINIC_MENU.map((item) => {
@@ -75,12 +89,14 @@ export function ClinicBookingScreen() {
         <Text style={styles.total}>Estimated total: ₹{total}</Text>
         <PrimaryButton title="Find clinic partner" onPress={book} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
+  flex: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

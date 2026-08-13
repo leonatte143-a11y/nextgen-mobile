@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
@@ -50,6 +50,22 @@ export function PartnerEnquiryScreen() {
     setRefreshing(false);
   };
 
+  // Mark all enquiries as read whenever this screen gains focus, so the
+  // entry-point red dot clears immediately. Update local state in-place
+  // rather than refetching, so the "opened" (muted) styling shows at once.
+  useFocusEffect(
+    useCallback(() => {
+      partnerService
+        .markEnquiriesRead()
+        .then(() => {
+          setEnquiries((prev) => prev.map((item) => ({ ...item, read: true })));
+        })
+        .catch(() => {
+          // best-effort; if this fails the badge/styling simply won't clear yet
+        });
+    }, []),
+  );
+
   if (loading) return <ScreenLoader />;
 
   return (
@@ -73,23 +89,31 @@ export function PartnerEnquiryScreen() {
             <Text style={styles.emptySub}>Users who view your profile will show up here.</Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="person-outline" size={20} color={colors.primary} />
+        renderItem={({ item }) => {
+          const unread = item.read === false;
+          return (
+            <View style={[styles.card, unread ? styles.cardUnread : styles.cardRead]}>
+              <View style={styles.iconCircle}>
+                <Ionicons name="person-outline" size={20} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1, opacity: unread ? 1 : 0.6 }}>
+                <View style={styles.titleRow}>
+                  {unread ? <View style={styles.unreadDot} /> : null}
+                  <Text style={[styles.cardTitle, unread ? styles.cardTitleUnread : styles.cardTitleRead]}>
+                    {item.payload?.viewerName || 'A user'} viewed your profile
+                  </Text>
+                </View>
+                {item.payload?.viewerPhone ? (
+                  <Text style={styles.cardDetail}>📞 {item.payload.viewerPhone}</Text>
+                ) : null}
+                {item.payload?.viewerLocation ? (
+                  <Text style={styles.cardDetail}>📍 {item.payload.viewerLocation}</Text>
+                ) : null}
+                <Text style={styles.time}>{timeAgo(item.createdAt)}</Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.payload?.viewerName || 'A user'} viewed your profile</Text>
-              {item.payload?.viewerPhone ? (
-                <Text style={styles.cardDetail}>📞 {item.payload.viewerPhone}</Text>
-              ) : null}
-              {item.payload?.viewerLocation ? (
-                <Text style={styles.cardDetail}>📍 {item.payload.viewerLocation}</Text>
-              ) : null}
-              <Text style={styles.time}>{timeAgo(item.createdAt)}</Text>
-            </View>
-          </View>
-        )}
+          );
+        }}
       />
     </View>
   );
@@ -121,6 +145,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     alignItems: 'flex-start',
   },
+  cardUnread: {
+    backgroundColor: colors.orangeTint,
+    borderColor: colors.primary,
+    borderWidth: 1.5,
+  },
+  cardRead: {
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+  },
   iconCircle: {
     width: 40,
     height: 40,
@@ -129,7 +162,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardTitle: { fontWeight: '800', color: colors.charcoal },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  cardTitle: { color: colors.charcoal },
+  cardTitleUnread: { fontWeight: '700' },
+  cardTitleRead: { fontWeight: '400' },
   cardDetail: { color: colors.grey, marginTop: 4, fontSize: 13 },
   time: { fontSize: 12, color: colors.grey, marginTop: 6 },
 });

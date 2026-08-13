@@ -1,6 +1,15 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { KairoTextInput } from '../components/KairoTextInput';
@@ -62,6 +71,10 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
         <Text style={styles.title}>Service location</Text>
         <View style={{ width: 24 }} />
       </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + spacing.xl }]}>
         <View style={styles.statusCard}>
           <Ionicons name="navigate-circle" size={22} color={colors.primary} />
@@ -117,11 +130,13 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
 
         <PrimaryButton title="Save service zone" onPress={save} loading={saving} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.white },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.grey },

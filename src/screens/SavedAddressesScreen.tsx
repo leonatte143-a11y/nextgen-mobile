@@ -7,11 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
 import { userService } from '../services/userService';
 
 const STORAGE_KEY = 'kairo_saved_addresses';
 
-type SavedAddress = { id: string; label: string; line: string };
+type SavedAddress = { id: string; label: string; line: string; latitude?: number; longitude?: number };
 
 export function SavedAddressesScreen() {
   const navigation = useNavigation();
@@ -20,6 +21,8 @@ export function SavedAddressesScreen() {
   const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [label, setLabel] = useState('Home');
   const [line, setLine] = useState('');
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const load = useCallback(async () => {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -48,14 +51,36 @@ export function SavedAddressesScreen() {
       Alert.alert('Address required', 'Enter a full address line.');
       return;
     }
-    const next = [...addresses, { id: `addr_${Date.now()}`, label: label.trim() || 'Saved', line: line.trim() }];
+    const next = [
+      ...addresses,
+      {
+        id: `addr_${Date.now()}`,
+        label: label.trim() || 'Saved',
+        line: line.trim(),
+        ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
+      },
+    ];
     await persist(next);
     if (next.length === 1) {
       await userService.updateProfile({ address: line.trim() });
       await refreshProfile();
     }
     setLine('');
+    setCoords(null);
     Alert.alert('Saved', 'Address added.');
+  };
+
+  const useMyLocation = async () => {
+    setLocating(true);
+    try {
+      const ok = await requestLocationPermission();
+      if (!ok) return;
+      const c = await getCurrentCoords();
+      if (c) setCoords(c);
+      else Alert.alert('Location unavailable', 'Could not fetch your current location. Try again.');
+    } finally {
+      setLocating(false);
+    }
   };
 
   const remove = (id: string) => {
@@ -84,6 +109,12 @@ export function SavedAddressesScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.cardLabel}>{a.label}</Text>
               <Text style={styles.cardLine}>{a.line}</Text>
+              {a.latitude != null && a.longitude != null ? (
+                <View style={styles.pinRow}>
+                  <Ionicons name="location" size={12} color={colors.primary} />
+                  <Text style={styles.pinTxt}>Pinned location saved</Text>
+                </View>
+              ) : null}
             </View>
             <Pressable onPress={() => remove(a.id)}>
               <Ionicons name="trash-outline" size={20} color={colors.error} />
@@ -99,6 +130,12 @@ export function SavedAddressesScreen() {
           onChangeText={setLine}
           multiline
         />
+        <Pressable style={styles.locBtn} onPress={() => void useMyLocation()} disabled={locating}>
+          <Ionicons name="locate-outline" size={18} color={colors.primary} />
+          <Text style={styles.locTxt}>
+            {locating ? 'Fetching location…' : coords ? 'Location pin added ✓' : 'Use my current location as pin'}
+          </Text>
+        </Pressable>
         <PrimaryButton title="Save address" onPress={() => void addAddress()} />
       </ScrollView>
     </View>
@@ -129,6 +166,8 @@ const styles = StyleSheet.create({
   },
   cardLabel: { fontWeight: '800', color: colors.navy },
   cardLine: { color: colors.slate, marginTop: 4, fontSize: 14 },
+  pinRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  pinTxt: { color: colors.primary, fontSize: 12, fontWeight: '600' },
   section: { fontWeight: '800', color: colors.navy, marginTop: spacing.lg, marginBottom: spacing.sm },
   input: {
     backgroundColor: colors.white,
@@ -140,4 +179,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
+  locBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  locTxt: { color: colors.primary, fontWeight: '700' },
 });

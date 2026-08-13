@@ -21,7 +21,7 @@ function PopularServiceCardComponent({ slot, service, onPress }: Props) {
       style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
     >
       <View style={styles.iconWrap}>
-        <Ionicons name={slot.icon as IconName} size={22} color={colors.primary} />
+        <Ionicons name={slot.icon as IconName} size={19} color={colors.primary} />
       </View>
       <Text style={styles.name} numberOfLines={1}>
         {service?.name ?? slot.name}
@@ -52,9 +52,9 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.9, borderColor: colors.primary },
   iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 39,
+    height: 39,
+    borderRadius: 20,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',

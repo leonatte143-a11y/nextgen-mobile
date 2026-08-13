@@ -2,7 +2,17 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { bookingService } from '../services/bookingService';
@@ -49,7 +59,11 @@ export function ReviewScreen() {
   };
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.body}>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView style={styles.root} contentContainerStyle={styles.body}>
       <Text style={styles.h1}>Service completed!</Text>
       <Text style={styles.sub}>How was your experience with {route.params.partnerName}?</Text>
       <View style={styles.stars}>
@@ -96,11 +110,13 @@ export function ReviewScreen() {
       <Pressable onPress={goHome} style={styles.skip}>
         <Text style={styles.skipTxt}>Skip</Text>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.white },
   body: { padding: spacing.lg, paddingTop: 48 },
   h1: { fontSize: 22, fontWeight: '800' },

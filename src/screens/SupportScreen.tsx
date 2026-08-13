@@ -5,7 +5,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -90,6 +92,10 @@ export function SupportScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
     <ScrollView style={styles.root} contentContainerStyle={styles.body}>
       <View style={[styles.hero, { paddingTop: 48 }]}> 
         <Pressable style={styles.back} onPress={() => navigation.goBack()}>
@@ -181,7 +187,7 @@ export function SupportScreen() {
         multiline
       />
       <PrimaryButton
-        title="Submit support ticket"
+        title="Submit Ticket"
         onPress={handleCreateTicket}
         loading={ticketLoading}
       />
@@ -189,6 +195,7 @@ export function SupportScreen() {
         <Text style={styles.sosTxt}>SOS / Emergency</Text>
       </Pressable>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -212,6 +219,7 @@ function Quick({
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.white },
   body: { paddingBottom: spacing.xl, paddingHorizontal: spacing.md },
   hero: { backgroundColor: colors.primary, padding: spacing.lg, paddingBottom: spacing.xl },

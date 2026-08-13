@@ -1,8 +1,10 @@
 ﻿import React, { useMemo, useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -158,7 +160,11 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   }, [isCancelled, quote?.status, request.status]);
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
       style={styles.root}
       contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}
     >
@@ -467,11 +473,13 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.greyLight },
   content: { padding: spacing.lg, paddingBottom: spacing.xl },
   map: {

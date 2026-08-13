@@ -3,7 +3,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -182,6 +184,10 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
         </Text>
       </View>
 
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Pressable style={styles.addBtn} onPress={() => setAddOpen(true)}>
           <Ionicons name="add" size={22} color={colors.white} />
@@ -230,6 +236,7 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
           ))
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <Modal visible={!!edit} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -301,6 +308,7 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.greyLight },
   header: {
     paddingHorizontal: spacing.md,

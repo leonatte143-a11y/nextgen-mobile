@@ -39,6 +39,7 @@ module.exports = ({ config }) => {
     extra: {
       ...(config.extra || {}),
       projectId: 'a30926c2-d34c-4ceb-ba72-767edc62b46e'
-    }
+    },
+    plugins: [...(config.plugins || []), 'expo-font']
   };
 };

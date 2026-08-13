@@ -196,14 +196,14 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <Text style={styles.muted}>{t(language, 'expertsIn')}</Text>
         <CategoryGrid categories={categories} language={language} onCategoryPress={onCategoryPress} />
 
-        <Text style={styles.h2}>KAIRO Store</Text>
+        <Text style={[styles.h2, styles.storeH2]}>KAIRO Store</Text>
         <View style={styles.shopExoRow}>
           <Pressable
             style={styles.shopExoCard}
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="storefront-outline" size={18} color={colors.primary} />
+              <Ionicons name="storefront-outline" size={11} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>Shop</Text>
           </Pressable>
@@ -212,7 +212,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store', params: { initialTab: 'materials' } })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="swap-horizontal-outline" size={18} color={colors.primary} />
+              <Ionicons name="swap-horizontal-outline" size={11} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>EXO</Text>
             <Text style={styles.marketSub}>Buy or Sell</Text>
@@ -243,7 +243,6 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <View style={styles.footer}>
           <Text style={styles.footerBrand}>KAIRO</Text>
           <Text style={styles.footerTag}>Your trusted home services platform — Andhra Pradesh</Text>
-          <Text style={styles.footerLink}>support@kairo.com · +91 98765 43210</Text>
         </View>
       </ScrollView>
 
@@ -320,7 +319,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   bannerWrap: {
-    marginBottom: 10,
+    marginBottom: 6,
   },
   searchBar: {
     flex: 1,
@@ -357,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    paddingVertical: 6,
+    paddingVertical: 3,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.lg,
@@ -370,8 +369,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   marketIcon: {
-    width: 31,
-    height: 31,
+    width: 16,
+    height: 16,
     borderRadius: radius.md,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
@@ -386,9 +385,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
   },
-  chooseServiceRowTitle: { marginTop: 5 },
+  chooseServiceRowTitle: { marginTop: 2 },
   h2: { fontSize: 18, fontWeight: '800', color: colors.navy, paddingHorizontal: spacing.md, marginTop: spacing.md },
   chooseServiceH2: { marginTop: 10 },
+  storeH2: { marginTop: spacing.md / 2 },
   muted: { paddingHorizontal: spacing.md, color: colors.grey, marginBottom: spacing.sm },
   sectionTitle: {
     paddingHorizontal: spacing.md,
@@ -433,5 +433,4 @@ const styles = StyleSheet.create({
   footer: { padding: spacing.xl, alignItems: 'center', backgroundColor: colors.greyLight },
   footerBrand: { fontWeight: '900', fontSize: 18, color: colors.primary },
   footerTag: { color: colors.grey, textAlign: 'center', marginTop: spacing.sm },
-  footerLink: { color: colors.charcoal, marginTop: spacing.md, fontSize: 13 },
 });

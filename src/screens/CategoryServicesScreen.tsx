@@ -3,7 +3,15 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubCategoryGrid } from '../components/home/SubCategoryGrid';
 import { colors, radius, spacing } from '../constants/theme';
@@ -64,6 +72,7 @@ export function CategoryServicesScreen() {
   }
 
   return (
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
@@ -99,10 +108,12 @@ export function CategoryServicesScreen() {
         <SubCategoryGrid items={filtered} onItemPress={(item) => void onSubPress(item)} />
       )}
     </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.greyLight },
   top: {
     flexDirection: 'row',

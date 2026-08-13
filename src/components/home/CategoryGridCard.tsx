@@ -29,7 +29,7 @@ function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, 
       ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: iconBg }, selected && styles.iconWrapSelected]}>
-        <Ionicons name={icon} size={21} color={iconColor} />
+        <Ionicons name={icon} size={18} color={iconColor} />
       </View>
       <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={2}>
         {title}
@@ -62,9 +62,9 @@ const styles = StyleSheet.create({
   },
   cardPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
   iconWrap: {
-    width: 43,
-    height: 43,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',

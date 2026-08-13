@@ -3,7 +3,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -24,7 +25,6 @@ type MenuTarget =
   | 'Settings'
   | 'Rewards'
   | 'Conversations'
-  | 'Language'
   | 'MyFavorites'
   | 'SavedAddresses'
   | 'AdvertiseBusiness';
@@ -35,34 +35,29 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
   const { user, partnerToken, refreshProfile, logoutUser, language } = useAuth();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
 
-  const MENU: {
+  type MenuItem = {
     label: string;
     icon: keyof typeof Ionicons.glyphMap;
     target?: MenuTarget;
     comingSoon?: boolean;
     onPress?: () => void;
-  }[] = [
+  };
+
+  const MENU_TOP: MenuItem[] = [
     { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
     { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
     { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
     { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
-    {
-      label: 'Refer & Earn',
-      icon: 'share-social-outline',
-      onPress: () => {
-        Share.share({ message: REFERRAL_SHARE_MESSAGE() }).catch(() => {
-          // ignore share cancellation
-        });
-      },
-    },
+  ];
+  const MENU_BOTTOM: MenuItem[] = [
     { label: t(language, 'helpSupport'), icon: 'help-circle-outline', target: 'Conversations' },
-    { label: t(language, 'language'), icon: 'globe-outline', target: 'Language' },
     { label: 'Saved Addresses', icon: 'location-outline', target: 'SavedAddresses' },
   ];
   const [bookingsCount, setBookingsCount] = useState(0);
   const [queriesCount, setQueriesCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [accountModalVisible, setAccountModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -160,7 +155,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             </Pressable>
             <Pressable
               style={styles.pairBtn}
-              onPress={() => navigation.navigate('Conversations', { role: 'user' })}
+              onPress={() => navigation.navigate('Support')}
             >
               <Ionicons name="chatbubbles-outline" size={16} color={colors.primary} />
               <Text style={styles.pairBtnTxt}>Support</Text>
@@ -198,7 +193,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
         </View>
       </View>
       <View style={styles.menu}>
-        {MENU.map((m) => (
+        {MENU_TOP.map((m) => (
           <Pressable
             key={m.label}
             style={[styles.menuRow, m.comingSoon && styles.menuRowDisabled]}
@@ -218,31 +213,58 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </Pressable>
         ))}
-        <Pressable
-          style={styles.deleteBtn}
-          onPress={() => {
-            Alert.alert(
-              'Delete account?',
-              'Your account will be deactivated. Contact support to restore access.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await userService.deleteAccount();
-                      await logoutUser();
-                      navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
-                    } catch (e) {
-                      Alert.alert('Error', e instanceof Error ? e.message : 'Could not delete account');
-                    }
-                  },
-                },
-              ],
-            );
-          }}
-        >
+        <View style={styles.menuRow}>
+          <Ionicons name="share-social-outline" size={22} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.menuTxt}>Refer & Earn</Text>
+            {user.referralCode ? (
+              <View style={styles.referralRow}>
+                <Text style={styles.referralCodeTxt}>Your code: {user.referralCode}</Text>
+                <Pressable
+                  style={styles.referralCopyBtn}
+                  onPress={async () => {
+                    await Clipboard.setStringAsync(user.referralCode);
+                    Alert.alert('Copied', 'Referral code copied.');
+                  }}
+                >
+                  <Ionicons name="copy-outline" size={14} color={colors.primary} />
+                  <Text style={styles.referralCopyTxt}>Copy</Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
+          <Pressable
+            style={styles.referralShareBtn}
+            onPress={() => {
+              Share.share({ message: REFERRAL_SHARE_MESSAGE() }).catch(() => {
+                // ignore share cancellation
+              });
+            }}
+          >
+            <Text style={styles.referralShareTxt}>Share</Text>
+          </Pressable>
+        </View>
+        {MENU_BOTTOM.map((m) => (
+          <Pressable
+            key={m.label}
+            style={[styles.menuRow, m.comingSoon && styles.menuRowDisabled]}
+            onPress={
+              m.comingSoon
+                ? undefined
+                : m.onPress ?? (() => m.target && navigation.navigate(m.target))
+            }
+          >
+            <Ionicons name={m.icon} size={22} color={colors.primary} />
+            <Text style={styles.menuTxt}>{m.label}</Text>
+            {m.comingSoon ? (
+              <View style={styles.comingSoonPill}>
+                <Text style={styles.comingSoonTxt}>Coming Soon</Text>
+              </View>
+            ) : null}
+            <Ionicons name="chevron-forward" size={20} color={colors.grey} />
+          </Pressable>
+        ))}
+        <Pressable style={styles.deleteBtn} onPress={() => setAccountModalVisible(true)}>
           <Ionicons name="trash-outline" size={16} color={colors.error} />
           <Text style={styles.deleteTxt}>Delete Account</Text>
         </Pressable>
@@ -256,6 +278,70 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
           }}
         />
       </View>
+      <Modal
+        visible={accountModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAccountModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Account Options</Text>
+            <Pressable
+              style={styles.modalOption}
+              onPress={async () => {
+                setAccountModalVisible(false);
+                try {
+                  const result = await userService.toggleFreeze();
+                  Alert.alert(
+                    result.isFrozen ? 'Account frozen' : 'Account unfrozen',
+                    result.isFrozen
+                      ? 'Your account is now frozen. You can unfreeze anytime by logging back in and selecting this option again.'
+                      : 'Your account has been unfrozen.',
+                  );
+                } catch (e) {
+                  Alert.alert('Error', e instanceof Error ? e.message : 'Could not update account status');
+                }
+              }}
+            >
+              <Ionicons name="snow-outline" size={18} color={colors.primary} />
+              <Text style={styles.modalOptionTxt}>Freeze/Unfreeze Account</Text>
+            </Pressable>
+            <Pressable
+              style={styles.modalOption}
+              onPress={() => {
+                setAccountModalVisible(false);
+                Alert.alert(
+                  'Delete account?',
+                  'Your account will be deactivated. Contact support to restore access.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: async () => {
+                        try {
+                          await userService.deleteAccount();
+                          await logoutUser();
+                          navigation.reset({ index: 0, routes: [{ name: 'UserLogin' }] });
+                        } catch (e) {
+                          Alert.alert('Error', e instanceof Error ? e.message : 'Could not delete account');
+                        }
+                      },
+                    },
+                  ],
+                );
+              }}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text style={[styles.modalOptionTxt, { color: colors.error }]}>Delete Account Permanently</Text>
+            </Pressable>
+            <Pressable style={styles.modalCancel} onPress={() => setAccountModalVisible(false)}>
+              <Text style={styles.modalCancelTxt}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -414,4 +500,49 @@ const styles = StyleSheet.create({
   deleteTxt: { color: colors.error, fontWeight: '700', fontSize: 13 },
   errTitle: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   errSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg },
+  referralRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 4 },
+  referralCodeTxt: { fontSize: 12, color: colors.grey, fontWeight: '600' },
+  referralCopyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  referralCopyTxt: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  referralShareBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
+  },
+  referralShareTxt: { color: colors.white, fontWeight: '700', fontSize: 13 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: colors.charcoal, marginBottom: spacing.md },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalOptionTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 15 },
+  modalCancel: { marginTop: spacing.md, alignItems: 'center', padding: spacing.sm },
+  modalCancelTxt: { color: colors.grey, fontWeight: '700' },
 });
