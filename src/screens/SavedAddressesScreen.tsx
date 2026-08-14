@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
@@ -103,6 +103,7 @@ export function SavedAddressesScreen() {
         <Text style={styles.title}>Saved Addresses</Text>
         <View style={{ width: 24 }} />
       </View>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={styles.body}>
         {addresses.map((a) => (
           <View key={a.id} style={styles.card}>
@@ -138,11 +139,13 @@ export function SavedAddressesScreen() {
         </Pressable>
         <PrimaryButton title="Save address" onPress={() => void addAddress()} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.surface },
   header: {
     flexDirection: 'row',

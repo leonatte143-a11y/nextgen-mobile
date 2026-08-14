@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import type {
+  PartnerCustomerReview,
   PartnerEarningsSummary,
   PartnerPriceLimits,
   PartnerPricingListResponse,
@@ -130,8 +131,16 @@ export const partnerService = {
     return apiService.post(`/api/v1/partners/requests/${requestId}/estimate`, { newAmount }, 'partner');
   },
 
-  async cancelActiveJobWithFee(requestId: string): Promise<PartnerRequest> {
-    return apiService.post(`/api/v1/partners/requests/${requestId}/cancel-fee`, {}, 'partner');
+  async cancelActiveJobWithFee(requestId: string, reason: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/cancel-fee`, { reason }, 'partner');
+  },
+
+  async confirmCashReceived(requestId: string): Promise<PartnerRequest> {
+    return apiService.post(`/api/v1/partners/requests/${requestId}/confirm-cash`, {}, 'partner');
+  },
+
+  async getMyReviews(): Promise<PartnerCustomerReview[]> {
+    return apiService.get('/api/v1/partners/reviews/mine', 'partner');
   },
 
   async requestHeavyWorkEstimate(

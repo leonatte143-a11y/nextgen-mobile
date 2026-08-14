@@ -10,7 +10,7 @@ const SPLASH_MIN_MS = 2500;
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'> };
 
 export function SplashScreen({ navigation }: Props) {
-  const { isHydrating, hasCompletedLanguageOnboarding, userToken, partnerToken } = useAuth();
+  const { isHydrating, userToken, partnerToken } = useAuth();
   const [animationDone, setAnimationDone] = useState(false);
   const mountedAt = useRef(Date.now());
   const hasNavigated = useRef(false);
@@ -33,10 +33,6 @@ export function SplashScreen({ navigation }: Props) {
       if (hasNavigated.current) return;
       hasNavigated.current = true;
 
-      if (!hasCompletedLanguageOnboarding) {
-        navigation.replace('Language');
-        return;
-      }
       if (partnerToken) {
         navigation.replace('PartnerHome');
         return;
@@ -52,7 +48,6 @@ export function SplashScreen({ navigation }: Props) {
   }, [
     isHydrating,
     animationDone,
-    hasCompletedLanguageOnboarding,
     userToken,
     partnerToken,
     navigation,

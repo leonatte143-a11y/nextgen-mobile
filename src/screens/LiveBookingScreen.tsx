@@ -17,13 +17,7 @@ import type { RootStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'LiveBooking'>;
 
-const STEPS = [
-  'Booking confirmed',
-  'Partner assigned',
-  'Partner en route',
-  'Service started',
-  'Service completed',
-] as const;
+const STEPS = ['Booking confirmed', 'Partner assigned', 'Partner en route'] as const;
 
 const STATUS_STEP_INDEX: Record<string, number> = {
   partner_assigned: 1,
@@ -74,7 +68,8 @@ export function LiveBookingScreen() {
   }, [route.params.bookingId]);
 
   const activeStep = useMemo(() => {
-    return booking ? STATUS_STEP_INDEX[booking.status] ?? 0 : 0;
+    const raw = booking ? STATUS_STEP_INDEX[booking.status] ?? 0 : 0;
+    return Math.min(raw, STEPS.length - 1);
   }, [booking]);
 
   useEffect(() => {
@@ -90,7 +85,6 @@ export function LiveBookingScreen() {
       const updated = await bookingService.confirmPayment(booking.id);
       setBooking(updated);
       setPaymentOpen(false);
-      Alert.alert('Payment successful', 'Thank you! You can now rate your service.');
     } catch {
       Alert.alert('Payment failed', 'Could not process payment. Please try again.');
     } finally {
@@ -215,6 +209,8 @@ export function LiveBookingScreen() {
               navigation.navigate('Review', { bookingId: booking.id, partnerName: booking.partnerName })
             }
           />
+        ) : booking.status === 'completed' && booking.paymentStatus === 'awaiting_partner_confirmation' ? (
+          <Text style={styles.statusNote}>Waiting for your partner to confirm payment received…</Text>
         ) : booking.status === 'completed' && booking.paymentStatus === 'pending' ? (
           <PrimaryButton title="Pay now" onPress={() => setPaymentOpen(true)} />
         ) : null}
@@ -245,9 +241,9 @@ export function LiveBookingScreen() {
           <View style={styles.payCard}>
             <Text style={styles.payTitle}>Complete payment</Text>
             <Text style={styles.paySub}>
-              Pay ₹{booking.totalAmount} to confirm the service before leaving a review.
+              Confirm payment to your service partner before leaving a review.
             </Text>
-            <PrimaryButton title={`Pay ₹${booking.totalAmount}`} onPress={handleConfirmPayment} loading={paying} />
+            <PrimaryButton title="Pay" onPress={handleConfirmPayment} loading={paying} />
             <Pressable onPress={() => setPaymentOpen(false)} style={styles.payClose}>
               <Text style={styles.payCloseTxt}>Pay later</Text>
             </Pressable>

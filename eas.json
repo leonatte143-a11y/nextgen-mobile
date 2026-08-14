@@ -30,7 +30,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-production-backend.example.com",
+        "EXPO_PUBLIC_API_URL": "https://nexgen-backend-production-a6ab.up.railway.app",
         "EXPO_PUBLIC_SHOW_DEBUG_OTP": "0"
       }
     }

@@ -1,6 +1,7 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
+import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -21,6 +22,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePartner } from '../context/PartnerContext';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../constants/theme';
+import { ImageCropModal } from '../components/ImageCropModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { partnerService } from '../services/partnerService';
 import type { PublicCategory } from '../services/partnerService';
@@ -51,6 +53,8 @@ export function PartnerProfileScreen() {
   const [newCategorySelections, setNewCategorySelections] = useState<string[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
+  const [cropVisible, setCropVisible] = useState(false);
+  const [pendingAvatarUri, setPendingAvatarUri] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -149,14 +153,28 @@ export function PartnerProfileScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.5,
-      base64: true,
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
     });
-    if (result.canceled || !result.assets?.[0]?.base64) return;
-    const asset = result.assets[0];
-    const mime = asset.mimeType || 'image/jpeg';
-    await updateProfile({ photoUrl: `data:${mime};base64,${asset.base64}` });
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+    setPendingAvatarUri(result.assets[0].uri);
+    setCropVisible(true);
+  };
+
+  const handleAvatarCropSave = async (finalUri: string) => {
+    setCropVisible(false);
+    setPendingAvatarUri(null);
+    try {
+      const base64 = await new FileSystem.File(finalUri).base64();
+      await updateProfile({ photoUrl: `data:image/jpeg;base64,${base64}` });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not update profile photo.';
+      Alert.alert('Update failed', msg);
+    }
+  };
+
+  const handleAvatarCropCancel = () => {
+    setCropVisible(false);
+    setPendingAvatarUri(null);
   };
 
   const shareReferralCode = async (code: string) => {
@@ -424,6 +442,13 @@ export function PartnerProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <ImageCropModal
+        visible={cropVisible}
+        imageUri={pendingAvatarUri}
+        onSave={(finalUri) => void handleAvatarCropSave(finalUri)}
+        onCancel={handleAvatarCropCancel}
+      />
     </ScrollView>
     {showCopiedToast ? (
       <View style={styles.copiedToast} pointerEvents="none">

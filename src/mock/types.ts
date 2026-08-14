@@ -89,6 +89,7 @@ export interface PartnerRequest {
   isPartnerArrived?: boolean;
   workDoneRequested?: boolean;
   customRequirements?: string;
+  paymentStatus?: 'pending' | 'awaiting_partner_confirmation' | 'paid';
 }
 
 export interface PartnerProfile {
@@ -241,7 +242,7 @@ export interface Booking {
   workDoneRequested?: boolean;
   heavyWorkEstimateRequested?: boolean;
   customRequirements?: string;
-  paymentStatus?: 'pending' | 'paid';
+  paymentStatus?: 'pending' | 'awaiting_partner_confirmation' | 'paid';
   paymentMethod?: string;
 }
 

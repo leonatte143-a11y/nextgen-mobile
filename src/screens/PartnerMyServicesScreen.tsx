@@ -239,6 +239,7 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
       </KeyboardAvoidingView>
 
       <Modal visible={!!edit} transparent animationType="fade">
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit service</Text>
@@ -269,9 +270,11 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
             </View>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={addOpen} transparent animationType="fade">
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add service</Text>
@@ -302,6 +305,7 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
             </View>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

@@ -48,6 +48,11 @@ export const bookingService = {
     return apiService.post(`/api/v1/bookings/${id}/cancel`, {}, 'user');
   },
 
+  /**
+   * User confirms they paid cash to the partner. This does NOT immediately mark the
+   * booking as paid — it moves paymentStatus to 'awaiting_partner_confirmation' until the
+   * partner confirms cash receipt server-side, at which point paymentStatus becomes 'paid'.
+   */
   async confirmPayment(bookingId: string): Promise<Booking> {
     return apiService.post<Booking>(`/api/v1/bookings/${bookingId}/confirm-payment`, {}, 'user');
   },

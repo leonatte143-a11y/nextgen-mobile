@@ -22,7 +22,7 @@ type PartnerContextValue = {
   withdrawBalance: () => Promise<void>;
   updateProfile: (payload: Partial<PartnerProfile>) => Promise<void>;
   submitEstimateUpdate: (requestId: string, newAmount: number) => Promise<void>;
-  cancelActiveJobWithFee: (requestId: string) => Promise<void>;
+  cancelActiveJobWithFee: (requestId: string, reason: string) => Promise<void>;
 };
 
 const PartnerContext = createContext<PartnerContextValue | undefined>(undefined);
@@ -227,8 +227,8 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
     setEarnings(earningsResult);
   }, []);
 
-  const cancelActiveJobWithFee = useCallback(async (requestId: string) => {
-    await partnerService.cancelActiveJobWithFee(requestId);
+  const cancelActiveJobWithFee = useCallback(async (requestId: string, reason: string) => {
+    await partnerService.cancelActiveJobWithFee(requestId, reason);
     const [requestsResult, profileResult, earningsResult] = await Promise.all([
       partnerService.getRequests(),
       partnerService.getProfile(),

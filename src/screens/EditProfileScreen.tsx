@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ImageCropModal } from '../components/ImageCropModal';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -157,6 +157,7 @@ export function EditProfileScreen() {
   }
 
   return (
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView style={styles.root} contentContainerStyle={styles.body}>
       <View style={styles.top}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
@@ -191,10 +192,12 @@ export function EditProfileScreen() {
         onCancel={handleCropCancel}
       />
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, backgroundColor: colors.white },
   body: { padding: spacing.lg, paddingTop: 48 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },

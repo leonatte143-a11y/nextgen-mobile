@@ -19,9 +19,18 @@ import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { partnerService } from '../services/partnerService';
 import type { PartnerStackParamList } from '../navigation/PartnerStackTypes';
 
 type Props = NativeStackScreenProps<PartnerStackParamList, 'PartnerRequestDetail'>;
+
+const CANCEL_REASONS = [
+  'Customer unreachable',
+  'Vehicle/transport issue',
+  'Personal emergency',
+  'Wrong address / out of service area',
+  'Other',
+];
 
 export function PartnerRequestDetailScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -32,19 +41,20 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     completeJob,
     requestHeavyWorkEstimate,
     declineHeavyWorkEstimate,
-    submitEstimateUpdate,
     cancelActiveJobWithFee,
+    refreshPartner,
   } = usePartner();
   const [estimateOpen, setEstimateOpen] = useState(false);
   const [extraLabor, setExtraLabor] = useState('0');
   const [materialCost, setMaterialCost] = useState('0');
   const [description, setDescription] = useState('Partner recommended motor replacement');
-  const [estOpen, setEstOpen] = useState(false);
-  const [estVal, setEstVal] = useState('');
   const [endOtpOpen, setEndOtpOpen] = useState(false);
   const [endOtpInput, setEndOtpInput] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [confirmingCash, setConfirmingCash] = useState(false);
+  const [cancelReasonOpen, setCancelReasonOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
 
   const request = requests.find((item) => item.id === route.params.requestId);
 
@@ -89,6 +99,19 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
     setEndOtpInput('');
     Alert.alert('Job completed', 'The work is finished and earnings are updated.');
     navigation.goBack();
+  };
+
+  const handleConfirmCashReceived = async () => {
+    if (!request) return;
+    setConfirmingCash(true);
+    try {
+      await partnerService.confirmCashReceived(request.id);
+      await refreshPartner();
+    } catch {
+      Alert.alert('Error', 'Could not confirm cash received. Please try again.');
+    } finally {
+      setConfirmingCash(false);
+    }
   };
 
   const callCustomer = () => {
@@ -139,6 +162,26 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         },
       ],
     );
+  };
+
+  const submitCancelWithReason = async () => {
+    if (!request || canceling) return;
+    const reason = cancelReason.trim();
+    if (!reason) {
+      Alert.alert('Reason required', 'Please provide a reason for cancelling this job.');
+      return;
+    }
+    setCanceling(true);
+    try {
+      await cancelActiveJobWithFee(request.id, reason);
+      setCancelReasonOpen(false);
+      Alert.alert('Cancelled', '₹50 Visiting Fee credited to your wallet (mock).');
+      navigation.goBack();
+    } catch {
+      Alert.alert('Error', 'Could not cancel (mock).');
+    } finally {
+      setCanceling(false);
+    }
   };
 
   if (!request) {
@@ -214,19 +257,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         <Text style={styles.sectionTitle}>Timing</Text>
         <Text style={styles.sectionText}>{request.scheduledAt}</Text>
       </View>
-      {request.pendingEstimateAmount != null ? (
-        <View style={styles.pendBox}>
-          <Text style={styles.pendT}>
-            Waiting for user approval (mock) — new estimate ₹{request.pendingEstimateAmount}
-          </Text>
-        </View>
-      ) : null}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Price & Commission</Text>
-        <Text style={styles.sectionText}>Customer paid ₹{request.amount}</Text>
-        <Text style={styles.sectionText}>KAIRO commission ₹{request.commission}</Text>
-        <Text style={styles.sectionText}>Your share ₹{request.partnerShare}</Text>
-      </View>
       {request.lineItems?.length ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Booked services</Text>
@@ -269,13 +299,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
           </Text>
         </View>
       ) : null}
-      {request.visitingFee ? (
-        <View style={styles.statusCard}>
-          <Text style={styles.sectionTitle}>Visiting fee secured</Text>
-          <Text style={styles.sectionText}>₹{request.visitingFee} charged to customer.</Text>
-          <Text style={styles.sectionText}>₹45 credited to your wallet in mock flow.</Text>
-        </View>
-      ) : null}
       <Pressable
         style={styles.directionButton}
         onPress={() =>
@@ -297,15 +320,6 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
           </Pressable>
         ) : request.status === 'in_progress' ? (
           <>
-            <Pressable
-              style={[styles.inProgAction, styles.estimateBtn]}
-              onPress={() => {
-                setEstVal(String(request.amount));
-                setEstOpen(true);
-              }}
-            >
-              <Text style={styles.estimateBtnTxt}>Quick revise ₹ (mock)</Text>
-            </Pressable>
             <Pressable
               style={[styles.inProgAction, styles.editQuoteButton]}
               onPress={() => setEstimateOpen(true)}
@@ -333,6 +347,14 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
           </>
         ) : isCancelled ? (
           <Text style={styles.statusText}>This request was cancelled by the customer.</Text>
+        ) : request.status === 'completed' && request.paymentStatus === 'awaiting_partner_confirmation' ? (
+          <Pressable
+            style={[styles.inProgAction, styles.acceptButton]}
+            onPress={handleConfirmCashReceived}
+            disabled={confirmingCash}
+          >
+            <Text style={styles.acceptText}>Confirm Cash Received</Text>
+          </Pressable>
         ) : (
           <Text style={styles.statusText}>This request is {request.status}.</Text>
         )}
@@ -340,30 +362,10 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
       {canCancelActive ? (
         <Pressable
           style={[styles.button, styles.cancelBtn, { marginTop: spacing.sm }]}
-          onPress={async () => {
+          onPress={() => {
             if (canceling) return;
-            Alert.alert(
-              request.status === 'in_progress' ? 'Cancel job' : 'Cancel',
-              'A ₹50 visiting fee (mock) will be credited to your wallet. Continue?',
-              [
-                { text: 'No', style: 'cancel' },
-                {
-                  text: 'Yes',
-                  onPress: async () => {
-                    setCanceling(true);
-                    try {
-                      await cancelActiveJobWithFee(request.id);
-                      Alert.alert('Cancelled', '₹50 Visiting Fee credited to your wallet (mock).');
-                      navigation.goBack();
-                    } catch {
-                      Alert.alert('Error', 'Could not cancel (mock).');
-                    } finally {
-                      setCanceling(false);
-                    }
-                  },
-                },
-              ],
-            );
+            setCancelReason('');
+            setCancelReasonOpen(true);
           }}
           disabled={canceling || actionLoading}
         >
@@ -376,44 +378,12 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
         </Pressable>
       ) : null}
 
-      <Modal visible={estOpen} animationType="slide" transparent>
-        <View style={styles.quickModalRoot}>
-          <View style={styles.quickModalCard}>
-            <Text style={styles.quickModalH}>Update estimate (mock)</Text>
-            <Text style={styles.quickModalP}>The customer will need to accept the new amount in-app (mock flow).</Text>
-            <TextInput
-              value={estVal}
-              onChangeText={setEstVal}
-              keyboardType="number-pad"
-              style={styles.inp}
-              placeholder="Revised price (₹)"
-            />
-            <PrimaryButton
-              title="Submit for approval"
-              onPress={async () => {
-                const n = Math.max(0, Math.floor(parseFloat(estVal) || 0));
-                if (!n) {
-                  Alert.alert('Amount', 'Enter a valid number.');
-                  return;
-                }
-                await submitEstimateUpdate(request.id, n);
-                setEstOpen(false);
-                Alert.alert(
-                  'Sent',
-                  'Waiting for user approval (mock). The customer will see the revised estimate in their app.',
-                );
-              }}
-            />
-            <Pressable onPress={() => setEstOpen(false)} style={styles.modalX}>
-              <Text style={styles.modalXT}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
       <Modal visible={estimateOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <KeyboardAvoidingView
+            style={styles.modalCard}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
             <Text style={styles.modalTitle}>Heavy Work Estimate</Text>
             <Text style={styles.modalSub}>Send a revised quote for extra labor or parts.</Text>
             <TextInput
@@ -449,7 +419,56 @@ export function PartnerRequestDetailScreen({ route, navigation }: Props) {
                 style={styles.modalSave}
               />
             </View>
-          </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+
+      <Modal visible={cancelReasonOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            style={styles.modalCard}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <Text style={styles.modalTitle}>Why are you cancelling?</Text>
+            <Text style={styles.modalSub}>A reason is required before this job can be cancelled.</Text>
+            <View style={styles.cancelReasonChips}>
+              {CANCEL_REASONS.map((reasonOption) => (
+                <Pressable
+                  key={reasonOption}
+                  style={[styles.cancelReasonChip, cancelReason === reasonOption && styles.cancelReasonChipOn]}
+                  onPress={() => setCancelReason(reasonOption)}
+                >
+                  <Text
+                    style={[
+                      styles.cancelReasonChipTxt,
+                      cancelReason === reasonOption && styles.cancelReasonChipTxtOn,
+                    ]}
+                  >
+                    {reasonOption}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={cancelReason}
+              onChangeText={setCancelReason}
+              placeholder="Type or edit the reason here"
+              multiline
+              numberOfLines={3}
+            />
+            <View style={styles.modalActions}>
+              <Pressable style={styles.modalCancel} onPress={() => setCancelReasonOpen(false)}>
+                <Text style={styles.modalCancelTxt}>Back</Text>
+              </Pressable>
+              <PrimaryButton
+                title="Confirm cancellation"
+                onPress={submitCancelWithReason}
+                loading={canceling}
+                style={styles.modalSave}
+              />
+            </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
 
@@ -516,16 +535,6 @@ const styles = StyleSheet.create({
   chatUserTxt: { color: colors.white, fontWeight: '800' },
   quoteTotal: { marginTop: spacing.sm, fontWeight: '800' },
   hintText: { marginTop: spacing.sm, color: colors.primary, fontSize: 13, lineHeight: 20 },
-  statusCard: { backgroundColor: colors.primary, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.md },
-  pendBox: {
-    backgroundColor: colors.orangeTint,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  pendT: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
   customReqBox: {
     backgroundColor: colors.orangeTint,
     borderRadius: radius.md,
@@ -544,8 +553,6 @@ const styles = StyleSheet.create({
   rejectButton: { backgroundColor: colors.greyLight },
   acceptButton: { backgroundColor: colors.primary },
   editQuoteButton: { backgroundColor: colors.orangeTint },
-  estimateBtn: { backgroundColor: colors.orangeTint, borderWidth: 1, borderColor: colors.primary },
-  estimateBtnTxt: { color: colors.primary, fontWeight: '800' },
   inProgAction: { width: '100%', padding: spacing.md, borderRadius: radius.md, alignItems: 'center' },
   cancelBtn: { backgroundColor: colors.greyLight, width: '100%', padding: spacing.md },
   cancelBtnTxt: { color: colors.error, fontWeight: '800' },
@@ -556,18 +563,6 @@ const styles = StyleSheet.create({
   statusText: { textAlign: 'center', color: colors.grey, fontWeight: '700' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
   title: { fontSize: 18, fontWeight: '800' },
-  quickModalRoot: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: spacing.lg },
-  quickModalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg },
-  quickModalH: { fontSize: 18, fontWeight: '800' },
-  quickModalP: { color: colors.grey, marginTop: 8, marginBottom: spacing.md, fontSize: 13 },
-  inp: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    fontSize: 16,
-    marginBottom: spacing.md,
-  },
   modalX: { marginTop: spacing.md, alignItems: 'center' },
   modalXT: { color: colors.primary, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: spacing.lg },
@@ -580,4 +575,16 @@ const styles = StyleSheet.create({
   modalCancel: { justifyContent: 'center', paddingHorizontal: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   modalCancelTxt: { color: colors.charcoal, fontWeight: '700' },
   modalSave: { flex: 1 },
+  cancelReasonChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: spacing.sm },
+  cancelReasonChip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.greyLight,
+  },
+  cancelReasonChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  cancelReasonChipTxt: { color: colors.charcoal, fontSize: 13, fontWeight: '600' },
+  cancelReasonChipTxtOn: { color: colors.white },
 });
