@@ -36,6 +36,9 @@ export interface PartnerSummary {
   /** Written customer reviews (not yet backed by a review-collection flow). */
   reviews?: PartnerReview[];
   description?: string;
+  /** Service territory — used to gate booking when the requester is outside the partner's zone. */
+  serviceOuterRadiusKm?: number | null;
+  allowOutOfStation?: boolean;
 }
 
 export interface ServiceMenuItem {
@@ -116,6 +119,8 @@ export interface PartnerProfile {
   serviceInnerRadiusKm: number;
   serviceOuterRadiusKm: number;
   allowOutOfStation: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
   referralCode?: string;
   /** Photos the partner has uploaded for their public profile grid. */
   photos?: string[];

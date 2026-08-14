@@ -33,6 +33,17 @@ const TYPES: { value: ListingType; label: string; hint: string }[] = [
 
 const MAX_PHOTOS = 4;
 
+// Quick-pick shortcuts for the categories called out for the OLX-style expansion. Selecting
+// one just pre-fills the (already dynamic, DB-backed) category autocomplete above — it isn't
+// a separate hardcoded taxonomy, so any of these that also exist as real categories in the
+// database will match by name and carry a categoryId; the rest post as free-text category names.
+const QUICK_CATEGORIES: { label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { label: 'Rented Buildings', icon: 'business-outline' },
+  { label: 'Sites for Sale', icon: 'map-outline' },
+  { label: 'Part-Time Jobs', icon: 'briefcase-outline' },
+  { label: 'Vehicles', icon: 'car-sport-outline' },
+];
+
 export function PostListingScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
@@ -94,6 +105,13 @@ export function PostListingScreen() {
     }
   };
 
+  const pickQuickCategory = (label: string) => {
+    const match = categories.find((c) => c.name.toLowerCase() === label.toLowerCase());
+    setCategoryId(match?.id ?? '');
+    setCategoryQuery(label);
+    setShowSuggestions(false);
+  };
+
   const useMyLocation = async () => {
     setLocating(true);
     try {
@@ -149,112 +167,138 @@ export function PostListingScreen() {
         <View style={{ width: 24 }} />
       </View>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-        <Text style={styles.label}>What are you posting?</Text>
-        <View style={styles.typeRow}>
-          {TYPES.map((t) => (
-            <Pressable
-              key={t.value}
-              style={[styles.typeChip, listingType === t.value && styles.typeChipOn]}
-              onPress={() => setListingType(t.value)}
-            >
-              <Text style={[styles.typeTxt, listingType === t.value && styles.typeTxtOn]}>{t.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.hint}>{TYPES.find((t) => t.value === listingType)?.hint}</Text>
-
-        <Text style={styles.label}>Photos ({photos.length}/{MAX_PHOTOS})</Text>
-        <View style={styles.photoRow}>
-          {photos.map((uri, i) => (
-            <View key={i} style={styles.photoThumbWrap}>
-              <Image source={{ uri }} style={styles.photoThumb} />
+        <View style={styles.card}>
+          <Text style={styles.label}>What are you posting?</Text>
+          <View style={styles.typeRow}>
+            {TYPES.map((t) => (
               <Pressable
-                style={styles.photoRemove}
-                onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                key={t.value}
+                style={[styles.typeChip, listingType === t.value && styles.typeChipOn]}
+                onPress={() => setListingType(t.value)}
               >
-                <Ionicons name="close" size={14} color={colors.white} />
-              </Pressable>
-            </View>
-          ))}
-          {photos.length < MAX_PHOTOS ? (
-            <Pressable style={styles.photoAdd} onPress={pickPhoto}>
-              <Ionicons name="camera-outline" size={22} color={colors.primary} />
-            </Pressable>
-          ) : null}
-        </View>
-
-        <KairoTextInput label="Product Name" value={title} onChangeText={setTitle} placeholder="e.g. Hand-cutting machine" />
-
-        <Text style={styles.label}>Category</Text>
-        <KairoTextInput
-          value={categoryQuery}
-          onChangeText={(t) => {
-            setCategoryQuery(t);
-            setCategoryId('');
-            setShowSuggestions(true);
-          }}
-          onFocus={() => setShowSuggestions(true)}
-          placeholder="e.g. Heavy Tools"
-        />
-        {showSuggestions && filteredSuggestions.length > 0 ? (
-          <View style={styles.suggestBox}>
-            {filteredSuggestions.map((c) => (
-              <Pressable
-                key={c.id || 'others'}
-                style={styles.suggestRow}
-                onPress={() => {
-                  if (c === OTHERS_CATEGORY) {
-                    setCategoryId('');
-                    setShowSuggestions(false);
-                    return;
-                  }
-                  setCategoryId(c.id);
-                  setCategoryQuery(c.name);
-                  setShowSuggestions(false);
-                }}
-              >
-                <Text style={styles.suggestTxt}>{c.name}</Text>
+                <Text style={[styles.typeTxt, listingType === t.value && styles.typeTxtOn]}>{t.label}</Text>
               </Pressable>
             ))}
           </View>
-        ) : null}
+          <Text style={styles.hint}>{TYPES.find((t) => t.value === listingType)?.hint}</Text>
+        </View>
 
-        {listingType === 'rent' ? (
-          <>
-            <KairoTextInput
-              label="Security Deposit Amount (₹)"
-              value={depositAmount}
-              onChangeText={(t) => setDepositAmount(t.replace(/\D/g, ''))}
-              keyboardType="number-pad"
-            />
-            <KairoTextInput
-              label="Rent per day (₹, optional)"
-              value={rentPricePerDay}
-              onChangeText={(t) => setRentPricePerDay(t.replace(/\D/g, ''))}
-              keyboardType="number-pad"
-            />
-            <Text style={styles.hint}>
-              The deposit is held until the item is returned — you and the renter settle it directly.
-            </Text>
-          </>
-        ) : (
+        <View style={styles.card}>
+          <Text style={styles.label}>Popular categories</Text>
+          <View style={styles.quickRow}>
+            {QUICK_CATEGORIES.map((qc) => (
+              <Pressable
+                key={qc.label}
+                style={[styles.quickChip, categoryQuery === qc.label && styles.quickChipOn]}
+                onPress={() => pickQuickCategory(qc.label)}
+              >
+                <Ionicons
+                  name={qc.icon}
+                  size={18}
+                  color={categoryQuery === qc.label ? colors.white : colors.primary}
+                />
+                <Text style={[styles.quickTxt, categoryQuery === qc.label && styles.quickTxtOn]}>{qc.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.label}>Category</Text>
           <KairoTextInput
-            label="Price (₹)"
-            value={price}
-            onChangeText={(t) => setPrice(t.replace(/\D/g, ''))}
-            keyboardType="number-pad"
+            value={categoryQuery}
+            onChangeText={(t) => {
+              setCategoryQuery(t);
+              setCategoryId('');
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            placeholder="e.g. Heavy Tools, Real Estate, Vehicles…"
           />
-        )}
+          {showSuggestions && filteredSuggestions.length > 0 ? (
+            <View style={styles.suggestBox}>
+              {filteredSuggestions.map((c) => (
+                <Pressable
+                  key={c.id || 'others'}
+                  style={styles.suggestRow}
+                  onPress={() => {
+                    if (c === OTHERS_CATEGORY) {
+                      setCategoryId('');
+                      setShowSuggestions(false);
+                      return;
+                    }
+                    setCategoryId(c.id);
+                    setCategoryQuery(c.name);
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <Text style={styles.suggestTxt}>{c.name}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+        </View>
 
-        <KairoTextInput label="Description" value={description} onChangeText={setDescription} multiline />
-        <KairoTextInput label="City (optional)" value={city} onChangeText={setCity} />
+        <View style={styles.card}>
+          <Text style={styles.label}>Photos ({photos.length}/{MAX_PHOTOS})</Text>
+          <View style={styles.photoRow}>
+            {photos.map((uri, i) => (
+              <View key={i} style={styles.photoThumbWrap}>
+                <Image source={{ uri }} style={styles.photoThumb} />
+                <Pressable
+                  style={styles.photoRemove}
+                  onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                >
+                  <Ionicons name="close" size={14} color={colors.white} />
+                </Pressable>
+              </View>
+            ))}
+            {photos.length < MAX_PHOTOS ? (
+              <Pressable style={styles.photoAdd} onPress={pickPhoto}>
+                <Ionicons name="camera-outline" size={22} color={colors.primary} />
+              </Pressable>
+            ) : null}
+          </View>
 
-        <Pressable style={styles.locBtn} onPress={useMyLocation}>
-          <Ionicons name="locate-outline" size={18} color={colors.primary} />
-          <Text style={styles.locTxt}>{locating ? 'Fetching location…' : coords ? 'Location added ✓' : 'Use my current location'}</Text>
-        </Pressable>
+          <KairoTextInput label="Product Name" value={title} onChangeText={setTitle} placeholder="e.g. Hand-cutting machine" />
 
-        <PrimaryButton title="Post listing" onPress={submit} loading={saving} disabled={!canSave} />
+          {listingType === 'rent' ? (
+            <>
+              <KairoTextInput
+                label="Security Deposit Amount (₹)"
+                value={depositAmount}
+                onChangeText={(t) => setDepositAmount(t.replace(/\D/g, ''))}
+                keyboardType="number-pad"
+              />
+              <KairoTextInput
+                label="Rent per day (₹, optional)"
+                value={rentPricePerDay}
+                onChangeText={(t) => setRentPricePerDay(t.replace(/\D/g, ''))}
+                keyboardType="number-pad"
+              />
+              <Text style={styles.hint}>
+                The deposit is held until the item is returned — you and the renter settle it directly.
+              </Text>
+            </>
+          ) : (
+            <KairoTextInput
+              label="Price (₹)"
+              value={price}
+              onChangeText={(t) => setPrice(t.replace(/\D/g, ''))}
+              keyboardType="number-pad"
+            />
+          )}
+
+          <KairoTextInput label="Description" value={description} onChangeText={setDescription} multiline />
+        </View>
+
+        <View style={styles.card}>
+          <KairoTextInput label="City (optional)" value={city} onChangeText={setCity} />
+          <Pressable style={styles.locBtn} onPress={useMyLocation}>
+            <Ionicons name="locate-outline" size={18} color={colors.primary} />
+            <Text style={styles.locTxt}>{locating ? 'Fetching location…' : coords ? 'Location added ✓' : 'Use my current location'}</Text>
+          </Pressable>
+        </View>
+
+        <PrimaryButton title="Post listing" onPress={submit} loading={saving} disabled={!canSave} style={styles.submitBtn} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -271,7 +315,34 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   headerTitle: { color: colors.white, fontWeight: '800', fontSize: 17 },
-  body: { padding: spacing.lg, paddingBottom: spacing.xl },
+  body: { padding: spacing.lg, paddingBottom: spacing.xl, backgroundColor: colors.greyLight },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  quickChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.white,
+  },
+  quickChipOn: { backgroundColor: colors.primary },
+  quickTxt: { fontWeight: '700', color: colors.primary, fontSize: 13 },
+  quickTxtOn: { color: colors.white },
+  submitBtn: { marginTop: spacing.xs },
   label: { fontWeight: '700', color: colors.charcoal, marginTop: spacing.md, marginBottom: spacing.sm },
   hint: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm, lineHeight: 18 },
   typeRow: { flexDirection: 'row', gap: spacing.sm },

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import { getCoordsIfPermitted } from '../../services/locationService';
 import { marketplaceService } from '../../services/marketplaceService';
@@ -108,6 +108,31 @@ export function MaterialsTabContent({ header }: { header?: React.ReactNode }) {
                 <Ionicons name="options-outline" size={20} color={colors.white} />
               </Pressable>
             </View>
+            {categories.length > 0 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.categoryChipsRow}
+              >
+                <Pressable
+                  style={[styles.categoryChip, !categoryId && styles.categoryChipOn]}
+                  onPress={() => setCategoryId(null)}
+                >
+                  <Text style={[styles.categoryChipTxt, !categoryId && styles.categoryChipTxtOn]}>All</Text>
+                </Pressable>
+                {categories.map((c) => (
+                  <Pressable
+                    key={c.id}
+                    style={[styles.categoryChip, categoryId === c.id && styles.categoryChipOn]}
+                    onPress={() => setCategoryId(categoryId === c.id ? null : c.id)}
+                  >
+                    <Text style={[styles.categoryChipTxt, categoryId === c.id && styles.categoryChipTxtOn]}>
+                      {c.name}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            ) : null}
           </>
         }
         ListEmptyComponent={
@@ -208,6 +233,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  categoryChipsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.white,
+  },
+  categoryChip: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.greyLight,
+  },
+  categoryChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  categoryChipTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
+  categoryChipTxtOn: { color: colors.white },
   grid: { padding: spacing.md, paddingBottom: 100 },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
   card: {

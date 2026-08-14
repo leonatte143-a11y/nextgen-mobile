@@ -153,7 +153,8 @@ export function PartnerProfileScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.5,
-      allowsEditing: false,
+      allowsEditing: true,
+      aspect: [1, 1],
     });
     if (result.canceled || !result.assets?.[0]?.uri) return;
     setPendingAvatarUri(result.assets[0].uri);

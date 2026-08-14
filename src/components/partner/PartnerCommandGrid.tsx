@@ -91,7 +91,10 @@ export function PartnerCommandGrid({
           <Text style={styles.val}>{pendingCount}</Text>
           <Text style={styles.lab}>Pending Works</Text>
         </Pressable>
-        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
+        <Pressable
+          style={styles.card}
+          onPress={() => (navigation as any).navigate('Requests', { initialView: 'completed' })}
+        >
           <Ionicons name="checkmark-done-outline" size={22} color={ORANGE} />
           <Text style={styles.val}>{lifetimeCompleted}</Text>
           <Text style={styles.lab}>Completed History</Text>

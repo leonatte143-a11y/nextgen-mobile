@@ -1,6 +1,7 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +16,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { colors, radius, spacing } from '../constants/theme';
 import { usePartner } from '../context/PartnerContext';
+import { getCurrentCoords } from '../services/locationService';
 import type { PartnerLocationEditScreenProps } from '../navigation/PartnerStackTypes';
 
 const RADIUS_OPTIONS = [3, 5, 8, 10, 15] as const;
@@ -27,6 +29,8 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
   const [outerKm, setOuterKm] = useState(10);
   const [outOfStation, setOutOfStation] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -34,8 +38,27 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
       setInnerKm(profile.serviceInnerRadiusKm);
       setOuterKm(profile.serviceOuterRadiusKm);
       setOutOfStation(profile.allowOutOfStation);
+      setCoords(
+        profile.latitude != null && profile.longitude != null
+          ? { latitude: profile.latitude, longitude: profile.longitude }
+          : null,
+      );
     }
   }, [profile]);
+
+  const captureLocation = async () => {
+    setLocating(true);
+    try {
+      const pos = await getCurrentCoords();
+      if (!pos) {
+        Alert.alert('Could not get location', 'Allow location access and try again.');
+        return;
+      }
+      setCoords(pos);
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const save = async () => {
     if (!profile) return;
@@ -46,6 +69,7 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
         serviceInnerRadiusKm: innerKm,
         serviceOuterRadiusKm: outerKm,
         allowOutOfStation: outOfStation,
+        ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
       });
       await refreshPartner();
       navigation.goBack();
@@ -80,9 +104,18 @@ export function PartnerLocationEditScreen({ navigation }: PartnerLocationEditScr
           <Ionicons name="navigate-circle" size={22} color={colors.primary} />
           <View style={{ flex: 1 }}>
             <Text style={styles.statusTitle}>GPS status</Text>
-            <Text style={styles.statusTxt}>Monitoring live location for job matching (mock).</Text>
+            <Text style={styles.statusTxt}>
+              {coords
+                ? `Base point set: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`
+                : 'No base point set yet — capture your current location below.'}
+            </Text>
           </View>
         </View>
+
+        <Pressable style={styles.locateBtn} onPress={captureLocation} disabled={locating}>
+          <Ionicons name="locate-outline" size={18} color={colors.primary} />
+          <Text style={styles.locateTxt}>{locating ? 'Getting location…' : 'Use my current location as base point'}</Text>
+        </Pressable>
 
         <Text style={styles.label}>Primary city / area</Text>
         <KairoTextInput
@@ -161,6 +194,19 @@ const styles = StyleSheet.create({
   },
   statusTitle: { fontWeight: '800', color: colors.charcoal },
   statusTxt: { color: colors.grey, fontSize: 13, marginTop: 4, lineHeight: 18 },
+  locateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.white,
+  },
+  locateTxt: { color: colors.primary, fontWeight: '700' },
   label: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm, marginTop: spacing.md },
   hint: { fontSize: 12, color: colors.grey, marginTop: spacing.xs, marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.sm },

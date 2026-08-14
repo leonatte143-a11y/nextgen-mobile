@@ -48,11 +48,12 @@ export function EditProfileScreen() {
     }
     const result =
       source === 'camera'
-        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: false })
+        ? await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: true, aspect: [1, 1] })
         : await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 0.6,
-            allowsEditing: false,
+            allowsEditing: true,
+            aspect: [1, 1],
           });
     if (result.canceled || !result.assets?.[0]?.uri) return;
     setPendingUri(result.assets[0].uri);

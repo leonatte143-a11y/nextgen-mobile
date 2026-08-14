@@ -3,13 +3,11 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Image, Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
-import { REFERRAL_SHARE_MESSAGE } from '../constants/referral';
 import { getSearchQueryCount } from '../lib/localStorage';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/bookingService';
@@ -213,37 +211,11 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </Pressable>
         ))}
-        <View style={styles.menuRow}>
+        <Pressable style={styles.menuRow} onPress={() => navigation.navigate('Rewards')}>
           <Ionicons name="share-social-outline" size={22} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.menuTxt}>Refer & Earn</Text>
-            {user.referralCode ? (
-              <View style={styles.referralRow}>
-                <Text style={styles.referralCodeTxt}>Your code: {user.referralCode}</Text>
-                <Pressable
-                  style={styles.referralCopyBtn}
-                  onPress={async () => {
-                    await Clipboard.setStringAsync(user.referralCode);
-                    Alert.alert('Copied', 'Referral code copied.');
-                  }}
-                >
-                  <Ionicons name="copy-outline" size={14} color={colors.primary} />
-                  <Text style={styles.referralCopyTxt}>Copy</Text>
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
-          <Pressable
-            style={styles.referralShareBtn}
-            onPress={() => {
-              Share.share({ message: REFERRAL_SHARE_MESSAGE() }).catch(() => {
-                // ignore share cancellation
-              });
-            }}
-          >
-            <Text style={styles.referralShareTxt}>Share</Text>
-          </Pressable>
-        </View>
+          <Text style={styles.menuTxt}>Refer & Earn</Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.grey} />
+        </Pressable>
         {MENU_BOTTOM.map((m) => (
           <Pressable
             key={m.label}
@@ -500,26 +472,6 @@ const styles = StyleSheet.create({
   deleteTxt: { color: colors.error, fontWeight: '700', fontSize: 13 },
   errTitle: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
   errSub: { color: colors.grey, marginTop: spacing.sm, marginBottom: spacing.lg },
-  referralRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 4 },
-  referralCodeTxt: { fontSize: 12, color: colors.grey, fontWeight: '600' },
-  referralCopyBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  referralCopyTxt: { fontSize: 11, fontWeight: '700', color: colors.primary },
-  referralShareBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.primary,
-  },
-  referralShareTxt: { color: colors.white, fontWeight: '700', fontSize: 13 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

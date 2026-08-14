@@ -199,23 +199,14 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <Text style={[styles.h2, styles.storeH2]}>KAIRO Store</Text>
         <View style={styles.shopExoRow}>
           <Pressable
-            style={styles.shopExoCard}
-            onPress={() => navigation.navigate('MainTabs', { screen: 'Store' })}
-          >
-            <View style={styles.marketIcon}>
-              <Ionicons name="storefront-outline" size={11} color={colors.primary} />
-            </View>
-            <Text style={styles.marketTitle}>Shop</Text>
-          </Pressable>
-          <Pressable
-            style={styles.shopExoCard}
+            style={styles.exoCard}
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store', params: { initialTab: 'materials' } })}
           >
             <View style={styles.marketIcon}>
               <Ionicons name="swap-horizontal-outline" size={11} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>EXO</Text>
-            <Text style={styles.marketSub}>Buy or Sell</Text>
+            <Text style={styles.marketSub}>Buy / Sell</Text>
           </Pressable>
         </View>
 
@@ -351,12 +342,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     marginBottom: spacing.md,
   },
-  shopExoCard: {
+  exoCard: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    paddingVertical: 3,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.lg,

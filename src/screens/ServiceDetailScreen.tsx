@@ -61,6 +61,12 @@ export function ServiceDetailScreen() {
   }, [selectedPartner?.id]);
 
   const partnerDistance = selectedPartner?.distanceKm ?? svc?.distanceKm ?? 0;
+  const outsideServiceArea = Boolean(
+    selectedPartner &&
+      !selectedPartner.allowOutOfStation &&
+      selectedPartner.serviceOuterRadiusKm != null &&
+      partnerDistance > selectedPartner.serviceOuterRadiusKm,
+  );
 
   if (loading || !svc) {
     return <ScreenLoader />;
@@ -80,7 +86,7 @@ export function ServiceDetailScreen() {
   };
 
   const bookService = async () => {
-    if (!selectedPartner || booking) return;
+    if (!selectedPartner || booking || outsideServiceArea) return;
     setBooking(true);
     setRequestSent(true);
     try {
@@ -92,9 +98,10 @@ export function ServiceDetailScreen() {
         paymentMethod: 'Cash',
       });
       navigation.replace('BookingTracking', { bookingId: b.id });
-    } catch {
+    } catch (e: unknown) {
       setRequestSent(false);
-      Alert.alert('Error', 'Could not book this service. Please try again.');
+      const msg = e instanceof Error ? e.message : 'Could not book this service. Please try again.';
+      Alert.alert('Error', msg);
     } finally {
       setBooking(false);
     }
@@ -208,6 +215,10 @@ export function ServiceDetailScreen() {
       <View style={styles.footer}>
         {requestSent ? (
           <Text style={styles.requestSentText}>Request sent — connecting you to a partner…</Text>
+        ) : outsideServiceArea ? (
+          <Text style={styles.outsideAreaText}>
+            You're outside {selectedPartner?.name}'s service area — booking is unavailable.
+          </Text>
         ) : (
           <PrimaryButton
             title="Book service"
@@ -238,6 +249,7 @@ const styles = StyleSheet.create({
   splitRow: { flexDirection: 'row', gap: spacing.md },
   splitCol: { flex: 1, minWidth: 0 },
   requestSentText: { textAlign: 'center', color: colors.primary, fontWeight: '700', paddingVertical: spacing.sm },
+  outsideAreaText: { textAlign: 'center', color: colors.error, fontWeight: '700', paddingVertical: spacing.sm },
   partner: {
     padding: spacing.md,
     backgroundColor: colors.greyLight,
@@ -255,16 +267,16 @@ const styles = StyleSheet.create({
   statusTextLight: { fontSize: 11, fontWeight: '800', color: colors.white },
   pRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   pPhoto: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  pPhotoImg: { width: '100%', height: '100%' },
-  pPhotoTxt: { fontSize: 20, fontWeight: '800', color: colors.primary },
+  pPhotoImg: { width: '100%', height: '100%', resizeMode: 'cover' },
+  pPhotoTxt: { fontSize: 28, fontWeight: '800', color: colors.primary },
   pTitle: { fontSize: 12, color: colors.grey },
   pName: { fontSize: 17, fontWeight: '800', marginTop: 4 },
   pSub: { color: colors.grey, marginTop: 4 },

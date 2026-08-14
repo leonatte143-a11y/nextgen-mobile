@@ -69,7 +69,6 @@ export const MAIN_CATEGORIES: MainCategory[] = [
       { id: 'hr_elec', title: 'Electrician', subtitle: 'Fan Repair', icon: 'flash-outline', searchQuery: 'electrician' },
       { id: 'hr_plumb', title: 'Plumber', subtitle: 'Leakage/Taps', icon: 'water-outline', searchQuery: 'plumber' },
       { id: 'hr_ac', title: 'AC Service', subtitle: 'Filter/Gas', icon: 'snow-outline', searchQuery: 'ac service' },
-      { id: 'hr_clean', title: 'Cleaning', subtitle: 'Full House', icon: 'sparkles-outline', searchQuery: 'house cleaning' },
       { id: 'hr_kit', title: 'Kitchen Appliance', subtitle: 'Repair & service', icon: 'restaurant-outline', searchQuery: 'kitchen appliance' },
       { id: 'hr_ro', title: 'Water Purifier', subtitle: 'RO service', icon: 'funnel-outline', searchQuery: 'water purifier' },
       { id: 'hr_wm', title: 'Washing Machine', subtitle: 'Repair', icon: 'shirt-outline', searchQuery: 'washing machine' },
@@ -103,8 +102,7 @@ export const MAIN_CATEGORIES: MainCategory[] = [
     icon: 'medkit-outline',
     subServices: [
       { id: 'lh_rmp', title: 'RMP Doctors', subtitle: 'Quick Consult', icon: 'medical-outline', searchQuery: 'rmp doctor' },
-      { id: 'lh_diag', title: 'Diagnostic Center', subtitle: 'Blood Test/Home', icon: 'flask-outline', searchQuery: 'diagnostic blood test' },
-      { id: 'lh_med', title: 'Medicine Delivery', subtitle: 'Fast delivery', icon: 'bandage-outline', searchQuery: 'medicine delivery' },
+      { id: 'lh_diag', title: 'Lab Technician', subtitle: 'Blood Test/Home', icon: 'flask-outline', searchQuery: 'lab technician blood test' },
     ],
   },
   {

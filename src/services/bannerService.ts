@@ -46,12 +46,20 @@ export const bannerService = {
     cache = null;
   },
 
-  async submitAdRequest(payload: SubmitAdRequestPayload): Promise<AdvertisementBanner> {
-    return apiService.post<AdvertisementBanner>('/api/v1/partners/ads', payload, 'partner');
+  /** "Advertise your business" is a User-App flow (Profile menu), so it submits through the
+   * user-scoped endpoint by default. Partners have their own separate advertise entry point
+   * that still posts to the partner-scoped endpoint. */
+  async submitAdRequest(
+    payload: SubmitAdRequestPayload,
+    scope: 'user' | 'partner' = 'user',
+  ): Promise<AdvertisementBanner> {
+    const path = scope === 'partner' ? '/api/v1/partners/ads' : '/api/v1/users/ads';
+    return apiService.post<AdvertisementBanner>(path, payload, scope);
   },
 
-  async listMyAds(): Promise<MyAdRequest[]> {
-    const data = await apiService.get<MyAdRequest[]>('/api/v1/partners/ads', 'partner');
+  async listMyAds(scope: 'user' | 'partner' = 'user'): Promise<MyAdRequest[]> {
+    const path = scope === 'partner' ? '/api/v1/partners/ads' : '/api/v1/users/ads';
+    const data = await apiService.get<MyAdRequest[]>(path, scope);
     return Array.isArray(data) ? data : [];
   },
 

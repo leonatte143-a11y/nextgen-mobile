@@ -86,14 +86,12 @@ export function ServiceProvidersScreen() {
               }
             >
               <View style={styles.row}>
-                <View style={styles.photoFrame}>
-                  <View style={styles.photo}>
-                    {item.photoUrl ? (
-                      <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
-                    ) : (
-                      <Text style={styles.photoTxt}>{item.name[0]}</Text>
-                    )}
-                  </View>
+                <View style={styles.photo}>
+                  {item.photoUrl ? (
+                    <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
+                  ) : (
+                    <Text style={styles.photoTxt}>{item.name[0]}</Text>
+                  )}
                 </View>
                 <View style={styles.info}>
                   <View style={styles.titleRow}>
@@ -149,24 +147,17 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   row: { flexDirection: 'row', gap: spacing.md },
-  photoFrame: {
-    padding: 3,
-    borderRadius: 32,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    backgroundColor: colors.orangeTint,
-  },
   photo: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.white,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  photoImage: { width: 52, height: 52, resizeMode: 'cover' },
-  photoTxt: { color: colors.primary, fontSize: 20, fontWeight: '800' },
+  photoImage: { width: '100%', height: '100%', resizeMode: 'cover' },
+  photoTxt: { color: colors.primary, fontSize: 28, fontWeight: '800' },
   info: { flex: 1 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
   name: { fontSize: 16, fontWeight: '700', color: colors.charcoal, flex: 1 },

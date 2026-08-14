@@ -43,8 +43,22 @@ export function ImageCropModal({ visible, imageUri, onSave, onCancel }: Props) {
   const rotate = () => void applyManipulation([{ rotate: 90 }]);
   const flip = () => void applyManipulation([{ flip: ImageManipulator.FlipType.Horizontal }]);
 
-  const save = () => {
-    if (currentUri) onSave(currentUri);
+  // Resize + compress on final save so large camera photos (5-15MB) come out well under 1MB
+  // before being base64-encoded and sent to the server.
+  const save = async () => {
+    if (!currentUri || busy) return;
+    setBusy(true);
+    try {
+      const result = await ImageManipulator.manipulateAsync(currentUri, [{ resize: { width: 1024 } }], {
+        compress: 0.6,
+        format: ImageManipulator.SaveFormat.JPEG,
+      });
+      onSave(result.uri);
+    } catch {
+      onSave(currentUri);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -78,7 +92,7 @@ export function ImageCropModal({ visible, imageUri, onSave, onCancel }: Props) {
               <Ionicons name="swap-horizontal-outline" size={18} color={colors.charcoal} />
               <Text style={styles.secondaryTxt}>Flip</Text>
             </Pressable>
-            <Pressable style={styles.saveBtn} onPress={save} disabled={busy || !currentUri}>
+            <Pressable style={styles.saveBtn} onPress={() => void save()} disabled={busy || !currentUri}>
               <Ionicons name="checkmark" size={18} color={colors.white} />
               <Text style={styles.saveTxt}>Save</Text>
             </Pressable>

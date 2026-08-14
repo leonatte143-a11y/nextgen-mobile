@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, Linking, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { partnerService, type PartnerEnquiry } from '../services/partnerService';
+import { formatTelUrl } from '../utils/phone';
 
 function timeAgo(value: string): string {
   const d = new Date(value);
@@ -20,16 +21,48 @@ function timeAgo(value: string): string {
   return `${days}d ago`;
 }
 
+function exactTimestamp(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+}
+
+function callViewer(phone?: string | null) {
+  const url = formatTelUrl(phone);
+  if (url) void Linking.openURL(url);
+}
+
 export function PartnerEnquiryScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [enquiries, setEnquiries] = useState<PartnerEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [newToast, setNewToast] = useState<string | null>(null);
+  const knownIdsRef = useRef<Set<string> | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     try {
       const rows = await partnerService.getEnquiries();
+      // In-app "new enquiry" signal: if this isn't the first load and the refreshed
+      // list contains ids we haven't seen yet, surface a toast (no push-notification
+      // infra needed since the partner is already looking at the app).
+      if (knownIdsRef.current) {
+        const freshCount = rows.filter((r) => !knownIdsRef.current!.has(r.id)).length;
+        if (freshCount > 0) {
+          if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+          setNewToast(freshCount === 1 ? 'New enquiry received' : `${freshCount} new enquiries received`);
+          toastTimerRef.current = setTimeout(() => setNewToast(null), 3000);
+        }
+      }
+      knownIdsRef.current = new Set(rows.map((r) => r.id));
       setEnquiries(rows);
     } catch {
       // keep whatever was previously loaded; list is best-effort
@@ -65,6 +98,12 @@ export function PartnerEnquiryScreen() {
         });
     }, []),
   );
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   if (loading) return <ScreenLoader />;
 
@@ -109,12 +148,25 @@ export function PartnerEnquiryScreen() {
                 {item.payload?.viewerLocation ? (
                   <Text style={styles.cardDetail}>📍 {item.payload.viewerLocation}</Text>
                 ) : null}
-                <Text style={styles.time}>{timeAgo(item.createdAt)}</Text>
+                <Text style={styles.time}>
+                  {exactTimestamp(item.createdAt)} · {timeAgo(item.createdAt)}
+                </Text>
+                {item.payload?.viewerPhone ? (
+                  <Pressable style={styles.callBtn} onPress={() => callViewer(item.payload?.viewerPhone)}>
+                    <Ionicons name="call" size={14} color={colors.white} />
+                    <Text style={styles.callTxt}>Call</Text>
+                  </Pressable>
+                ) : null}
               </View>
             </View>
           );
         }}
       />
+      {newToast ? (
+        <View style={styles.toast} pointerEvents="none">
+          <Text style={styles.toastTxt}>{newToast}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -169,4 +221,26 @@ const styles = StyleSheet.create({
   cardTitleRead: { fontWeight: '400' },
   cardDetail: { color: colors.grey, marginTop: 4, fontSize: 13 },
   time: { fontSize: 12, color: colors.grey, marginTop: 6 },
+  callBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+    marginTop: spacing.sm,
+  },
+  callTxt: { color: colors.white, fontWeight: '700', fontSize: 12 },
+  toast: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+  },
+  toastTxt: { color: colors.white, fontWeight: '700' },
 });
