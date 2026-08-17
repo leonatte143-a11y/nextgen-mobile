@@ -9,13 +9,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubCategoryGrid } from '../components/home/SubCategoryGrid';
-import { colors, radius, spacing } from '../constants/theme';
-import { filterSubServices, getMainCategory, type SubServiceItem } from '../data/serviceCatalog';
+import { colors, spacing } from '../constants/theme';
+import { getMainCategory, type SubServiceItem } from '../data/serviceCatalog';
 import { catalogService } from '../services/catalogService';
 import { ScreenLoader } from '../components/ScreenLoader';
 import type { RootStackParamList } from '../navigation/types';
@@ -27,7 +26,6 @@ export function CategoryServicesScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const insets = useSafeAreaInsets();
-  const [search, setSearch] = useState('');
   const [navigating, setNavigating] = useState(false);
 
   const category = getMainCategory(route.params.categoryId);
@@ -37,10 +35,7 @@ export function CategoryServicesScreen() {
       navigation.replace('HealthcareEmergencies');
     }
   }, [navigation, route.params.categoryId]);
-  const filtered = useMemo(
-    () => (category ? filterSubServices(category.subServices, search) : []),
-    [category, search],
-  );
+  const filtered = useMemo(() => category?.subServices ?? [], [category]);
 
   const onSubPress = async (item: SubServiceItem) => {
     if (!category || navigating) return;
@@ -84,28 +79,15 @@ export function CategoryServicesScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.searchRow}>
-        <Ionicons name="search-outline" size={20} color={colors.grey} />
-        <TextInput
-          style={styles.searchIn}
-          placeholder="Search services..."
-          placeholderTextColor={colors.grey}
-          value={search}
-          onChangeText={setSearch}
-          returnKeyType="search"
-        />
-        {search.length > 0 ? (
-          <Pressable onPress={() => setSearch('')} hitSlop={8}>
-            <Ionicons name="close-circle" size={20} color={colors.grey} />
-          </Pressable>
-        ) : null}
-      </View>
-
       {navigating ? <ScreenLoader /> : null}
       {filtered.length === 0 ? (
-        <Text style={styles.empty}>No services match your search.</Text>
+        <Text style={styles.empty}>No services available.</Text>
       ) : (
-        <SubCategoryGrid items={filtered} onItemPress={(item) => void onSubPress(item)} />
+        <SubCategoryGrid
+          items={filtered}
+          onItemPress={(item) => void onSubPress(item)}
+          wideIds={category.id === 'professional_education' ? ['pe_eng', 'pe_super', 'pe_teacher'] : undefined}
+        />
       )}
     </View>
     </KeyboardAvoidingView>
@@ -125,18 +107,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   title: { flex: 1, textAlign: 'center', fontSize: 18, fontWeight: '800', color: colors.charcoal },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: spacing.md,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  searchIn: { flex: 1, paddingVertical: spacing.md, fontSize: 15, color: colors.charcoal },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl, paddingHorizontal: spacing.lg },
   err: { padding: spacing.lg, color: colors.error },
 });

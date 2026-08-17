@@ -33,7 +33,7 @@ type Props = {
   locationLabel: string;
 };
 
-const AD_HEIGHT = 168;
+const AD_HEIGHT = 184;
 const ROTATE_MS = 9_000;
 
 function HomeAdBannerComponent({ locationLabel }: Props) {
@@ -151,13 +151,6 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
           })}
         </ScrollView>
       </Animated.View>
-      {visibleBanners.length > 1 ? (
-        <View style={styles.dots}>
-          {visibleBanners.map((b, i) => (
-            <View key={b.id} style={[styles.dot, i === idx && styles.dotOn]} />
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -195,9 +188,6 @@ const styles = StyleSheet.create({
   },
   title: { color: colors.white, fontSize: 18, fontWeight: '800' },
   subtitle: { color: 'rgba(255,255,255,0.9)', fontSize: 13, marginTop: 4 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 5, marginBottom: spacing.sm },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.border },
-  dotOn: { width: 16, backgroundColor: colors.primary },
   placeholder: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,

@@ -5,6 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -257,7 +258,11 @@ export function PartnerProfileScreen() {
 
       <View style={styles.profileCard}>
         <Pressable style={styles.profileImage} onPress={pickAvatar}>
-          <Text style={styles.profileLetter}>{profile.name.charAt(0)}</Text>
+          {profile.photoUrl ? (
+            <Image source={{ uri: profile.photoUrl }} style={styles.profileImagePhoto} />
+          ) : (
+            <Text style={styles.profileLetter}>{profile.name.charAt(0)}</Text>
+          )}
           <View style={styles.cameraBadge}>
             <Ionicons name="camera" size={14} color={colors.white} />
           </View>
@@ -467,7 +472,8 @@ const styles = StyleSheet.create({
   profileTitleRow: { alignItems: 'center', marginBottom: spacing.md },
   profileTitle: { fontSize: 20, fontWeight: '800', color: colors.navy },
   profileCard: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
-  profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
+  profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  profileImagePhoto: { width: '100%', height: '100%', resizeMode: 'cover' },
   profileLetter: { color: colors.primary, fontSize: 40, fontWeight: '800' },
   cameraBadge: {
     position: 'absolute',

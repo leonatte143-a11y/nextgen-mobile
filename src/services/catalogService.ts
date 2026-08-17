@@ -21,8 +21,14 @@ export const catalogService = {
     return apiService.get(`/api/v1/catalog/services/${id}`);
   },
 
-  async getServicePartners(id: string): Promise<PartnerSummary[]> {
-    return apiService.get(`/api/v1/catalog/services/${id}/partners`);
+  async getServicePartners(id: string, coords?: { latitude: number; longitude: number } | null): Promise<PartnerSummary[]> {
+    const query = new URLSearchParams();
+    if (coords) {
+      query.set('lat', String(coords.latitude));
+      query.set('lng', String(coords.longitude));
+    }
+    const qs = query.toString();
+    return apiService.get(`/api/v1/catalog/services/${id}/partners${qs ? `?${qs}` : ''}`);
   },
 
   async searchServices(query: string): Promise<CatalogService[]> {

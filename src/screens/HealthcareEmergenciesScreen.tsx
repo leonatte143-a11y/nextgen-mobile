@@ -13,6 +13,7 @@ type ServiceTile = {
   id: string;
   title: string;
   subtitle: string;
+  footnote?: string;
   icon: React.ComponentProps<typeof Ionicons>['name'];
   accent: string;
   onPress: (nav: Nav) => void;
@@ -21,11 +22,11 @@ type ServiceTile = {
 const SERVICES: ServiceTile[] = [
   {
     id: 'lab',
-    title: 'Lab Technicians',
+    title: 'Diagnostics',
     subtitle: 'Blood sample collection',
     icon: 'flask-outline',
     accent: colors.trustTeal,
-    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Lab Technicians', searchQuery: 'lab blood sample' }),
+    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Diagnostics', searchQuery: 'lab blood sample diagnostics' }),
   },
   {
     id: 'physio',
@@ -33,15 +34,15 @@ const SERVICES: ServiceTile[] = [
     subtitle: 'Recovery care',
     icon: 'body-outline',
     accent: colors.primary,
-    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Physiotherapists', searchQuery: 'physiotherapist' }),
+    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Physiotherapists', searchQuery: 'physiotherapist' }),
   },
   {
     id: 'clinics',
-    title: 'Clinics',
+    title: 'Hospitals / Clinics',
     subtitle: 'Doctor appointments',
     icon: 'business-outline',
     accent: colors.trustTeal,
-    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Clinics & Doctors', searchQuery: 'doctor clinic hospital RMP PMP consultation' }),
+    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Hospitals / Clinics', searchQuery: 'doctor clinic hospital RMP PMP consultation' }),
   },
   {
     id: 'nurse',
@@ -53,11 +54,12 @@ const SERVICES: ServiceTile[] = [
   },
   {
     id: 'yoga',
-    title: 'Yoga & Fitness',
+    title: 'Gym & Yoga',
     subtitle: 'Personal trainers',
+    footnote: 'Centers and Trainers',
     icon: 'barbell-outline',
     accent: colors.primary,
-    onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Yoga & Fitness', searchQuery: 'yoga fitness' }),
+    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Gym & Yoga', searchQuery: 'yoga fitness gym' }),
   },
   {
     id: 'baby',
@@ -83,6 +85,14 @@ const SERVICES: ServiceTile[] = [
     accent: colors.emergency,
     onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Ambulance', searchQuery: 'ambulance emergency transport driver' }),
   },
+  {
+    id: 'weddings',
+    title: 'Weddings',
+    subtitle: 'Venues & planning',
+    icon: 'flower-outline',
+    accent: colors.premiumGold,
+    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Weddings', searchQuery: 'wedding hall bridal makeup' }),
+  },
 ];
 
 export function HealthcareEmergenciesScreen() {
@@ -95,16 +105,17 @@ export function HealthcareEmergenciesScreen() {
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
-        <Text style={styles.headerTitle}>Life & Health</Text>
+        <Text style={styles.headerTitle}>Health & Care</Text>
         <View style={{ width: 24 }} />
       </View>
       <ScrollView contentContainerStyle={styles.grid}>
         {SERVICES.map((s) => (
           <Pressable key={s.id} style={styles.card} onPress={() => s.onPress(navigation)}>
             <View style={[styles.iconCircle, { backgroundColor: `${s.accent}18` }]}>
-              <Ionicons name={s.icon} size={28} color={s.accent} />
+              <Ionicons name={s.icon} size={26} color={s.accent} />
             </View>
             <Text style={styles.cardTitle}>{s.title}</Text>
+            {s.footnote ? <Text style={styles.cardFootnote}>{s.footnote}</Text> : null}
           </Pressable>
         ))}
       </ScrollView>
@@ -134,7 +145,7 @@ const styles = StyleSheet.create({
     width: '47%',
     backgroundColor: colors.white,
     borderRadius: radius.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
     borderWidth: 1,
@@ -144,9 +155,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+  cardFootnote: { fontSize: 10, color: colors.grey, marginTop: 2, textAlign: 'center' },
   iconCircle: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',

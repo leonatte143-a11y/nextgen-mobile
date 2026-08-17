@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatTelUrl } from '../utils/phone';
 import { catalogService } from '../services/catalogService';
 import { bookingService } from '../services/bookingService';
+import { getCoordsIfPermitted } from '../services/locationService';
 import type { CatalogService, PartnerSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -36,9 +37,10 @@ export function ServiceDetailScreen() {
       setLoading(true);
       setPartnerLoading(true);
 
+      const coords = await getCoordsIfPermitted();
       const [s, partners] = await Promise.all([
         catalogService.getServiceById(route.params.serviceId),
-        catalogService.getServicePartners(route.params.serviceId),
+        catalogService.getServicePartners(route.params.serviceId, coords),
       ]);
 
       setSvc(s);

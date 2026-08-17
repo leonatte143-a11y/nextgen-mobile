@@ -10,6 +10,7 @@ import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import type { CatalogService, PartnerSummary } from '../mock/types';
 import { catalogService } from '../services/catalogService';
+import { getCoordsIfPermitted } from '../services/locationService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -27,9 +28,10 @@ export function ServiceProvidersScreen() {
     (async () => {
       setLoading(true);
       try {
+        const coords = await getCoordsIfPermitted();
         const [svc, partners] = await Promise.all([
           catalogService.getServiceById(route.params.serviceId),
-          catalogService.getServicePartners(route.params.serviceId),
+          catalogService.getServicePartners(route.params.serviceId, coords),
         ]);
         setService(svc);
         setProviders(partners ?? []);
@@ -106,6 +108,11 @@ export function ServiceProvidersScreen() {
                   <Text style={styles.meta} numberOfLines={1}>
                     Jobs completed: {item.jobsCompleted}
                   </Text>
+                  {item.description ? (
+                    <Text style={styles.description} numberOfLines={2}>
+                      {item.description}
+                    </Text>
+                  ) : null}
                   <View style={styles.distanceRow}>
                     <Ionicons name="location" size={14} color={colors.primary} />
                     <Text style={styles.distance}>
@@ -167,6 +174,7 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: '800', color: colors.white },
   rating: { fontSize: 13, color: colors.charcoal, marginTop: spacing.xs },
   meta: { fontSize: 12, color: colors.grey, marginTop: spacing.xs },
+  description: { fontSize: 12, color: colors.charcoal, marginTop: spacing.xs, lineHeight: 16 },
   distanceRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.xs },
   distance: { fontSize: 13, fontWeight: '700', color: colors.charcoal },
 });

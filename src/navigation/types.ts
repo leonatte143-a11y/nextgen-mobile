@@ -33,6 +33,7 @@ export type RootStackParamList = {
   MyFavorites: undefined;
   SavedAddresses: undefined;
   HealthcareEmergencies: undefined;
+  PremiumPartnerFeed: { title: string; searchQuery: string };
   AmbulanceSos: undefined;
   ClinicBooking: undefined;
   Shop: { initialTab?: 'shops' | 'materials' } | undefined;

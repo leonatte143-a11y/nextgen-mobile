@@ -24,6 +24,7 @@ import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
 import { PartnerRegisterScreen } from '../screens/PartnerRegisterScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { HealthcareEmergenciesScreen } from '../screens/HealthcareEmergenciesScreen';
+import { PremiumPartnerFeedScreen } from '../screens/PremiumPartnerFeedScreen';
 import { AmbulanceSosScreen } from '../screens/AmbulanceSosScreen';
 import { ClinicBookingScreen } from '../screens/ClinicBookingScreen';
 import { ShopScreen } from '../screens/ShopScreen';
@@ -82,6 +83,7 @@ export function RootNavigator() {
       <Stack.Screen name="MyFavorites" component={MyFavoritesScreen} />
       <Stack.Screen name="SavedAddresses" component={SavedAddressesScreen} />
       <Stack.Screen name="HealthcareEmergencies" component={HealthcareEmergenciesScreen} />
+      <Stack.Screen name="PremiumPartnerFeed" component={PremiumPartnerFeedScreen} />
       <Stack.Screen name="AmbulanceSos" component={AmbulanceSosScreen} />
       <Stack.Screen name="ClinicBooking" component={ClinicBookingScreen} />
       <Stack.Screen name="Shop" component={ShopScreen} />

@@ -16,14 +16,15 @@ type Props = {
 const CARD_WIDTH = getGridCardWidth();
 
 function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, onPress, selected }: Props) {
-  const iconBg = selected ? accentColor : `${accentColor}18`;
+  const ringBg = `${accentColor}18`;
+  const iconBg = selected ? accentColor : `${accentColor}33`;
   const iconColor = selected ? colors.white : accentColor;
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
-        { width: CARD_WIDTH },
+        { width: CARD_WIDTH, backgroundColor: ringBg },
         selected && styles.cardSelected,
         pressed && styles.cardPressed,
       ]}
@@ -42,9 +43,8 @@ export const CategoryGridCard = memo(CategoryGridCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
     borderRadius: radius.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     marginBottom: spacing.sm,
