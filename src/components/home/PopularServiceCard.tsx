@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import type { CatalogService } from '../../mock/types';
 import type { IconName, PopularServiceSlot } from '../../data/serviceCatalog';
+import { getAccentTint } from '../../utils/accentColor';
 import { getGridCardWidth } from '../../utils/gridLayout';
 
 type Props = {
@@ -20,7 +21,7 @@ function PopularServiceCardComponent({ slot, service, onPress }: Props) {
       onPress={onPress}
       style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
     >
-      <View style={styles.iconWrap}>
+      <View style={[styles.iconWrap, { backgroundColor: getAccentTint(slot.id) }]}>
         <Ionicons name={slot.icon as IconName} size={19} color={colors.primary} />
       </View>
       <Text style={styles.name} numberOfLines={1}>

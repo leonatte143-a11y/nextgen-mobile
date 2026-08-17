@@ -28,9 +28,13 @@ export function AdvertiseBusinessScreen() {
   const [businessName, setBusinessName] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
   const [socialLink, setSocialLink] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [bannerUri, setBannerUri] = useState<string | null>(null);
   const [bannerBase64, setBannerBase64] = useState<string | null>(null);
   const [bannerType, setBannerType] = useState<'image' | 'video' | null>(null);
+
+  const REQUIRED_RATIO = 16 / 9;
+  const RATIO_TOLERANCE = 0.08;
 
   const pickBanner = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,6 +52,18 @@ export function AdvertiseBusinessScreen() {
     if (result.canceled || !result.assets?.[0]?.uri) return;
     const asset = result.assets[0];
     const isVideo = asset.type === 'video';
+
+    if (asset.width && asset.height) {
+      const ratio = asset.width / asset.height;
+      if (Math.abs(ratio - REQUIRED_RATIO) > RATIO_TOLERANCE) {
+        Alert.alert(
+          'Wrong aspect ratio',
+          `Your ${isVideo ? 'video' : 'image'} isn't close to the required 16:9 ratio. Please choose or crop a 16:9 file.`,
+        );
+        return;
+      }
+    }
+
     setBannerUri(asset.uri);
     setBannerType(isVideo ? 'video' : 'image');
     // Video assets are not base64-encoded here (impractically large over JSON) — the submission
@@ -75,6 +91,7 @@ export function AdvertiseBusinessScreen() {
       bannerBase64: bannerBase64 || undefined,
       bannerType: bannerType || 'image',
       socialLink: socialLink.trim() || undefined,
+      whatsappNumber: whatsappNumber.trim() || undefined,
     });
   };
 
@@ -100,6 +117,7 @@ export function AdvertiseBusinessScreen() {
 
         <Text style={styles.label}>Cover Banner</Text>
         <Text style={styles.hint}>Upload an image or short video for your ad banner slot.</Text>
+        <Text style={styles.ratioHint}>Required aspect ratio: 16:9</Text>
         <Pressable style={styles.bannerPicker} onPress={pickBanner}>
           {bannerUri ? (
             bannerType === 'video' ? (
@@ -118,6 +136,13 @@ export function AdvertiseBusinessScreen() {
           )}
         </Pressable>
 
+        <KairoTextInput
+          label="WhatsApp Number (optional)"
+          value={whatsappNumber}
+          onChangeText={setWhatsappNumber}
+          placeholder="+91 98765 43210"
+          keyboardType="phone-pad"
+        />
         <KairoTextInput
           label="Social Media Links (optional)"
           value={socialLink}
@@ -145,7 +170,8 @@ const styles = StyleSheet.create({
   body: { padding: spacing.lg, paddingBottom: spacing.xl },
   sub: { color: colors.grey, marginBottom: spacing.lg, fontSize: 15, fontWeight: '600' },
   label: { fontWeight: '700', color: colors.charcoal, marginTop: spacing.md, marginBottom: spacing.sm },
-  hint: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm, lineHeight: 18 },
+  hint: { color: colors.grey, fontSize: 12, marginBottom: spacing.xs, lineHeight: 18 },
+  ratioHint: { color: colors.primary, fontSize: 12, fontWeight: '700', marginBottom: spacing.sm },
   bannerPicker: {
     borderRadius: radius.md,
     overflow: 'hidden',

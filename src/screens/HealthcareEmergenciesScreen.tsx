@@ -85,14 +85,6 @@ const SERVICES: ServiceTile[] = [
     accent: colors.emergency,
     onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Ambulance', searchQuery: 'ambulance emergency transport driver' }),
   },
-  {
-    id: 'weddings',
-    title: 'Weddings',
-    subtitle: 'Venues & planning',
-    icon: 'flower-outline',
-    accent: colors.premiumGold,
-    onPress: (nav) => nav.navigate('PremiumPartnerFeed', { title: 'Weddings', searchQuery: 'wedding hall bridal makeup' }),
-  },
 ];
 
 export function HealthcareEmergenciesScreen() {

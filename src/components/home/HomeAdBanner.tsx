@@ -34,7 +34,7 @@ type Props = {
 };
 
 const AD_HEIGHT = 184;
-const ROTATE_MS = 9_000;
+const ROTATE_MS = 5_000;
 
 function HomeAdBannerComponent({ locationLabel }: Props) {
   const navigation = useNavigation<Nav>();

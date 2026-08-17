@@ -14,6 +14,7 @@ import { PartnerGalleryScreen } from '../screens/PartnerGalleryScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import {
   PartnerDashboardScreen,
+  PartnerEditProfileScreen,
   PartnerLocationEditScreen,
   PartnerProfileScreen,
   PartnerRequestsScreen,
@@ -121,6 +122,7 @@ export function PartnerTabs() {
         <Stack.Screen name="PartnerRequestDetail" component={PartnerRequestDetailScreen} />
         <Stack.Screen name="PartnerRequestStatus" component={PartnerRequestStatusScreen} />
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
+        <Stack.Screen name="PartnerEditProfile" component={PartnerEditProfileScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
         <Stack.Screen name="PartnerSettings" component={PartnerSettingsScreen} />

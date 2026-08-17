@@ -43,12 +43,15 @@ export function AdSubscriptionCheckoutScreen() {
         endDate.setDate(endDate.getDate() + params.durationValue);
       }
 
+      const whatsappDigits = params.whatsappNumber?.replace(/[^0-9]/g, '');
+      const redirectValue = whatsappDigits ? `https://wa.me/${whatsappDigits}` : params.socialLink;
+
       await bannerService.submitAdRequest({
         businessName: params.businessName,
         businessAddress: params.businessAddress,
         imageUrl: params.bannerBase64,
         mediaType: 'image',
-        redirectValue: params.socialLink,
+        redirectValue,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       });

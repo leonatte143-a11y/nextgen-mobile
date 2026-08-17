@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import React, { useState } from 'react';
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActionSheetIOS, Alert, FlatList, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../constants/theme';
 import { usePartner } from '../context/PartnerContext';
+import { ImageCropModal } from '../components/ImageCropModal';
 
 const COLUMN_GAP = spacing.sm;
 
@@ -14,9 +16,23 @@ export function PartnerGalleryScreen() {
   const navigation = useNavigation();
   const { profile, updateProfile } = usePartner();
   const [saving, setSaving] = useState(false);
+  const [cropVisible, setCropVisible] = useState(false);
+  const [pendingUri, setPendingUri] = useState<string | null>(null);
   const photos = profile?.photos ?? [];
 
-  const addPhoto = async () => {
+  const pickFrom = async (source: 'camera' | 'gallery') => {
+    if (source === 'camera') {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permission needed', 'Allow camera access to take a photo.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+      if (result.canceled || !result.assets?.[0]?.uri) return;
+      setPendingUri(result.assets[0].uri);
+      setCropVisible(true);
+      return;
+    }
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Permission needed', 'Allow photo library access to add photos to your gallery.');
@@ -24,21 +40,49 @@ export function PartnerGalleryScreen() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.6,
-      base64: true,
-      allowsMultipleSelection: true,
+      quality: 0.8,
     });
-    if (result.canceled || !result.assets?.length) return;
-    const newUris = result.assets
-      .filter((asset) => !!asset.base64)
-      .map((asset) => `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`);
-    if (!newUris.length) return;
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+    setPendingUri(result.assets[0].uri);
+    setCropVisible(true);
+  };
+
+  const addPhoto = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ['Cancel', 'Camera', 'Gallery'], cancelButtonIndex: 0 },
+        (index) => {
+          if (index === 1) void pickFrom('camera');
+          if (index === 2) void pickFrom('gallery');
+        },
+      );
+      return;
+    }
+    Alert.alert('Add Photo', 'Choose a source', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Camera', onPress: () => void pickFrom('camera') },
+      { text: 'Gallery', onPress: () => void pickFrom('gallery') },
+    ]);
+  };
+
+  const handleCropSave = async (finalUri: string) => {
+    setCropVisible(false);
+    setPendingUri(null);
     setSaving(true);
     try {
-      await updateProfile({ photos: [...photos, ...newUris] });
+      const base64 = await new FileSystem.File(finalUri).base64();
+      const uri = `data:image/jpeg;base64,${base64}`;
+      await updateProfile({ photos: [...photos, uri] });
+    } catch (e: unknown) {
+      Alert.alert('Update failed', e instanceof Error ? e.message : 'Could not add photo.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCropCancel = () => {
+    setCropVisible(false);
+    setPendingUri(null);
   };
 
   const removePhoto = async (uri: string) => {
@@ -83,6 +127,13 @@ export function PartnerGalleryScreen() {
         <Ionicons name="add" size={22} color={colors.white} />
         <Text style={styles.addBtnTxt}>{saving ? 'Saving…' : 'Add Photo'}</Text>
       </Pressable>
+
+      <ImageCropModal
+        visible={cropVisible}
+        imageUri={pendingUri}
+        onSave={(finalUri) => void handleCropSave(finalUri)}
+        onCancel={handleCropCancel}
+      />
     </View>
   );
 }

@@ -16,13 +16,16 @@ import { CategoryGrid } from '../components/home/CategoryGrid';
 import { HomeAdBanner } from '../components/home/HomeAdBanner';
 import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
+import { TopRatedCarousel } from '../components/home/TopRatedCarousel';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
+import { getCurrentCoords } from '../services/locationService';
 import { notificationService } from '../services/notificationService';
+import { getAccentTint } from '../utils/accentColor';
 import { incrementSearchQueryCount } from '../lib/localStorage';
 import { t } from '../i18n/strings';
 import type { RootStackParamList } from '../navigation/types';
@@ -76,6 +79,12 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Auto-fetch location once when Home mounts so distance-dependent screens (booking,
+  // ad geofencing, EXO proximity sort) get a real fix without each prompting separately.
+  useEffect(() => {
+    void getCurrentCoords();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -199,11 +208,11 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <Text style={[styles.h2, styles.storeH2]}>KAIRO Store</Text>
         <View style={styles.shopExoRow}>
           <Pressable
-            style={styles.exoCard}
+            style={[styles.exoCard, { backgroundColor: getAccentTint('hs_int') }]}
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store', params: { initialTab: 'materials' } })}
           >
             <View style={styles.marketIcon}>
-              <Ionicons name="swap-horizontal-outline" size={11} color={colors.primary} />
+              <Ionicons name="swap-horizontal-outline" size={20} color={colors.primary} />
             </View>
             <Text style={styles.marketTitle}>EXO</Text>
             <Text style={styles.marketSub}>Buy / Sell</Text>
@@ -216,20 +225,10 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <View style={styles.rowTitle}>
           <Text style={styles.h2}>{t(language, 'topRated')}</Text>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
-          {filteredTopRated.map((item) => (
-            <Pressable
-              key={item.id}
-              style={styles.topCard}
-              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
-            >
-              <View style={styles.topPhoto}>
-                <Text style={styles.topPhotoTxt}>{item.partner.name[0]}</Text>
-              </View>
-              <Text style={styles.topName} numberOfLines={1}>{item.name}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+        <TopRatedCarousel
+          items={filteredTopRated}
+          onItemPress={(item) => navigation.navigate('ServiceProviders', { serviceId: item.id })}
+        />
 
         <View style={styles.footer}>
           <Text style={styles.footerBrand}>KAIRO</Text>
@@ -360,14 +359,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   marketIcon: {
-    width: 16,
-    height: 16,
+    width: 32,
+    height: 32,
     borderRadius: radius.md,
-    backgroundColor: colors.orangeTint,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marketTitle: { fontWeight: '900', fontSize: 16, color: colors.navy, letterSpacing: 0.2 },
+  marketTitle: { fontWeight: '900', fontSize: 18, lineHeight: 22, color: colors.navy, letterSpacing: 0.2 },
   marketSub: { color: colors.grey, fontSize: 12, marginTop: 2 },
   rowTitle: {
     flexDirection: 'row',
@@ -389,31 +388,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
-  carousel: { paddingHorizontal: spacing.md, gap: spacing.md, paddingBottom: spacing.md },
-  topCard: {
-    width: 140,
-    backgroundColor: colors.white,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginRight: spacing.md,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  topPhoto: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.orangeTint,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  topPhotoTxt: { fontWeight: '800', color: colors.primary },
-  topName: { fontWeight: '700', fontSize: 14, color: colors.charcoal },
   topRate: { fontSize: 13, color: colors.grey, marginTop: 2 },
   topPrice: { fontSize: 15, fontWeight: '800', color: colors.primary, marginTop: 4 },
   why: { padding: spacing.md },

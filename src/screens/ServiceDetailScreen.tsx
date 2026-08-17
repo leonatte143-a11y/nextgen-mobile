@@ -13,11 +13,12 @@ import { formatTelUrl } from '../utils/phone';
 import { catalogService } from '../services/catalogService';
 import { bookingService } from '../services/bookingService';
 import { getCoordsIfPermitted } from '../services/locationService';
-import type { CatalogService, PartnerSummary } from '../mock/types';
+import type { CatalogService, PartnerReview, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'ServiceDetail'>;
+type Tab = 'gallery' | 'services' | 'ratings';
 
 export function ServiceDetailScreen() {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,11 @@ export function ServiceDetailScreen() {
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [booking, setBooking] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>('gallery');
+  const [serviceMenu, setServiceMenu] = useState<ServiceMenuItem[] | null>(null);
+  const [serviceMenuLoading, setServiceMenuLoading] = useState(false);
+  const [reviews, setReviews] = useState<PartnerReview[] | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const loggedPartnerIdRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
@@ -61,6 +67,26 @@ export function ServiceDetailScreen() {
     loggedPartnerIdRef.current = selectedPartner.id;
     catalogService.logProfileView(selectedPartner.id).catch(() => {});
   }, [selectedPartner?.id]);
+
+  React.useEffect(() => {
+    if (activeTab !== 'services' || !selectedPartner || serviceMenu != null || serviceMenuLoading) return;
+    setServiceMenuLoading(true);
+    catalogService
+      .getPartnerServiceMenu(route.params.serviceId, selectedPartner.id)
+      .then((items) => setServiceMenu(items))
+      .catch(() => setServiceMenu([]))
+      .finally(() => setServiceMenuLoading(false));
+  }, [activeTab, selectedPartner, serviceMenu, serviceMenuLoading, route.params.serviceId]);
+
+  React.useEffect(() => {
+    if (activeTab !== 'ratings' || !selectedPartner || reviews != null || reviewsLoading) return;
+    setReviewsLoading(true);
+    catalogService
+      .getPartnerReviews(selectedPartner.id)
+      .then((rows) => setReviews(rows))
+      .catch(() => setReviews(selectedPartner.reviews ?? []))
+      .finally(() => setReviewsLoading(false));
+  }, [activeTab, selectedPartner, reviews, reviewsLoading]);
 
   const partnerDistance = selectedPartner?.distanceKm ?? svc?.distanceKm ?? 0;
   const outsideServiceArea = Boolean(
@@ -109,6 +135,12 @@ export function ServiceDetailScreen() {
     }
   };
 
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'gallery', label: 'Gallery' },
+    { key: 'services', label: 'Services' },
+    { key: 'ratings', label: 'Ratings' },
+  ];
+
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
       <View style={[styles.top, { paddingTop: spacing.md + insets.top }]}>
@@ -141,6 +173,9 @@ export function ServiceDetailScreen() {
                 {selectedPartner.phone ? (
                   <Text style={styles.pPhone}>📞 {selectedPartner.phone}</Text>
                 ) : null}
+                {selectedPartner.description ? (
+                  <Text style={styles.description}>{selectedPartner.description}</Text>
+                ) : null}
               </View>
             </View>
             <View style={[styles.partnerStatus, selectedPartner.isOnline ? styles.online : styles.offline]}>
@@ -158,42 +193,74 @@ export function ServiceDetailScreen() {
           </View>
         )}
 
-        {selectedPartner?.description ? (
-          <Text style={styles.description}>{selectedPartner.description}</Text>
-        ) : null}
-
         {selectedPartner ? (
           <View style={styles.actions}>
             <Pressable style={styles.secondary} onPress={callPartner}>
-              <Ionicons name="call-outline" size={20} color={colors.primary} />
-              <Text style={styles.secTxt}>Call</Text>
+              <Ionicons name="call-outline" size={20} color={colors.success} />
+              <Text style={[styles.secTxt, { color: colors.success }]}>Call</Text>
             </Pressable>
             <Pressable style={styles.secondary} onPress={chatPartner}>
-              <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-              <Text style={styles.secTxt}>Chat</Text>
+              <Ionicons name="chatbubble-outline" size={20} color={colors.warning} />
+              <Text style={[styles.secTxt, { color: colors.warning }]}>Chat</Text>
             </Pressable>
           </View>
         ) : null}
 
         {selectedPartner ? (
-          <View style={styles.splitRow}>
-            <View style={styles.splitCol}>
-              <Text style={styles.sectionTitle}>Gallery</Text>
-              {selectedPartner.photos && selectedPartner.photos.length > 0 ? (
-                <View style={styles.galleryGrid}>
+          <View style={styles.tabSection}>
+            <View style={styles.tabBar}>
+              {TABS.map((tabDef) => {
+                const isActive = activeTab === tabDef.key;
+                return (
+                  <Pressable
+                    key={tabDef.key}
+                    style={[styles.tabBtn, isActive && styles.tabBtnActive]}
+                    onPress={() => setActiveTab(tabDef.key)}
+                  >
+                    <Text style={[styles.tabTxt, isActive && styles.tabTxtActive]}>{tabDef.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {activeTab === 'gallery' ? (
+              selectedPartner.photos && selectedPartner.photos.length > 0 ? (
+                <View style={styles.galleryList}>
                   {selectedPartner.photos.map((uri, i) => (
                     <Image key={`${uri}-${i}`} source={{ uri }} style={styles.galleryImg} />
                   ))}
                 </View>
               ) : (
                 <Text style={styles.emptySectionText}>No photos uploaded by this partner yet.</Text>
-              )}
-            </View>
-            <View style={styles.splitCol}>
-              <Text style={styles.sectionTitle}>Ratings</Text>
-              {selectedPartner.reviews && selectedPartner.reviews.length > 0 ? (
+              )
+            ) : null}
+
+            {activeTab === 'services' ? (
+              serviceMenuLoading ? (
+                <Text style={styles.emptySectionText}>Loading services…</Text>
+              ) : serviceMenu && serviceMenu.length > 0 ? (
+                <View style={styles.menuList}>
+                  {serviceMenu.map((item) => (
+                    <View key={item.id} style={styles.menuRow}>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={styles.menuTitle}>{item.title}</Text>
+                        {item.subtitle ? <Text style={styles.menuSubtitle}>{item.subtitle}</Text> : null}
+                      </View>
+                      <Text style={styles.menuPrice}>₹{item.price}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.emptySectionText}>This partner hasn't listed a service menu yet.</Text>
+              )
+            ) : null}
+
+            {activeTab === 'ratings' ? (
+              reviewsLoading ? (
+                <Text style={styles.emptySectionText}>Loading reviews…</Text>
+              ) : reviews && reviews.length > 0 ? (
                 <View style={styles.reviewList}>
-                  {selectedPartner.reviews.map((r) => (
+                  {reviews.map((r) => (
                     <View key={r.id} style={styles.reviewRow}>
                       <Text style={styles.reviewBullet}>•</Text>
                       <View style={{ flex: 1 }}>
@@ -209,8 +276,8 @@ export function ServiceDetailScreen() {
                 <Text style={styles.emptySectionText}>
                   {selectedPartner.reviewsCount ? `${selectedPartner.reviewsCount} reviews · details unavailable yet.` : 'No reviews yet.'}
                 </Text>
-              )}
-            </View>
+              )
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
@@ -245,11 +312,8 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: '800', flex: 1, textAlign: 'center' },
   body: { padding: spacing.lg },
-  sectionTitle: { fontSize: 16, fontWeight: '800', marginTop: spacing.lg, marginBottom: spacing.sm, color: colors.charcoal },
   emptySectionText: { color: colors.grey, fontSize: 13, fontStyle: 'italic' },
-  description: { color: colors.charcoal, fontSize: 14, lineHeight: 20, marginTop: spacing.lg },
-  splitRow: { flexDirection: 'row', gap: spacing.md },
-  splitCol: { flex: 1, minWidth: 0 },
+  description: { color: colors.charcoal, fontSize: 13, lineHeight: 18, marginTop: 6 },
   requestSentText: { textAlign: 'center', color: colors.primary, fontWeight: '700', paddingVertical: spacing.sm },
   outsideAreaText: { textAlign: 'center', color: colors.error, fontWeight: '700', paddingVertical: spacing.sm },
   partner: {
@@ -292,10 +356,10 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: spacing.md,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     borderRadius: radius.md,
   },
-  secTxt: { fontWeight: '700', color: colors.primary },
+  secTxt: { fontWeight: '700' },
   partnerLoading: { marginTop: spacing.lg, color: colors.grey, fontStyle: 'italic' },
   partnerEmpty: {
     padding: spacing.md,
@@ -304,14 +368,43 @@ const styles = StyleSheet.create({
   },
   partnerEmptyTitle: { fontSize: 16, fontWeight: '700', marginBottom: spacing.xs },
   partnerEmptyText: { color: colors.grey, lineHeight: 20 },
-  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  tabSection: { marginTop: spacing.lg },
+  tabBar: {
+    flexDirection: 'row',
+    borderRadius: radius.md,
+    backgroundColor: colors.greyLight,
+    padding: 4,
+    gap: 4,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+  },
+  tabBtnActive: { backgroundColor: colors.primary },
+  tabTxt: { fontWeight: '700', color: colors.grey, fontSize: 13 },
+  tabTxtActive: { color: colors.white },
+  galleryList: { marginTop: spacing.md, gap: spacing.md },
   galleryImg: {
-    width: 64,
-    height: 64,
+    width: '100%',
+    height: 320,
     borderRadius: radius.md,
     backgroundColor: colors.greyLight,
   },
-  reviewList: { gap: spacing.md },
+  menuList: { marginTop: spacing.md, gap: spacing.sm },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.md,
+  },
+  menuTitle: { fontWeight: '700', color: colors.charcoal },
+  menuSubtitle: { color: colors.grey, fontSize: 12, marginTop: 2 },
+  menuPrice: { fontWeight: '800', color: colors.primary },
+  reviewList: { marginTop: spacing.md, gap: spacing.md },
   reviewRow: { flexDirection: 'row', gap: spacing.sm },
   reviewBullet: { color: colors.primary, fontSize: 16, lineHeight: 20 },
   reviewAuthor: { fontWeight: '700', color: colors.charcoal },

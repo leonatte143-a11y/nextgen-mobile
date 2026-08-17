@@ -79,7 +79,7 @@ export function PartnerCommandGrid({
           <Text style={styles.lab}>Enquiry</Text>
           {unreadEnquiries > 0 ? <View style={styles.unreadDot} /> : null}
         </Pressable>
-        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Requests')}>
+        <Pressable style={styles.card} onPress={() => (navigation as any).navigate('Conversations', { role: 'partner' })}>
           <Ionicons name="chatbubbles-outline" size={22} color={ORANGE} />
           <Text style={styles.lab}>Chat</Text>
         </Pressable>

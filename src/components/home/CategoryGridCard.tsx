@@ -16,8 +16,7 @@ type Props = {
 const CARD_WIDTH = getGridCardWidth();
 
 function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, onPress, selected }: Props) {
-  const ringBg = `${accentColor}18`;
-  const iconBg = selected ? accentColor : `${accentColor}33`;
+  const ringBg = `${accentColor}33`;
   const iconColor = selected ? colors.white : accentColor;
   return (
     <Pressable
@@ -29,7 +28,7 @@ function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, 
         pressed && styles.cardPressed,
       ]}
     >
-      <View style={[styles.iconWrap, { backgroundColor: iconBg }, selected && styles.iconWrapSelected]}>
+      <View style={[styles.iconWrap, selected && styles.iconWrapSelected]}>
         <Ionicons name={icon} size={18} color={iconColor} />
       </View>
       <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={2}>
@@ -44,12 +43,10 @@ export const CategoryGridCard = memo(CategoryGridCardComponent);
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -57,7 +54,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardSelected: {
-    borderColor: colors.primary,
     backgroundColor: colors.orangeTint,
   },
   cardPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
@@ -65,7 +61,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.orangeTint,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,

@@ -135,7 +135,7 @@ export function PartnerEnquiryScreen() {
               <View style={styles.iconCircle}>
                 <Ionicons name="person-outline" size={20} color={colors.primary} />
               </View>
-              <View style={{ flex: 1, opacity: unread ? 1 : 0.6 }}>
+              <View style={{ flex: 1 }}>
                 <View style={styles.titleRow}>
                   {unread ? <View style={styles.unreadDot} /> : null}
                   <Text style={[styles.cardTitle, unread ? styles.cardTitleUnread : styles.cardTitleRead]}>
@@ -218,9 +218,9 @@ const styles = StyleSheet.create({
   unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
   cardTitle: { color: colors.charcoal },
   cardTitleUnread: { fontWeight: '700' },
-  cardTitleRead: { fontWeight: '400' },
-  cardDetail: { color: colors.grey, marginTop: 4, fontSize: 13 },
-  time: { fontSize: 12, color: colors.grey, marginTop: 6 },
+  cardTitleRead: { fontWeight: '600' },
+  cardDetail: { color: colors.charcoal, marginTop: 4, fontSize: 13 },
+  time: { fontSize: 12, color: colors.slate, marginTop: 6 },
   callBtn: {
     flexDirection: 'row',
     alignItems: 'center',

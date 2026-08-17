@@ -45,7 +45,7 @@ export const MAIN_CATEGORIES: MainCategory[] = [
     bucketId: 'home_services',
     title: 'Home Services',
     titleTe: 'ఇంటి సేవలు',
-    icon: 'home-outline',
+    icon: 'home',
     subServices: [
       { id: 'hs_clean', title: 'House Cleaning', subtitle: 'Deep & regular', icon: 'sparkles-outline', searchQuery: 'house cleaning' },
       { id: 'hs_paint', title: 'Painters', subtitle: 'Interior & exterior', icon: 'color-palette-outline', searchQuery: 'painter' },
@@ -79,8 +79,8 @@ export const MAIN_CATEGORIES: MainCategory[] = [
   {
     id: 'professional_education',
     bucketId: 'professional_education',
-    title: 'Professionals & Transport',
-    titleTe: 'వృత్తి & రవాణా',
+    title: 'Transport & Professionals',
+    titleTe: 'రవాణా & వృత్తి',
     icon: 'school-outline',
     subServices: [
       { id: 'pe_travels', title: 'Car Travels', subtitle: 'Outstation trips', icon: 'car-sport-outline', searchQuery: 'car travels' },

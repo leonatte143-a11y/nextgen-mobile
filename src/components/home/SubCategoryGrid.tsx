@@ -3,6 +3,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import type { SubServiceItem } from '../../data/serviceCatalog';
+import { getAccentTint } from '../../utils/accentColor';
 import { GRID_COLUMNS, getGridCardWidth, isGridPlaceholder, padGridRows } from '../../utils/gridLayout';
 
 type Props = {
@@ -15,9 +16,6 @@ type Props = {
 
 const CARD_WIDTH = getGridCardWidth();
 
-/** Distinct light background per card, cycled by position — text stays dark/high-contrast on all of them. */
-const CARD_TINTS = ['#FFF3E0', '#E3F2FD', '#E8F5E9', '#FCE4EC', '#F3E5F5', '#FFFDE7', '#E0F7FA', '#EFEBE9'];
-
 function SubCategoryGridComponent({ items, onItemPress, wideIds }: Props) {
   const wideIdSet = useMemo(() => new Set(wideIds ?? []), [wideIds]);
   const normalItems = useMemo(() => items.filter((i) => !wideIdSet.has(i.id)), [items, wideIdSet]);
@@ -28,7 +26,7 @@ function SubCategoryGridComponent({ items, onItemPress, wideIds }: Props) {
   const gridData = useMemo(() => padGridRows(normalItems, GRID_COLUMNS), [normalItems]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: (typeof gridData)[number]; index: number }) => {
+    ({ item }: { item: (typeof gridData)[number] }) => {
       if (isGridPlaceholder(item)) {
         return <View style={[styles.placeholder, { width: CARD_WIDTH }]} />;
       }
@@ -37,7 +35,7 @@ function SubCategoryGridComponent({ items, onItemPress, wideIds }: Props) {
           onPress={() => onItemPress(item)}
           style={({ pressed }) => [
             styles.card,
-            { width: CARD_WIDTH, backgroundColor: CARD_TINTS[index % CARD_TINTS.length] },
+            { width: CARD_WIDTH, backgroundColor: getAccentTint(item.id) },
             pressed && styles.pressed,
           ]}
         >
@@ -73,15 +71,16 @@ function SubCategoryGridComponent({ items, onItemPress, wideIds }: Props) {
       ListFooterComponent={
         wideRows.length > 0 ? (
           <View style={styles.wideList}>
-            {wideRows.map((row, rowIndex) => (
-              <View key={row.map((i) => i.id).join('-')} style={styles.wideRow}>
-                {row.map((item, itemIndex) => (
+            {wideRows.map((row) => (
+              <View key={row.map((i) => i.id).join('-')} style={[styles.wideRow, row.length === 1 && styles.wideRowCentered]}>
+                {row.map((item) => (
                   <Pressable
                     key={item.id}
                     onPress={() => onItemPress(item)}
                     style={({ pressed }) => [
                       styles.wideCard,
-                      { backgroundColor: CARD_TINTS[(normalItems.length + rowIndex * 2 + itemIndex) % CARD_TINTS.length] },
+                      row.length === 1 && styles.wideCardCentered,
+                      { backgroundColor: getAccentTint(item.id) },
                       pressed && styles.pressed,
                     ]}
                   >
@@ -110,7 +109,7 @@ const styles = StyleSheet.create({
   placeholder: { opacity: 0 },
   card: {
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     borderWidth: 1,
@@ -134,13 +133,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 11, fontWeight: '700', color: colors.charcoal, textAlign: 'center' },
   wideList: { gap: spacing.sm, marginTop: spacing.xs },
   wideRow: { flexDirection: 'row', gap: spacing.sm },
+  wideRowCentered: { justifyContent: 'center' },
   wideCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+  wideCardCentered: { flex: 0, width: '100%', justifyContent: 'center' },
   wideIconWrap: {
     width: 32,
     height: 32,

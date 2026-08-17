@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '../constants/theme';
+import { colors, radius, spacing } from '../constants/theme';
 import { MaterialsTabContent } from '../components/materials/MaterialsTabContent';
 import type { MainTabScreenProps } from '../navigation/types';
 
@@ -26,7 +26,21 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md },
+  header: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
   title: { fontSize: 24, fontWeight: '900', color: colors.navy },
   sub: { color: colors.grey, marginTop: 4, fontSize: 14, fontWeight: '600' },
 });

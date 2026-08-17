@@ -2,6 +2,19 @@
 
 export type Coords = { latitude: number; longitude: number };
 
+/** In-memory cache populated once per app session (see `HomeScreen`'s mount effect) so
+ * screens that only best-effort check permission (`getCoordsIfPermitted`) still get a real
+ * fix without each of them having to actively prompt. */
+let cachedCoords: Coords | null = null;
+
+export function setCachedCoords(coords: Coords | null): void {
+  cachedCoords = coords;
+}
+
+export function getCachedCoordsSync(): Coords | null {
+  return cachedCoords;
+}
+
 let Location: typeof import('expo-location') | null = null;
 
 async function getLocationModule() {
@@ -54,7 +67,9 @@ export async function getCurrentCoords(): Promise<Coords | null> {
     const pos = await mod.getCurrentPositionAsync({
       accuracy: Platform.OS === 'android' ? mod.Accuracy.Balanced : mod.Accuracy.High,
     });
-    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    cachedCoords = coords;
+    return coords;
   } catch {
     return null;
   }
@@ -63,6 +78,7 @@ export async function getCurrentCoords(): Promise<Coords | null> {
 /** Best-effort coords for non-critical features (e.g. ad geo-fencing) — never prompts the
  * user; returns null unless location permission was already granted elsewhere. */
 export async function getCoordsIfPermitted(): Promise<Coords | null> {
+  if (cachedCoords) return cachedCoords;
   const mod = await getLocationModule();
   if (!mod) return null;
   try {
@@ -71,7 +87,9 @@ export async function getCoordsIfPermitted(): Promise<Coords | null> {
     const pos = await mod.getCurrentPositionAsync({
       accuracy: Platform.OS === 'android' ? mod.Accuracy.Balanced : mod.Accuracy.High,
     });
-    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    cachedCoords = coords;
+    return coords;
   } catch {
     return null;
   }

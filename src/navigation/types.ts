@@ -51,6 +51,7 @@ export type RootStackParamList = {
     bannerBase64?: string;
     bannerType?: 'image' | 'video';
     socialLink?: string;
+    whatsappNumber?: string;
   };
   AdSubscriptionCheckout: {
     businessName: string;
@@ -58,6 +59,7 @@ export type RootStackParamList = {
     bannerUri?: string;
     bannerBase64?: string;
     socialLink?: string;
+    whatsappNumber?: string;
     planId: 'image' | 'video';
     durationUnit: 'days' | 'months';
     durationValue: number;

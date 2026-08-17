@@ -1,7 +1,5 @@
-﻿import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -23,7 +21,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePartner } from '../context/PartnerContext';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../constants/theme';
-import { ImageCropModal } from '../components/ImageCropModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { partnerService } from '../services/partnerService';
 import type { PublicCategory } from '../services/partnerService';
@@ -31,9 +28,19 @@ import type { PartnerReferralSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 
+/** Legacy parent/bucket-level labels that should never appear as selectable partner
+ * categories — they're grouping labels, not real services (also covers the health-category
+ * rename: Lab Technician/RMP doctors are replaced by Diagnostics/Hospitals & Clinics). */
+const EXCLUDED_CATEGORY_LABELS = new Set(
+  ['Lab Technician', 'RMP doctors', 'Home Repair', 'Home Service', 'Life & Health', 'Professional & Education'].map(
+    (s) => s.toLowerCase(),
+  ),
+);
+const EXTRA_CATEGORY_LABELS = ['Diagnostics', 'Hospitals / Clinics'];
+
 const STATIC_PARTNER_CATEGORIES = Array.from(
   new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
-).filter((name) => !/^other/i.test(name.trim()));
+).filter((name) => !/^other/i.test(name.trim()) && !EXCLUDED_CATEGORY_LABELS.has(name.toLowerCase()));
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
@@ -43,19 +50,16 @@ export function PartnerProfileScreen() {
   const { userToken, logoutPartner } = useAuth();
   const { profile, updateProfile, isLoading } = usePartner();
   const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [nameDraft, setNameDraft] = useState('');
-  const [phoneDraft, setPhoneDraft] = useState('');
+  const [descEditing, setDescEditing] = useState(false);
+  const [descSaving, setDescSaving] = useState(false);
   const [referrals, setReferrals] = useState<PartnerReferralSummary | null>(null);
   const [referralsLoading, setReferralsLoading] = useState(true);
   const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
   const [extraCategories, setExtraCategories] = useState<PublicCategory[]>([]);
   const [newCategorySelections, setNewCategorySelections] = useState<string[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
-  const [cropVisible, setCropVisible] = useState(false);
-  const [pendingAvatarUri, setPendingAvatarUri] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -94,89 +98,53 @@ export function PartnerProfileScreen() {
       const name = cat.nameEn;
       if (!name) continue;
       const key = name.toLowerCase();
-      if (key === 'other' || key === 'others' || /^other/i.test(key)) continue;
+      if (key === 'other' || key === 'others' || /^other/i.test(key) || EXCLUDED_CATEGORY_LABELS.has(key)) continue;
       if (!seen.has(key)) {
         seen.add(key);
         merged.push(name);
       }
     }
-    return merged;
+    for (const name of EXTRA_CATEGORY_LABELS) {
+      const key = name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(name);
+      }
+    }
+    return merged.sort((a, b) => a.localeCompare(b));
   }, [extraCategories]);
+
+  const filteredCategoryOptions = React.useMemo(() => {
+    const q = categorySearch.trim().toLowerCase();
+    if (!q) return allCategoryOptions;
+    return allCategoryOptions.filter((option) => option.toLowerCase().includes(q));
+  }, [allCategoryOptions, categorySearch]);
 
   if (isLoading || !profile) {
     return null;
   }
 
-  const startEdit = () => {
-    setNameDraft(profile.name);
-    setPhoneDraft(profile.phone);
+  const cancelDescEdit = () => {
     setDescription(profile.description ?? '');
-    setEditing(true);
+    setDescEditing(false);
   };
 
-  const cancelEdit = () => {
-    setNameDraft(profile.name);
-    setPhoneDraft(profile.phone);
-    setDescription(profile.description ?? '');
-    setEditing(false);
-  };
-
-  const handleSave = async () => {
-    setLoading(true);
+  const saveDescription = async () => {
+    setDescSaving(true);
     try {
-      await updateProfile({
-        name: nameDraft.trim() || profile.name,
-        phone: phoneDraft.trim() || profile.phone,
-        skills: profile.skills,
-        categories: profile.categories,
-        description: description.trim(),
-      });
-      setEditing(false);
+      await updateProfile({ description: description.trim() });
+      setDescEditing(false);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Could not save profile.';
+      const msg = e instanceof Error ? e.message : 'Could not save description.';
       Alert.alert('Update failed', msg);
     } finally {
-      setLoading(false);
+      setDescSaving(false);
     }
   };
 
   const handleLogout = async () => {
     await logoutPartner();
     navigation.replace('UserLogin');
-  };
-
-  const pickAvatar = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo library access to update your profile photo.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.5,
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (result.canceled || !result.assets?.[0]?.uri) return;
-    setPendingAvatarUri(result.assets[0].uri);
-    setCropVisible(true);
-  };
-
-  const handleAvatarCropSave = async (finalUri: string) => {
-    setCropVisible(false);
-    setPendingAvatarUri(null);
-    try {
-      const base64 = await new FileSystem.File(finalUri).base64();
-      await updateProfile({ photoUrl: `data:image/jpeg;base64,${base64}` });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Could not update profile photo.';
-      Alert.alert('Update failed', msg);
-    }
-  };
-
-  const handleAvatarCropCancel = () => {
-    setCropVisible(false);
-    setPendingAvatarUri(null);
   };
 
   const shareReferralCode = async (code: string) => {
@@ -191,6 +159,7 @@ export function PartnerProfileScreen() {
 
   const openCategoriesModal = () => {
     setNewCategorySelections([]);
+    setCategorySearch('');
     setCategoriesModalOpen(true);
   };
 
@@ -257,85 +226,77 @@ export function PartnerProfileScreen() {
       </View>
 
       <View style={styles.profileCard}>
-        <Pressable style={styles.profileImage} onPress={pickAvatar}>
+        <View style={styles.profileImage}>
           {profile.photoUrl ? (
             <Image source={{ uri: profile.photoUrl }} style={styles.profileImagePhoto} />
           ) : (
             <Text style={styles.profileLetter}>{profile.name.charAt(0)}</Text>
           )}
-          <View style={styles.cameraBadge}>
-            <Ionicons name="camera" size={14} color={colors.white} />
-          </View>
-        </Pressable>
+        </View>
         <View style={styles.profileInfo}>
-          {editing ? (
-            <>
-              <TextInput style={styles.editInput} value={nameDraft} onChangeText={setNameDraft} placeholder="Name" placeholderTextColor={colors.orangeTint} />
-              <TextInput
-                style={[styles.editInput, styles.editInputDisabled]}
-                value={phoneDraft}
-                onChangeText={setPhoneDraft}
-                placeholder="Phone"
-                placeholderTextColor={colors.orangeTint}
-                keyboardType="phone-pad"
-                editable={false}
-              />
-            </>
-          ) : (
-            <>
-              <View style={styles.nameRow}>
-                {profile.verificationStatus === 'Verified' ? (
-                  <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark" size={12} color={colors.white} />
-                  </View>
-                ) : null}
-                <Text style={styles.profileName}>{profile.name}</Text>
+          <View style={styles.nameRow}>
+            {profile.verificationStatus === 'Verified' ? (
+              <View style={styles.verifiedBadge}>
+                <Ionicons name="checkmark" size={12} color={colors.white} />
               </View>
-              <Text style={styles.profileSub}>{profile.phone}</Text>
-              <Text style={styles.profileSub}>{profile.verificationStatus}</Text>
-            </>
-          )}
+            ) : null}
+            <Text style={styles.profileName}>{profile.name}</Text>
+          </View>
+          <Text style={styles.profileSub}>{profile.phone}</Text>
+          <Text style={styles.profileSub}>{profile.verificationStatus}</Text>
         </View>
       </View>
 
-      {editing ? (
-        <View style={styles.editActionsRow}>
-          <PrimaryButton
-            title={loading ? 'Saving…' : 'Save'}
-            onPress={handleSave}
-            loading={loading}
-            style={[styles.editSaveBtn, styles.editActionBtn]}
-          />
-          <PrimaryButton
-            title="Cancel"
-            variant="outline"
-            onPress={cancelEdit}
-            disabled={loading}
-            style={[styles.editSaveBtn, styles.editActionBtn]}
-          />
-        </View>
-      ) : (
-        <Pressable style={styles.editProfileBtn} onPress={startEdit}>
-          <Ionicons name="create-outline" size={18} color={colors.primary} />
-          <Text style={styles.editProfileTxt}>Edit Profile</Text>
-        </Pressable>
-      )}
+      <Pressable style={styles.editProfileBtn} onPress={() => (navigation as any).navigate('PartnerEditProfile')}>
+        <Ionicons name="create-outline" size={18} color={colors.primary} />
+        <Text style={styles.editProfileTxt}>Edit Profile</Text>
+      </Pressable>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Description</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Description</Text>
+          {!descEditing ? (
+            <Pressable onPress={() => setDescEditing(true)} hitSlop={8}>
+              <Ionicons name="create-outline" size={18} color={colors.primary} />
+            </Pressable>
+          ) : null}
+        </View>
         <TextInput
           value={description}
           onChangeText={setDescription}
-          style={[styles.bioInput, !editing && styles.editInputDisabled]}
+          style={[styles.bioInput, !descEditing && styles.bioInputReadonly]}
           multiline
-          numberOfLines={2}
+          numberOfLines={3}
           placeholder="Write a short description of who you are and what you do"
           placeholderTextColor={colors.grey}
-          editable={editing}
+          editable={descEditing}
         />
+        {descEditing ? (
+          <View style={styles.editActionsRow}>
+            <PrimaryButton
+              title={descSaving ? 'Saving…' : 'Save'}
+              onPress={saveDescription}
+              loading={descSaving}
+              style={[styles.editSaveBtn, styles.editActionBtn]}
+            />
+            <PrimaryButton
+              title="Cancel"
+              variant="outline"
+              onPress={cancelDescEdit}
+              disabled={descSaving}
+              style={[styles.editSaveBtn, styles.editActionBtn]}
+            />
+          </View>
+        ) : null}
       </View>
 
-      <View style={styles.section}>
+      <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerServicePricing')}>
+        <Ionicons name="list-outline" size={20} color={colors.primary} />
+        <Text style={styles.menuTxt}>Service Menu</Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.grey} />
+      </Pressable>
+
+      <View style={[styles.section, styles.referralSection]}>
         <Text style={styles.sectionTitle}>Referral Earnings</Text>
         {referralsLoading ? (
           <Text style={styles.sectionText}>Loading referral earnings…</Text>
@@ -416,19 +377,30 @@ export function PartnerProfileScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add service categories</Text>
+            <View style={styles.searchRow}>
+              <Ionicons name="search-outline" size={18} color={colors.grey} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search categories..."
+                placeholderTextColor={colors.grey}
+                value={categorySearch}
+                onChangeText={setCategorySearch}
+              />
+            </View>
             <ScrollView style={styles.modalScroll}>
-              <View style={styles.tagsRow}>
-                {allCategoryOptions
+              <View style={styles.categoryColumn}>
+                {filteredCategoryOptions
                   .filter((option) => !profile.categories.includes(option))
                   .map((option) => {
                     const selected = newCategorySelections.includes(option);
                     return (
                       <Pressable
                         key={option}
-                        style={[styles.chip, selected && styles.chipOn]}
+                        style={[styles.categoryRow, selected && styles.categoryRowOn]}
                         onPress={() => toggleNewCategory(option)}
                       >
-                        <Text style={[styles.chipTxt, selected && styles.chipOnTxt]}>{option}</Text>
+                        <Text style={[styles.categoryRowTxt, selected && styles.categoryRowTxtOn]}>{option}</Text>
+                        {selected ? <Ionicons name="checkmark" size={18} color={colors.white} /> : null}
                       </Pressable>
                     );
                   })}
@@ -448,13 +420,6 @@ export function PartnerProfileScreen() {
           </View>
         </View>
       </Modal>
-
-      <ImageCropModal
-        visible={cropVisible}
-        imageUri={pendingAvatarUri}
-        onSave={(finalUri) => void handleAvatarCropSave(finalUri)}
-        onCancel={handleAvatarCropCancel}
-      />
     </ScrollView>
     {showCopiedToast ? (
       <View style={styles.copiedToast} pointerEvents="none">
@@ -475,21 +440,6 @@ const styles = StyleSheet.create({
   profileImage: { width: 104, height: 104, borderRadius: 52, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   profileImagePhoto: { width: '100%', height: '100%', resizeMode: 'cover' },
   profileLetter: { color: colors.primary, fontSize: 40, fontWeight: '800' },
-  cameraBadge: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: colors.navy,
-    borderWidth: 2,
-    borderColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-    elevation: 10,
-  },
   profileInfo: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   verifiedBadge: {
@@ -502,16 +452,6 @@ const styles = StyleSheet.create({
   },
   profileName: { color: colors.white, fontSize: 20, fontWeight: '800' },
   profileSub: { color: colors.orangeTint, marginTop: spacing.xs },
-  editInput: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: radius.sm,
-    color: colors.white,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginTop: spacing.xs,
-    fontWeight: '700',
-  },
-  editInputDisabled: { opacity: 0.6 },
   editActionsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   editActionBtn: { flex: 1, marginTop: 0 },
   editSaveBtn: { marginTop: spacing.md },
@@ -529,14 +469,15 @@ const styles = StyleSheet.create({
   },
   editProfileTxt: { color: colors.primary, fontWeight: '800' },
   section: { marginTop: spacing.lg, backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg },
+  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { fontSize: 14, color: colors.grey, fontWeight: '700', marginBottom: spacing.sm },
   sectionText: { fontSize: 15, color: colors.charcoal, marginBottom: spacing.xs },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   tag: { backgroundColor: colors.primary, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.sm },
-  tagGrey: { backgroundColor: colors.greyLight, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.sm },
   tagText: { color: colors.white, fontWeight: '700' },
-  textArea: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 120, padding: spacing.md, textAlignVertical: 'top' },
-  bioInput: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 52, padding: spacing.md, textAlignVertical: 'top', color: colors.charcoal },
+  bioInput: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 64, padding: spacing.md, textAlignVertical: 'top', color: colors.charcoal },
+  bioInputReadonly: { opacity: 0.85 },
+  referralSection: { padding: spacing.md },
   categoriesSection: {
     marginTop: spacing.lg,
     backgroundColor: colors.orangeTint,
@@ -558,7 +499,7 @@ const styles = StyleSheet.create({
   },
   addCategoriesTxt: { color: colors.white, fontWeight: '800' },
   referralCode: { fontSize: 22, fontWeight: '900', color: colors.charcoal, letterSpacing: 1 },
-  referralActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, marginBottom: spacing.sm },
+  referralActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.xs },
   referralActionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -605,18 +546,32 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.lg },
   modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg, maxHeight: '80%' },
   modalTitle: { fontSize: 18, fontWeight: '800', marginBottom: spacing.md },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.greyLight,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+  searchInput: { flex: 1, paddingVertical: spacing.sm, color: colors.charcoal, fontSize: 14 },
   modalScroll: { marginBottom: spacing.md },
-  chip: {
+  categoryColumn: { gap: spacing.xs },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.full,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors.white,
   },
-  chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipTxt: { color: colors.charcoal, fontWeight: '600' },
-  chipOnTxt: { color: colors.white },
+  categoryRowOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  categoryRowTxt: { color: colors.charcoal, fontWeight: '600' },
+  categoryRowTxtOn: { color: colors.white },
   modalActions: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   modalCancel: { padding: spacing.md },
   modalCancelTxt: { color: colors.grey, fontWeight: '700' },

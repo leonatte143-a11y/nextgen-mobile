@@ -1,4 +1,4 @@
-import type { BucketId, CatalogService, PartnerSummary, ServiceMenuItem } from '../mock/types';
+import type { BucketId, CatalogService, PartnerReview, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import { apiService } from './apiService';
 
 export const catalogService = {
@@ -54,5 +54,9 @@ export const catalogService = {
 
   async logProfileView(partnerId: string): Promise<boolean> {
     return apiService.post(`/api/v1/catalog/partners/${partnerId}/view`, undefined, 'user');
+  },
+
+  async getPartnerReviews(partnerId: string): Promise<PartnerReview[]> {
+    return apiService.get(`/api/v1/catalog/partners/${partnerId}/reviews`);
   },
 };

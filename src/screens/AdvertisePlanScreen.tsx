@@ -59,6 +59,7 @@ export function AdvertisePlanScreen() {
       bannerUri: params.bannerUri,
       bannerBase64: params.bannerBase64,
       socialLink: params.socialLink,
+      whatsappNumber: params.whatsappNumber,
       planId,
       durationUnit,
       durationValue: parsedDuration,

@@ -38,12 +38,13 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
     icon: keyof typeof Ionicons.glyphMap;
     target?: MenuTarget;
     comingSoon?: boolean;
+    highlight?: boolean;
     onPress?: () => void;
   };
 
   const MENU_TOP: MenuItem[] = [
     { label: 'My Favorites', icon: 'heart-outline', target: 'MyFavorites' },
-    { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness' },
+    { label: 'Advertise your business', icon: 'megaphone-outline', target: 'AdvertiseBusiness', highlight: true },
     { label: t(language, 'settings'), icon: 'settings-outline', target: 'Settings' },
     { label: t(language, 'rewards'), icon: 'gift-outline', target: 'Rewards' },
   ];
@@ -194,7 +195,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
         {MENU_TOP.map((m) => (
           <Pressable
             key={m.label}
-            style={[styles.menuRow, m.comingSoon && styles.menuRowDisabled]}
+            style={[styles.menuRow, m.highlight && styles.menuRowHighlight, m.comingSoon && styles.menuRowDisabled]}
             onPress={
               m.comingSoon
                 ? undefined
@@ -219,7 +220,7 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
         {MENU_BOTTOM.map((m) => (
           <Pressable
             key={m.label}
-            style={[styles.menuRow, m.comingSoon && styles.menuRowDisabled]}
+            style={[styles.menuRow, m.highlight && styles.menuRowHighlight, m.comingSoon && styles.menuRowDisabled]}
             onPress={
               m.comingSoon
                 ? undefined
@@ -460,6 +461,7 @@ const styles = StyleSheet.create({
   },
   menuTxt: { flex: 1, fontWeight: '600', color: colors.charcoal },
   menuRowDisabled: { opacity: 0.55 },
+  menuRowHighlight: { backgroundColor: colors.orangeTint },
   comingSoonPill: {
     backgroundColor: colors.greyLight,
     borderRadius: radius.full,
