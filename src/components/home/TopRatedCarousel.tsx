@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { colors, radius, spacing } from '../../constants/theme';
 import type { CatalogService } from '../../mock/types';
+import { findSubServiceIdForCatalogService } from '../../data/serviceCatalog';
 import { getAccentTint } from '../../utils/accentColor';
 import { useSequentialAdIndexState } from '../../hooks/useSequentialAds';
 
@@ -62,11 +63,11 @@ export function TopRatedCarousel({ items, onItemPress }: Props) {
       {items.map((item) => (
         <Pressable
           key={item.id}
-          style={styles.topCard}
+          style={[styles.topCard, { backgroundColor: getAccentTint(findSubServiceIdForCatalogService(item) ?? item.id) }]}
           onLayout={onCardLayout}
           onPress={() => onItemPress(item)}
         >
-          <View style={[styles.topPhoto, { backgroundColor: getAccentTint(item.id) }]}>
+          <View style={styles.topPhoto}>
             {item.partner.photoUrl ? (
               <Image source={{ uri: item.partner.photoUrl }} style={styles.topPhotoImg} />
             ) : (
@@ -85,11 +86,8 @@ const styles = StyleSheet.create({
   topCard: {
     width: 110,
     alignItems: 'center',
-    backgroundColor: colors.white,
     borderRadius: radius.md,
     padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -100,6 +98,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xs,

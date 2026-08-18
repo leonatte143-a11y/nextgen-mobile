@@ -27,7 +27,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const TYPES: { value: ListingType; label: string; hint: string }[] = [
   { value: 'rent', label: 'Rent Out', hint: 'Tools & machinery — set a security deposit' },
-  { value: 'sell', label: 'Sell', hint: 'Bikes, gear, anything OLX-style' },
+  { value: 'sell', label: 'Sell', hint: 'Bikes, gear, and more — reach buyers nearby' },
   { value: 'resale', label: 'Resale', hint: 'Leftover project materials at a discount' },
 ];
 
@@ -161,7 +161,7 @@ export function PostListingScreen() {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color={colors.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
         </Pressable>
         <Text style={styles.headerTitle}>Post Ad</Text>
         <View style={{ width: 24 }} />
@@ -310,21 +310,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.white,
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  headerTitle: { color: colors.white, fontWeight: '800', fontSize: 17 },
-  body: { padding: spacing.lg, paddingBottom: spacing.xl, backgroundColor: colors.greyLight },
+  headerTitle: { color: colors.charcoal, fontWeight: '800', fontSize: 18 },
+  body: { padding: spacing.lg, paddingBottom: spacing.xl, backgroundColor: colors.surface },
   card: {
     backgroundColor: colors.white,
     borderRadius: radius.lg,
     padding: spacing.lg,
     marginBottom: spacing.lg,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
@@ -335,9 +337,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.white,
+    backgroundColor: colors.orangeTint,
   },
   quickChipOn: { backgroundColor: colors.primary },
   quickTxt: { fontWeight: '700', color: colors.primary, fontSize: 13 },
@@ -348,14 +348,12 @@ const styles = StyleSheet.create({
   typeRow: { flexDirection: 'row', gap: spacing.sm },
   typeChip: {
     flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    borderRadius: radius.full,
     alignItems: 'center',
     backgroundColor: colors.greyLight,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  typeChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  typeChipOn: { backgroundColor: colors.primary },
   typeTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
   typeTxtOn: { color: colors.white },
   photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },

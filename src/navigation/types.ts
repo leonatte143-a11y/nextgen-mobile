@@ -43,7 +43,18 @@ export type RootStackParamList = {
   PostListing: undefined;
   ListingDetail: { listingId: string };
   MarketplaceChat: { listingId: string; otherPartyName?: string };
-  AdvertiseBusiness: undefined;
+  AdvertiseBusiness: {
+    draftId?: string;
+    prefill?: {
+      businessName?: string;
+      businessAddress?: string;
+      socialLink?: string;
+      whatsappNumber?: string;
+      bannerUri?: string;
+      bannerBase64?: string;
+      bannerType?: 'image' | 'video';
+    };
+  } | undefined;
   AdvertisePlan: {
     businessName: string;
     businessAddress: string;
@@ -52,18 +63,21 @@ export type RootStackParamList = {
     bannerType?: 'image' | 'video';
     socialLink?: string;
     whatsappNumber?: string;
+    draftId?: string;
   };
   AdSubscriptionCheckout: {
     businessName: string;
     businessAddress?: string;
     bannerUri?: string;
     bannerBase64?: string;
+    bannerType?: 'image' | 'video';
     socialLink?: string;
     whatsappNumber?: string;
     planId: 'image' | 'video';
     durationUnit: 'days' | 'months';
     durationValue: number;
     totalAmount: number;
+    draftId?: string;
   };
   MyAds: undefined;
   Conversations: { role: 'user' | 'partner' } | undefined;

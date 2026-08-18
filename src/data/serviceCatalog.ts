@@ -36,6 +36,9 @@ export type PopularServiceSlot = {
   searchTerms: string[];
   fallbackPrice?: number;
   fallbackRating?: number;
+  /** Id of the matching sub-category entry (see MAIN_CATEGORIES), so this slot's card
+   * uses the exact same accent color as that service's sub-category page tile. */
+  subServiceId?: string;
 };
 
 /** Main categories — order fixed for home grid (3 columns). */
@@ -124,15 +127,15 @@ export const MAIN_CATEGORIES: MainCategory[] = [
 ];
 
 export const POPULAR_SERVICE_SLOTS: PopularServiceSlot[] = [
-  { id: 'pop_plumber', name: 'Plumber', subtitle: 'Leakage & taps', icon: 'water-outline', searchTerms: ['plumber'], fallbackPrice: 300, fallbackRating: 4.7 },
-  { id: 'pop_fan', name: 'Fan Repair', subtitle: 'All brands', icon: 'sync-outline', searchTerms: ['fan repair', 'fan'], fallbackPrice: 250, fallbackRating: 4.6 },
-  { id: 'pop_elec', name: 'Electrician', subtitle: 'Wiring & MCB', icon: 'flash-outline', searchTerms: ['electrician'], fallbackPrice: 280, fallbackRating: 4.5 },
-  { id: 'pop_ac', name: 'AC Repair', subtitle: 'Service & gas', icon: 'snow-outline', searchTerms: ['ac repair', 'ac'], fallbackPrice: 450, fallbackRating: 4.6 },
-  { id: 'pop_clean', name: 'House Cleaning', subtitle: 'Deep clean', icon: 'sparkles-outline', searchTerms: ['cleaning', 'house'], fallbackPrice: 499, fallbackRating: 4.8 },
+  { id: 'pop_plumber', name: 'Plumber', subtitle: 'Leakage & taps', icon: 'water-outline', searchTerms: ['plumber'], fallbackPrice: 300, fallbackRating: 4.7, subServiceId: 'hr_plumb' },
+  { id: 'pop_fan', name: 'Fan Repair', subtitle: 'All brands', icon: 'sync-outline', searchTerms: ['fan repair', 'fan'], fallbackPrice: 250, fallbackRating: 4.6, subServiceId: 'hr_elec' },
+  { id: 'pop_elec', name: 'Electrician', subtitle: 'Wiring & MCB', icon: 'flash-outline', searchTerms: ['electrician'], fallbackPrice: 280, fallbackRating: 4.5, subServiceId: 'hr_elec' },
+  { id: 'pop_ac', name: 'AC Repair', subtitle: 'Service & gas', icon: 'snow-outline', searchTerms: ['ac repair', 'ac'], fallbackPrice: 450, fallbackRating: 4.6, subServiceId: 'hr_ac' },
+  { id: 'pop_clean', name: 'House Cleaning', subtitle: 'Deep clean', icon: 'sparkles-outline', searchTerms: ['cleaning', 'house'], fallbackPrice: 499, fallbackRating: 4.8, subServiceId: 'hs_clean' },
   { id: 'pop_cctv', name: 'CCTV Repair', subtitle: 'Install & fix', icon: 'videocam-outline', searchTerms: ['cctv'], fallbackPrice: 350, fallbackRating: 4.4 },
-  { id: 'pop_paint', name: 'Painter', subtitle: 'Interior paint', icon: 'color-palette-outline', searchTerms: ['painter', 'paint'], fallbackPrice: 399, fallbackRating: 4.5 },
-  { id: 'pop_ro', name: 'Water Purifier', subtitle: 'RO service', icon: 'funnel-outline', searchTerms: ['purifier', 'ro'], fallbackPrice: 320, fallbackRating: 4.6 },
-  { id: 'pop_carp', name: 'Carpenter', subtitle: 'Furniture fix', icon: 'hammer-outline', searchTerms: ['carpenter'], fallbackPrice: 350, fallbackRating: 4.5 },
+  { id: 'pop_paint', name: 'Painter', subtitle: 'Interior paint', icon: 'color-palette-outline', searchTerms: ['painter', 'paint'], fallbackPrice: 399, fallbackRating: 4.5, subServiceId: 'hs_paint' },
+  { id: 'pop_ro', name: 'Water Purifier', subtitle: 'RO service', icon: 'funnel-outline', searchTerms: ['purifier', 'ro'], fallbackPrice: 320, fallbackRating: 4.6, subServiceId: 'hr_ro' },
+  { id: 'pop_carp', name: 'Carpenter', subtitle: 'Furniture fix', icon: 'hammer-outline', searchTerms: ['carpenter'], fallbackPrice: 350, fallbackRating: 4.5, subServiceId: 'hs_wood' },
 ];
 
 export function getMainCategory(id: MainCategoryId): MainCategory | undefined {
@@ -157,6 +160,16 @@ export function buildPopularDisplay(
     ...slot,
     service: matchCatalogService(catalog, slot.searchTerms),
   }));
+}
+
+/** Finds the sub-category tile (if any) that corresponds to a real catalog service, so
+ * screens like Top Rated can reuse that tile's exact accent color for the same service. */
+export function findSubServiceIdForCatalogService(service: CatalogService): string | undefined {
+  const category = MAIN_CATEGORIES.find((c) => c.bucketId === service.bucketId);
+  if (!category) return undefined;
+  const hay = `${service.name} ${service.subtext ?? ''} ${service.categoryLabel ?? ''}`.toLowerCase();
+  const match = category.subServices.find((s) => hay.includes(s.searchQuery.toLowerCase()) || hay.includes(s.title.toLowerCase()));
+  return match?.id;
 }
 
 export function filterSubServices(

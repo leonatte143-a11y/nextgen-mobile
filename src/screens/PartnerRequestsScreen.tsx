@@ -55,7 +55,10 @@ export function PartnerRequestsScreen({ navigation, route }: Props) {
           </View>
         </View>
         <Text style={styles.requestMeta}>{item.customerName} · {item.address}</Text>
-        <Text style={styles.requestMeta}>₹{item.partnerShare} take-home · {item.distanceKm} km</Text>
+        <Text style={styles.requestMeta}>
+          {item.lineItems && item.lineItems.length > 0 ? `₹${item.partnerShare} take-home · ` : ''}
+          {item.distanceKm} km
+        </Text>
       </Pressable>
     );
   };

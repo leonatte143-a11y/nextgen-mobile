@@ -3,7 +3,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -18,6 +18,10 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type R = RouteProp<RootStackParamList, 'ServiceDetail'>;
+
+const GALLERY_COLS = 3;
+const GALLERY_GAP = spacing.sm;
+const GALLERY_THUMB_SIZE = (Dimensions.get('window').width - spacing.lg * 2 - GALLERY_GAP * (GALLERY_COLS - 1)) / GALLERY_COLS;
 type Tab = 'gallery' | 'services' | 'ratings';
 
 export function ServiceDetailScreen() {
@@ -225,7 +229,7 @@ export function ServiceDetailScreen() {
 
             {activeTab === 'gallery' ? (
               selectedPartner.photos && selectedPartner.photos.length > 0 ? (
-                <View style={styles.galleryList}>
+                <View style={styles.galleryGrid}>
                   {selectedPartner.photos.map((uri, i) => (
                     <Image key={`${uri}-${i}`} source={{ uri }} style={styles.galleryImg} />
                   ))}
@@ -385,10 +389,10 @@ const styles = StyleSheet.create({
   tabBtnActive: { backgroundColor: colors.primary },
   tabTxt: { fontWeight: '700', color: colors.grey, fontSize: 13 },
   tabTxtActive: { color: colors.white },
-  galleryList: { marginTop: spacing.md, gap: spacing.md },
+  galleryGrid: { marginTop: spacing.md, flexDirection: 'row', flexWrap: 'wrap', gap: GALLERY_GAP },
   galleryImg: {
-    width: '100%',
-    height: 320,
+    width: GALLERY_THUMB_SIZE,
+    height: GALLERY_THUMB_SIZE,
     borderRadius: radius.md,
     backgroundColor: colors.greyLight,
   },

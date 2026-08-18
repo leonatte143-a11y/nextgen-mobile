@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import type { RouteProp } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
@@ -18,13 +19,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
+import { getDraft, saveDraft } from '../lib/adDrafts';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type R = RouteProp<RootStackParamList, 'AdvertiseBusiness'>;
+
+const REQUIRED_RATIO = 16 / 9;
+const RATIO_TOLERANCE = 0.08;
+// Mirrors backend/src/controllers/bannerController.js MAX_IMAGE_DATA_URL_LENGTH — checked
+// client-side too so an oversized clip is rejected before the payment screen, not after.
+const MAX_MEDIA_DATA_URL_LENGTH = 8 * 1024 * 1024;
 
 export function AdvertiseBusinessScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<R>();
   const [businessName, setBusinessName] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
   const [socialLink, setSocialLink] = useState('');
@@ -32,9 +42,23 @@ export function AdvertiseBusinessScreen() {
   const [bannerUri, setBannerUri] = useState<string | null>(null);
   const [bannerBase64, setBannerBase64] = useState<string | null>(null);
   const [bannerType, setBannerType] = useState<'image' | 'video' | null>(null);
+  const [draftId, setDraftId] = useState<string | undefined>(route.params?.draftId);
+  const [savingDraft, setSavingDraft] = useState(false);
 
-  const REQUIRED_RATIO = 16 / 9;
-  const RATIO_TOLERANCE = 0.08;
+  useEffect(() => {
+    (async () => {
+      const prefill = route.params?.draftId ? await getDraft(route.params.draftId) : route.params?.prefill;
+      if (!prefill) return;
+      setBusinessName(prefill.businessName ?? '');
+      setBusinessAddress(prefill.businessAddress ?? '');
+      setSocialLink(prefill.socialLink ?? '');
+      setWhatsappNumber(prefill.whatsappNumber ?? '');
+      setBannerUri(prefill.bannerUri ?? null);
+      setBannerBase64(prefill.bannerBase64 ?? null);
+      setBannerType(prefill.bannerType ?? null);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickBanner = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -64,11 +88,45 @@ export function AdvertiseBusinessScreen() {
       }
     }
 
+    const dataUrl = asset.base64 ? `data:${asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg')};base64,${asset.base64}` : null;
+    if (dataUrl && dataUrl.length > MAX_MEDIA_DATA_URL_LENGTH) {
+      Alert.alert(
+        'File too large',
+        isVideo
+          ? 'This clip is too large to upload. Please choose a shorter/lower-resolution video.'
+          : 'This image is too large. Please choose a smaller photo.',
+      );
+      return;
+    }
+
     setBannerUri(asset.uri);
     setBannerType(isVideo ? 'video' : 'image');
-    // Video assets are not base64-encoded here (impractically large over JSON) — the submission
-    // step only sends an image data URI for now; video ad requests still need a real upload flow.
-    setBannerBase64(!isVideo && asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : null);
+    setBannerBase64(dataUrl);
+  };
+
+  const currentDraftFields = () => ({
+    businessName: businessName.trim(),
+    businessAddress: businessAddress.trim(),
+    socialLink: socialLink.trim() || undefined,
+    whatsappNumber: whatsappNumber.trim() || undefined,
+    bannerUri: bannerUri || undefined,
+    bannerBase64: bannerBase64 || undefined,
+    bannerType: bannerType || undefined,
+  });
+
+  const saveAsDraft = async () => {
+    if (!businessName.trim() && !bannerUri) {
+      Alert.alert('Nothing to save', 'Add at least a business name or banner before saving a draft.');
+      return;
+    }
+    setSavingDraft(true);
+    try {
+      const saved = await saveDraft({ id: draftId, ...currentDraftFields() });
+      setDraftId(saved.id);
+      Alert.alert('Draft saved', 'Find it under My Ads > Drafts.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+    } finally {
+      setSavingDraft(false);
+    }
   };
 
   const submit = () => {
@@ -92,6 +150,7 @@ export function AdvertiseBusinessScreen() {
       bannerType: bannerType || 'image',
       socialLink: socialLink.trim() || undefined,
       whatsappNumber: whatsappNumber.trim() || undefined,
+      draftId,
     });
   };
 
@@ -102,7 +161,9 @@ export function AdvertiseBusinessScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
         <Text style={styles.headerTitle}>Advertising</Text>
-        <View style={{ width: 24 }} />
+        <Pressable onPress={() => navigation.navigate('MyAds')} hitSlop={12}>
+          <Ionicons name="grid-outline" size={22} color={colors.white} />
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <Text style={styles.sub}>Promote your business</Text>
@@ -150,7 +211,11 @@ export function AdvertiseBusinessScreen() {
           placeholder="https://instagram.com/yourbusiness"
         />
 
-        <PrimaryButton title="Submit" onPress={submit} />
+        <PrimaryButton title="Submit" onPress={submit} style={styles.submitBtn} />
+        <Pressable onPress={saveAsDraft} disabled={savingDraft} style={styles.draftBtn}>
+          <Ionicons name="save-outline" size={18} color={colors.primary} />
+          <Text style={styles.draftBtnTxt}>{savingDraft ? 'Saving…' : 'Save as Draft'}</Text>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -188,4 +253,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.greyLight,
   },
   bannerPlaceholderTxt: { color: colors.primary, fontWeight: '700', marginTop: spacing.xs },
+  submitBtn: { marginTop: spacing.xs },
+  draftBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.md,
+    padding: spacing.sm,
+  },
+  draftBtnTxt: { color: colors.primary, fontWeight: '700' },
 });

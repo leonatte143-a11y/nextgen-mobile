@@ -16,12 +16,13 @@ type Props = {
 const CARD_WIDTH = getGridCardWidth();
 
 function PopularServiceCardComponent({ slot, service, onPress }: Props) {
+  const tint = getAccentTint(slot.subServiceId ?? slot.id);
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, { width: CARD_WIDTH }, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.card, { width: CARD_WIDTH, backgroundColor: tint }, pressed && styles.pressed]}
     >
-      <View style={[styles.iconWrap, { backgroundColor: getAccentTint(slot.id) }]}>
+      <View style={styles.iconWrap}>
         <Ionicons name={slot.icon as IconName} size={19} color={colors.primary} />
       </View>
       <Text style={styles.name} numberOfLines={1}>
@@ -35,12 +36,9 @@ export const PopularServiceCard = memo(PopularServiceCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
     borderRadius: radius.md,
     padding: spacing.sm,
     marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.07,
@@ -48,12 +46,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
   },
-  pressed: { opacity: 0.9, borderColor: colors.primary },
+  pressed: { opacity: 0.9 },
   iconWrap: {
     width: 39,
     height: 39,
     borderRadius: 20,
-    backgroundColor: colors.orangeTint,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xs,

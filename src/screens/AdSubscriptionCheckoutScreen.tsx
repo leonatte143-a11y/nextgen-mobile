@@ -7,6 +7,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
+import { deleteDraft } from '../lib/adDrafts';
 import type { RootStackParamList } from '../navigation/types';
 import { bannerService } from '../services/bannerService';
 
@@ -30,7 +31,7 @@ export function AdSubscriptionCheckoutScreen() {
 
   const onContinue = async () => {
     if (!params.bannerBase64) {
-      Alert.alert('Image required', 'Please go back and upload an image banner (video ads are not yet supported for submission).');
+      Alert.alert('Media required', 'Please go back and upload a cover banner.');
       return;
     }
     setSubmitting(true);
@@ -50,13 +51,15 @@ export function AdSubscriptionCheckoutScreen() {
         businessName: params.businessName,
         businessAddress: params.businessAddress,
         imageUrl: params.bannerBase64,
-        mediaType: 'image',
+        mediaType: params.bannerType ?? 'image',
         redirectValue,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       });
 
-      Alert.alert('Ad submitted for approval', `Your ${PLAN_LABELS[params.planId]} campaign for ${params.businessName} has been sent to KAIRO for review.`, [
+      if (params.draftId) await deleteDraft(params.draftId);
+
+      Alert.alert('Your ad is live', `Your ${PLAN_LABELS[params.planId]} campaign for ${params.businessName} is now live on KAIRO.`, [
         {
           text: 'OK',
           onPress: () => navigation.replace('MyAds'),

@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
@@ -9,7 +8,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -24,7 +22,6 @@ import { colors, radius, spacing } from '../constants/theme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { partnerService } from '../services/partnerService';
 import type { PublicCategory } from '../services/partnerService';
-import type { PartnerReferralSummary } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
 import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 
@@ -52,23 +49,11 @@ export function PartnerProfileScreen() {
   const [description, setDescription] = useState('');
   const [descEditing, setDescEditing] = useState(false);
   const [descSaving, setDescSaving] = useState(false);
-  const [referrals, setReferrals] = useState<PartnerReferralSummary | null>(null);
-  const [referralsLoading, setReferralsLoading] = useState(true);
   const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   const [extraCategories, setExtraCategories] = useState<PublicCategory[]>([]);
   const [newCategorySelections, setNewCategorySelections] = useState<string[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
-  const [showCopiedToast, setShowCopiedToast] = useState(false);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    partnerService
-      .getReferralEarnings()
-      .then(setReferrals)
-      .catch(() => setReferrals(null))
-      .finally(() => setReferralsLoading(false));
-  }, []);
 
   useEffect(() => {
     partnerService
@@ -78,18 +63,13 @@ export function PartnerProfileScreen() {
   }, []);
 
   useEffect(() => {
-    if (profile) {
+    // Skip while actively editing — PartnerContext polls the server every few seconds and
+    // hands back a new `profile` object each time even when nothing changed, which would
+    // otherwise stomp whatever the user is currently typing.
+    if (profile && !descEditing) {
       setDescription(profile.description ?? '');
     }
-  }, [profile]);
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
-    };
-  }, []);
+  }, [profile, descEditing]);
 
   const allCategoryOptions = React.useMemo(() => {
     const seen = new Set(STATIC_PARTNER_CATEGORIES.map((s) => s.toLowerCase()));
@@ -145,16 +125,6 @@ export function PartnerProfileScreen() {
   const handleLogout = async () => {
     await logoutPartner();
     navigation.replace('UserLogin');
-  };
-
-  const shareReferralCode = async (code: string) => {
-    try {
-      await Share.share({
-        message: `Join KAIRO as a service partner using my referral code ${code} and we both get rewarded!`,
-      });
-    } catch {
-      // ignore share cancellation
-    }
   };
 
   const openCategoriesModal = () => {
@@ -252,6 +222,20 @@ export function PartnerProfileScreen() {
         <Text style={styles.editProfileTxt}>Edit Profile</Text>
       </Pressable>
 
+      <Pressable
+        style={styles.switchModeBtn}
+        onPress={() => {
+          if (userToken) {
+            navigation.replace('MainTabs');
+          } else {
+            navigation.navigate('UserLogin');
+          }
+        }}
+      >
+        <Ionicons name="swap-horizontal-outline" size={18} color={colors.white} />
+        <Text style={styles.switchModeTxt}>{userToken ? 'Switch to User Mode' : 'Sign in as User'}</Text>
+      </Pressable>
+
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Description</Text>
@@ -296,37 +280,11 @@ export function PartnerProfileScreen() {
         <Ionicons name="chevron-forward" size={20} color={colors.grey} />
       </Pressable>
 
-      <View style={[styles.section, styles.referralSection]}>
-        <Text style={styles.sectionTitle}>Referral Earnings</Text>
-        {referralsLoading ? (
-          <Text style={styles.sectionText}>Loading referral earnings…</Text>
-        ) : referrals ? (
-          <>
-            <Text style={styles.referralCode}>{referrals.referralCode}</Text>
-            <View style={styles.referralActions}>
-              <Pressable
-                style={styles.referralActionBtn}
-                onPress={async () => {
-                  await Clipboard.setStringAsync(referrals.referralCode);
-                  if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-                  setShowCopiedToast(true);
-                  toastTimerRef.current = setTimeout(() => setShowCopiedToast(false), 1000);
-                }}
-              >
-                <Ionicons name="copy-outline" size={16} color={colors.primary} />
-                <Text style={styles.referralActionTxt}>Copy</Text>
-              </Pressable>
-              <Pressable style={styles.referralActionBtn} onPress={() => shareReferralCode(referrals.referralCode)}>
-                <Ionicons name="share-social-outline" size={16} color={colors.primary} />
-                <Text style={styles.referralActionTxt}>Share</Text>
-              </Pressable>
-            </View>
-            <Text style={styles.sectionText}>Total earned: ₹{referrals.totalEarned}</Text>
-          </>
-        ) : (
-          <Text style={styles.sectionText}>Could not load referral earnings.</Text>
-        )}
-      </View>
+      <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerReferral')}>
+        <Ionicons name="gift-outline" size={20} color={colors.primary} />
+        <Text style={styles.menuTxt}>Referral Earnings</Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.grey} />
+      </Pressable>
 
       <View style={styles.categoriesSection}>
         <Text style={styles.categoriesTitle}>Manage Categories</Text>
@@ -351,19 +309,6 @@ export function PartnerProfileScreen() {
         <Ionicons name="settings-outline" size={20} color={colors.primary} />
         <Text style={styles.menuTxt}>Settings</Text>
         <Ionicons name="chevron-forward" size={20} color={colors.grey} />
-      </Pressable>
-      <Pressable
-        style={styles.switchModeBtn}
-        onPress={() => {
-          if (userToken) {
-            navigation.replace('MainTabs');
-          } else {
-            navigation.navigate('UserLogin');
-          }
-        }}
-      >
-        <Ionicons name="swap-horizontal-outline" size={18} color={colors.white} />
-        <Text style={styles.switchModeTxt}>{userToken ? 'Switch to User Mode' : 'Sign in as User'}</Text>
       </Pressable>
 
       <PrimaryButton title="Logout" variant="outline" onPress={handleLogout} style={styles.logoutButton} />
@@ -421,11 +366,6 @@ export function PartnerProfileScreen() {
         </View>
       </Modal>
     </ScrollView>
-    {showCopiedToast ? (
-      <View style={styles.copiedToast} pointerEvents="none">
-        <Text style={styles.copiedToastTxt}>Copied</Text>
-      </View>
-    ) : null}
     </KeyboardAvoidingView>
   );
 }
@@ -477,7 +417,6 @@ const styles = StyleSheet.create({
   tagText: { color: colors.white, fontWeight: '700' },
   bioInput: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 64, padding: spacing.md, textAlignVertical: 'top', color: colors.charcoal },
   bioInputReadonly: { opacity: 0.85 },
-  referralSection: { padding: spacing.md },
   categoriesSection: {
     marginTop: spacing.lg,
     backgroundColor: colors.orangeTint,
@@ -498,20 +437,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   addCategoriesTxt: { color: colors.white, fontWeight: '800' },
-  referralCode: { fontSize: 22, fontWeight: '900', color: colors.charcoal, letterSpacing: 1 },
-  referralActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.xs },
-  referralActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.orangeTint,
-  },
-  referralActionTxt: { color: colors.primary, fontWeight: '700' },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -575,14 +500,4 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   modalCancel: { padding: spacing.md },
   modalCancelTxt: { color: colors.grey, fontWeight: '700' },
-  copiedToast: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-  },
-  copiedToastTxt: { color: colors.white, fontWeight: '700' },
 });

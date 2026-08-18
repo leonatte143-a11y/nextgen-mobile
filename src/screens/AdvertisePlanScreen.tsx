@@ -32,7 +32,7 @@ export function AdvertisePlanScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
-  const [planId, setPlanId] = useState<PlanId>('image');
+  const [planId, setPlanId] = useState<PlanId>(params.bannerType === 'video' ? 'video' : 'image');
   const [durationUnit, setDurationUnit] = useState<'days' | 'months'>('months');
   const [durationValue, setDurationValue] = useState('1');
 
@@ -58,12 +58,14 @@ export function AdvertisePlanScreen() {
       businessAddress: params.businessAddress,
       bannerUri: params.bannerUri,
       bannerBase64: params.bannerBase64,
+      bannerType: params.bannerType,
       socialLink: params.socialLink,
       whatsappNumber: params.whatsappNumber,
       planId,
       durationUnit,
       durationValue: parsedDuration,
       totalAmount,
+      draftId: params.draftId,
     });
   };
 

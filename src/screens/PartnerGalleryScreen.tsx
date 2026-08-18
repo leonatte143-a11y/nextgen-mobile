@@ -21,30 +21,34 @@ export function PartnerGalleryScreen() {
   const photos = profile?.photos ?? [];
 
   const pickFrom = async (source: 'camera' | 'gallery') => {
-    if (source === 'camera') {
-      const perm = await ImagePicker.requestCameraPermissionsAsync();
-      if (!perm.granted) {
-        Alert.alert('Permission needed', 'Allow camera access to take a photo.');
+    try {
+      if (source === 'camera') {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert('Permission needed', 'Allow camera access to take a photo.');
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+        if (result.canceled || !result.assets?.[0]?.uri) return;
+        setPendingUri(result.assets[0].uri);
+        setCropVisible(true);
         return;
       }
-      const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permission needed', 'Allow photo library access to add photos to your gallery.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+      });
       if (result.canceled || !result.assets?.[0]?.uri) return;
       setPendingUri(result.assets[0].uri);
       setCropVisible(true);
-      return;
+    } catch (e: unknown) {
+      Alert.alert('Could not open camera/gallery', e instanceof Error ? e.message : 'Please try again.');
     }
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo library access to add photos to your gallery.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
-    if (result.canceled || !result.assets?.[0]?.uri) return;
-    setPendingUri(result.assets[0].uri);
-    setCropVisible(true);
   };
 
   const addPhoto = () => {

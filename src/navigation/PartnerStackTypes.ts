@@ -9,6 +9,7 @@ export type PartnerStackParamList = {
   PartnerRequestStatus: { requestId: string };
   PartnerServicePricing: undefined;
   PartnerEditProfile: undefined;
+  PartnerReferral: undefined;
   PartnerLocationEdit: undefined;
   PartnerHRV: undefined;
   PartnerSettings: undefined;

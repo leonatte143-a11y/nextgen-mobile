@@ -43,7 +43,7 @@ export const CategoryGridCard = memo(CategoryGridCardComponent);
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
     marginBottom: spacing.sm,

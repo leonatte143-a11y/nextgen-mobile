@@ -243,23 +243,26 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit service</Text>
-            <TextInput
-              style={styles.input}
-              value={edit?.serviceName}
-              onChangeText={(t) => setEdit((e) => (e ? { ...e, serviceName: t } : e))}
-              placeholder="Service name"
-            />
+            <Text style={styles.fieldLabel}>Category</Text>
             <TextInput
               style={styles.input}
               value={edit?.category}
               onChangeText={(t) => setEdit((e) => (e ? { ...e, category: t } : e))}
-              placeholder="Category"
+              placeholder="e.g. Plumbing"
             />
+            <Text style={styles.fieldLabel}>Service Name</Text>
+            <TextInput
+              style={styles.input}
+              value={edit?.serviceName}
+              onChangeText={(t) => setEdit((e) => (e ? { ...e, serviceName: t } : e))}
+              placeholder="e.g. Pipe Fixes"
+            />
+            <Text style={styles.fieldLabel}>Amount / Price</Text>
             <TextInput
               style={styles.input}
               value={edit?.baseCost}
               onChangeText={(t) => setEdit((e) => (e ? { ...e, baseCost: t } : e))}
-              placeholder={`Price (₹${limits.min}–₹${limits.max})`}
+              placeholder={`₹${limits.min}–₹${limits.max}`}
               keyboardType="number-pad"
             />
             <View style={styles.modalActions}>
@@ -278,23 +281,26 @@ export function PartnerMyServicesScreen({ showBack, onBack }: Props = {}) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add service</Text>
+            <Text style={styles.fieldLabel}>Category</Text>
+            <TextInput
+              style={styles.input}
+              value={addCategory}
+              onChangeText={setAddCategory}
+              placeholder="e.g. Plumbing"
+            />
+            <Text style={styles.fieldLabel}>Service Name</Text>
             <TextInput
               style={styles.input}
               value={addName}
               onChangeText={setAddName}
               placeholder="e.g. Pipe Fixes"
             />
-            <TextInput
-              style={styles.input}
-              value={addCategory}
-              onChangeText={setAddCategory}
-              placeholder="Category (e.g. Plumbing)"
-            />
+            <Text style={styles.fieldLabel}>Amount / Price</Text>
             <TextInput
               style={styles.input}
               value={addPrice}
               onChangeText={setAddPrice}
-              placeholder={`Your price ₹${limits.min}–${limits.max}`}
+              placeholder={`₹${limits.min}–${limits.max}`}
               keyboardType="number-pad"
             />
             <View style={styles.modalActions}>
@@ -390,6 +396,7 @@ const styles = StyleSheet.create({
   },
   modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg },
   modalTitle: { fontSize: 18, fontWeight: '800', marginBottom: spacing.md },
+  fieldLabel: { fontSize: 13, fontWeight: '700', color: colors.charcoal, marginBottom: spacing.xs },
   input: {
     borderWidth: 1,
     borderColor: colors.border,

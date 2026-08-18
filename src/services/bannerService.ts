@@ -38,6 +38,7 @@ export type SubmitAdRequestPayload = {
  * describes admin/home-feed banners) — kept local to avoid touching that shared type. */
 export type MyAdRequest = AdvertisementBanner & {
   status: 'pending' | 'approved' | 'rejected';
+  reviewNote?: string | null;
   partnerId?: string | null;
 };
 

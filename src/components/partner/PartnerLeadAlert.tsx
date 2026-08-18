@@ -42,7 +42,8 @@ export function PartnerLeadAlert({ lead, onAccept, onDecline, onDismiss }: Props
         <Text style={styles.badge}>NEW LEAD</Text>
         <Text style={styles.title}>{lead.serviceName}</Text>
         <Text style={styles.meta}>
-          {lead.customerName} · {lead.distanceKm} km · ₹{lead.partnerShare} take-home
+          {lead.customerName} · {lead.distanceKm} km
+          {lead.lineItems && lead.lineItems.length > 0 ? ` · ₹${lead.partnerShare} take-home` : ''}
         </Text>
         <Text style={styles.addr} numberOfLines={3}>
           {lead.address}

@@ -17,6 +17,7 @@ import {
   PartnerEditProfileScreen,
   PartnerLocationEditScreen,
   PartnerProfileScreen,
+  PartnerReferralScreen,
   PartnerRequestsScreen,
   PartnerRequestDetailScreen,
   PartnerServicePricingScreen,
@@ -123,6 +124,7 @@ export function PartnerTabs() {
         <Stack.Screen name="PartnerRequestStatus" component={PartnerRequestStatusScreen} />
         <Stack.Screen name="PartnerServicePricing" component={PartnerServicePricingScreen} />
         <Stack.Screen name="PartnerEditProfile" component={PartnerEditProfileScreen} />
+        <Stack.Screen name="PartnerReferral" component={PartnerReferralScreen} />
         <Stack.Screen name="PartnerLocationEdit" component={PartnerLocationEditScreen} />
         <Stack.Screen name="PartnerHRV" component={PartnerHRVScreen} />
         <Stack.Screen name="PartnerSettings" component={PartnerSettingsScreen} />
