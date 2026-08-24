@@ -9,27 +9,34 @@ type Props = {
   title: string;
   icon: IconName;
   accentColor?: string;
+  pastelColor?: string;
   onPress: () => void;
   selected?: boolean;
 };
 
 const CARD_WIDTH = getGridCardWidth();
 
-function CategoryGridCardComponent({ title, icon, accentColor = colors.primary, onPress, selected }: Props) {
-  const ringBg = `${accentColor}33`;
+function CategoryGridCardComponent({
+  title,
+  icon,
+  accentColor = colors.primary,
+  pastelColor = colors.orangeTint,
+  onPress,
+  selected,
+}: Props) {
   const iconColor = selected ? colors.white : accentColor;
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
-        { width: CARD_WIDTH, backgroundColor: ringBg },
+        { width: CARD_WIDTH, backgroundColor: pastelColor },
         selected && styles.cardSelected,
         pressed && styles.cardPressed,
       ]}
     >
       <View style={[styles.iconWrap, selected && styles.iconWrapSelected]}>
-        <Ionicons name={icon} size={18} color={iconColor} />
+        <Ionicons name={icon} size={19} color={iconColor} />
       </View>
       <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={2}>
         {title}
@@ -43,12 +50,11 @@ export const CategoryGridCard = memo(CategoryGridCardComponent);
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
+    padding: spacing.sm,
     alignItems: 'center',
     marginBottom: spacing.sm,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.07,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
@@ -58,13 +64,13 @@ const styles = StyleSheet.create({
   },
   cardPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 39,
+    height: 39,
+    borderRadius: 20,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   iconWrapSelected: { backgroundColor: colors.primary },
   title: {

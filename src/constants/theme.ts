@@ -48,6 +48,16 @@ export const categoryAccentColors: Record<string, string> = {
   events: '#C62828',
 };
 
+/** Solid pastel card backgrounds for the main category grid — matches the Popular Services
+ * card style (flat tint, no alpha-blend) rather than diluting categoryAccentColors. */
+export const categoryPastelColors: Record<string, string> = {
+  home_services: '#E3F2FD',
+  home_repair: '#FFF9C4',
+  professional_education: '#F3E5F5',
+  life_health: '#E8F5E9',
+  events: '#FCE4EC',
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,

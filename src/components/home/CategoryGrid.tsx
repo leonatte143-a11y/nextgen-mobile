@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { categoryAccentColors, spacing } from '../../constants/theme';
+import { categoryAccentColors, categoryPastelColors, spacing } from '../../constants/theme';
 import type { MainCategory } from '../../data/serviceCatalog';
 import { GRID_COLUMNS, getGridCardWidth, isGridPlaceholder, padGridRows } from '../../utils/gridLayout';
 import { CategoryGridCard } from './CategoryGridCard';
@@ -26,6 +26,7 @@ function CategoryGridComponent({ categories, language, onCategoryPress }: Props)
           title={language === 'te' ? item.titleTe : item.title}
           icon={item.icon}
           accentColor={categoryAccentColors[item.id] ?? categoryAccentColors.home_services}
+          pastelColor={categoryPastelColors[item.id] ?? categoryPastelColors.home_services}
           onPress={() => onCategoryPress(item)}
         />
       );
