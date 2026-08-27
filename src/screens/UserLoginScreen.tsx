@@ -15,6 +15,8 @@ import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { firebaseAuthService } from '../services/firebaseAuthService';
+import type { FirebaseOtpConfirmation } from '../services/firebaseAuthService';
 import { apiService } from '../services/apiService';
 import { BASE_URL } from '../config/api';
 import { SHOW_DEBUG_OTP, logOtpEvent } from '../config/debug';
@@ -27,7 +29,7 @@ type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'UserLo
 const RESEND_SEC = 60;
 
 export function UserLoginScreen({ navigation }: Props) {
-  const { loginUser } = useAuth();
+  const { loginUser, loginUserWithFirebaseIdToken } = useAuth();
   const [phone, setPhone] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpLength, setOtpLength] = useState(6);
@@ -36,6 +38,10 @@ export function UserLoginScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [conn, setConn] = useState<'unknown' | 'ok' | 'fail'>('unknown');
+  // Test-only toggle: verifies via real Firebase Phone Auth SMS instead of the
+  // backend debug-OTP flow. Default flow above is untouched.
+  const [useFirebaseOtp, setUseFirebaseOtp] = useState(false);
+  const firebaseConfirmationRef = useRef<FirebaseOtpConfirmation | null>(null);
 
   useEffect(() => {
     if (otpSent && otpDigits.length >= otpLength) {
@@ -76,6 +82,21 @@ export function UserLoginScreen({ navigation }: Props) {
     setDevOtpHint('');
     setLoading(true);
     try {
+      if (useFirebaseOtp) {
+        logOtpEvent('Requesting Firebase OTP', { phone: phone.replace(/\D/g, '') });
+        const r = await firebaseAuthService.requestOtp(phone.replace(/\D/g, ''));
+        if (!r.ok || !r.confirmation) {
+          logOtpEvent('Firebase OTP request failed', { message: r.message });
+          setErr(r.message || 'Failed to send OTP.');
+        } else {
+          firebaseConfirmationRef.current = r.confirmation;
+          setOtpSent(true);
+          setOtpLength(6);
+          setOtpDigits(Array(6).fill(''));
+          startResendTimer();
+        }
+        return;
+      }
       logOtpEvent('Requesting OTP', { phone: phone.replace(/\D/g, '') });
       const r = await authService.requestOtp(phone.replace(/\D/g, ''));
       if (!r.ok) {
@@ -102,30 +123,52 @@ export function UserLoginScreen({ navigation }: Props) {
     }
   };
 
+  const afterLoginSuccess = async () => {
+    const locOk = await requestLocationPermission();
+    if (locOk) {
+      const coords = await getCurrentCoords();
+      if (coords) {
+        try {
+          await userService.updateProfile({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+        } catch {
+          /* non-blocking */
+        }
+      }
+    }
+    navigation.replace('MainTabs');
+  };
+
   const verify = async () => {
     setErr('');
     setLoading(true);
     try {
       const code = otpDigits.join('').replace(/\D/g, '').slice(0, otpLength);
+      if (useFirebaseOtp) {
+        if (!firebaseConfirmationRef.current) {
+          setErr('Request an OTP first.');
+          return;
+        }
+        const confirmed = await firebaseAuthService.confirmOtp(firebaseConfirmationRef.current, code);
+        if (!confirmed.ok || !confirmed.idToken) {
+          setErr(confirmed.message ?? 'Invalid OTP.');
+          return;
+        }
+        const r = await loginUserWithFirebaseIdToken(confirmed.idToken);
+        if (!r.ok) {
+          setErr(r.message ?? 'Could not verify OTP.');
+          return;
+        }
+        await afterLoginSuccess();
+        return;
+      }
       const r = await loginUser(phone.replace(/\D/g, ''), code);
       if (!r.ok) {
         setErr(r.message ?? 'Could not verify OTP.');
       } else {
-        const locOk = await requestLocationPermission();
-        if (locOk) {
-          const coords = await getCurrentCoords();
-          if (coords) {
-            try {
-              await userService.updateProfile({
-                latitude: coords.latitude,
-                longitude: coords.longitude,
-              });
-            } catch {
-              /* non-blocking */
-            }
-          }
-        }
-        navigation.replace('MainTabs');
+        await afterLoginSuccess();
       }
     } finally {
       setLoading(false);
@@ -152,6 +195,7 @@ export function UserLoginScreen({ navigation }: Props) {
     setOtpDigits([]);
     setDevOtpHint('');
     setErr('');
+    firebaseConfirmationRef.current = null;
   };
 
   return (
@@ -175,6 +219,19 @@ export function UserLoginScreen({ navigation }: Props) {
         onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
         editable={!otpSent}
       />
+      {!otpSent && __DEV__ ? (
+        <Pressable
+          onPress={() => {
+            setUseFirebaseOtp((v) => !v);
+            firebaseConfirmationRef.current = null;
+          }}
+          style={styles.firebaseToggle}
+        >
+          <Text style={styles.firebaseToggleTxt}>
+            {useFirebaseOtp ? '🔥 Using real Firebase SMS — tap to use test OTP' : '🔥 Test with real Firebase SMS instead'}
+          </Text>
+        </Pressable>
+      ) : null}
       {otpSent ? (
         <View style={styles.otpWrap}>
           <Text style={styles.otpLabel}>{`${otpLength}-digit code`}</Text>
@@ -292,6 +349,8 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
   },
   baseUrl: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm },
+  firebaseToggle: { marginBottom: spacing.md },
+  firebaseToggleTxt: { color: colors.primary, fontSize: 12, fontWeight: '600' },
   testConn: { alignSelf: 'flex-start', marginBottom: spacing.md },
   testConnTxt: { color: colors.primary, fontWeight: '700' },
   otpWrap: { marginBottom: spacing.md },

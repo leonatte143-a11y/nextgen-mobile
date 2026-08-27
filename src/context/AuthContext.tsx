@@ -27,6 +27,8 @@ type AuthContextValue = {
   completeLanguageOnboarding: () => Promise<void>;
   loginUser: (phone: string, otp: string) => Promise<{ ok: boolean; message?: string }>;
   loginPartner: (phone: string, otp: string) => Promise<{ ok: boolean; message?: string }>;
+  loginUserWithFirebaseIdToken: (idToken: string) => Promise<{ ok: boolean; message?: string }>;
+  loginPartnerWithFirebaseIdToken: (idToken: string) => Promise<{ ok: boolean; message?: string }>;
   logoutUser: () => Promise<void>;
   logoutPartner: () => Promise<void>;
   refreshProfile: () => Promise<RefreshProfileResult>;
@@ -111,6 +113,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { ok: true };
   }, []);
 
+  /** Firebase phone-auth flow: parallel to loginUser, not yet wired into the default UI. */
+  const loginUserWithFirebaseIdToken = useCallback(async (idToken: string) => {
+    const res = await authService.verifyFirebaseIdToken(idToken);
+    if (!res.ok || !res.token) {
+      logAuth('login_user_firebase_failed', { message: res.message });
+      return { ok: false, message: res.message || 'Verification failed.' };
+    }
+    await AsyncStorage.setItem(KEYS.userToken, res.token);
+    setUserToken(res.token);
+    logAuth('login_user_firebase_token_stored', { userId: res.user?.id });
+    try {
+      const p = await userService.getProfile();
+      setUser(p);
+    } catch {
+      if (res.user) {
+        setUser(res.user);
+      } else {
+        setUser(null);
+      }
+    }
+    return { ok: true };
+  }, []);
+
   const registerUser = useCallback(async (data: UserRegistrationInput) => {
     await authService.registerProfile(data);
   }, []);
@@ -124,6 +149,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(KEYS.partnerToken, res.token);
     setPartnerToken(res.token);
     logAuth('login_partner_token_stored', { partnerId: res.partner?.id });
+    return { ok: true };
+  }, []);
+
+  /** Firebase phone-auth flow: parallel to loginPartner, not yet wired into the default UI. */
+  const loginPartnerWithFirebaseIdToken = useCallback(async (idToken: string) => {
+    const res = await authService.firebasePartnerLogin(idToken);
+    if (!res.ok || !res.token) {
+      logAuth('login_partner_firebase_failed', { message: res.message });
+      return { ok: false, message: res.message || 'Could not sign in as partner.' };
+    }
+    await AsyncStorage.setItem(KEYS.partnerToken, res.token);
+    setPartnerToken(res.token);
+    logAuth('login_partner_firebase_token_stored', { partnerId: res.partner?.id });
     return { ok: true };
   }, []);
 
@@ -168,6 +206,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       completeLanguageOnboarding,
       loginUser,
       loginPartner,
+      loginUserWithFirebaseIdToken,
+      loginPartnerWithFirebaseIdToken,
       logoutUser,
       logoutPartner,
       refreshProfile,
@@ -184,6 +224,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       completeLanguageOnboarding,
       loginUser,
       loginPartner,
+      loginUserWithFirebaseIdToken,
+      loginPartnerWithFirebaseIdToken,
       logoutUser,
       logoutPartner,
       refreshProfile,

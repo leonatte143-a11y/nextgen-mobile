@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "KAIRO",
-    "slug": "nexgen-mobile",
+    "slug": "kairo-mobile",
+    "scheme": "kairo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,10 +27,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "owner": "kairo-expo",
     "extra": {
-      "projectId": "a30926c2-d34c-4ceb-ba72-767edc62b46e",
       "eas": {
-        "projectId": "a30926c2-d34c-4ceb-ba72-767edc62b46e"
+        "projectId": "e0375903-75b8-4a8d-93d6-b5295904abbb"
       }
     }
   }

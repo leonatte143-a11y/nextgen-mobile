@@ -20,7 +20,8 @@ module.exports = ({ config }) => {
   return {
     ...config,
     name: 'KAIRO',
-    slug: 'nexgen-mobile',
+    slug: 'kairo-mobile',
+    scheme: 'kairo',
     version: '1.0.0',
     icon: './assets/icon.png',
     splash: {
@@ -31,6 +32,11 @@ module.exports = ({ config }) => {
     android: {
       ...config.android,
       package: process.env.ANDROID_PACKAGE || 'com.kairo.mobileapp',
+      // EAS Build injects the real file path via the GOOGLE_SERVICES_JSON file
+      // env var (set with `eas env:set`, since the file is gitignored and EAS
+      // only uploads git-tracked files). Falls back to the local file for
+      // `expo prebuild`/local dev.
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#FF8C00'
@@ -38,8 +44,12 @@ module.exports = ({ config }) => {
     },
     extra: {
       ...(config.extra || {}),
-      projectId: 'a30926c2-d34c-4ceb-ba72-767edc62b46e'
     },
-    plugins: [...(config.plugins || []), 'expo-font']
+    plugins: [
+      ...(config.plugins || []),
+      'expo-font',
+      '@react-native-firebase/app',
+      '@react-native-firebase/auth',
+    ]
   };
 };

@@ -40,6 +40,10 @@ yarn-error.*
 .env.production
 .env*.local
 
+# Firebase config (project-specific, not for source control)
+google-services.json
+GoogleService-Info.plist
+
 # typescript
 *.tsbuildinfo
 
@@ -47,3 +51,8 @@ yarn-error.*
 /ios
 /android
 node_modules
+
+# local EAS build downloads (regenerate via `eas build`, don't commit)
+*.apk
+*.aab
+build-output/

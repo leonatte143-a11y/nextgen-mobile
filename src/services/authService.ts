@@ -95,6 +95,64 @@ export const authService = {
     }
   },
 
+  /**
+   * Firebase phone-auth flow: exchanges a Firebase ID token (already verified
+   * client-side via firebaseAuthService) for a KAIRO user session. Parallel
+   * path to verifyOtp — not yet wired into the login screens.
+   */
+  async verifyFirebaseIdToken(idToken: string): Promise<{
+    ok: boolean;
+    token?: string;
+    message: string;
+    user?: User;
+  }> {
+    try {
+      const data = await apiService.post<{
+        ok: boolean;
+        token?: string;
+        message?: string;
+        user?: unknown;
+      }>('/api/v1/auth/firebase/verify', { idToken });
+      const ok = !!data.ok && !!data.token;
+      return {
+        ok,
+        token: data.token,
+        message: data.message ?? (ok ? '' : 'Verification failed.'),
+        user: data.user != null ? coerceUser(data.user) : undefined,
+      };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Firebase verify failed.';
+      return { ok: false, message: msg };
+    }
+  },
+
+  /** Firebase phone-auth flow: partner login variant of verifyFirebaseIdToken. */
+  async firebasePartnerLogin(idToken: string): Promise<{
+    ok: boolean;
+    token?: string;
+    message: string;
+    partner?: PartnerProfile;
+  }> {
+    try {
+      const data = await apiService.post<{
+        ok: boolean;
+        token?: string;
+        message?: string;
+        partner?: PartnerProfile;
+      }>('/api/v1/auth/firebase/partner-login', { idToken });
+      const ok = !!data.ok && !!data.token;
+      return {
+        ok,
+        token: data.token,
+        message: data.message ?? (ok ? '' : 'Could not sign in.'),
+        partner: data.partner,
+      };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Firebase partner login failed.';
+      return { ok: false, message: msg };
+    }
+  },
+
   async logout(): Promise<void> {
     try {
       await apiService.post('/api/v1/auth/logout', {});
