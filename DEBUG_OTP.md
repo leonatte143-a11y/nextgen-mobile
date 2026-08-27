@@ -61,7 +61,7 @@ EXPO_PUBLIC_SHOW_DEBUG_OTP=0
 #### For Staging/Railway
 File: `.env.staging`
 ```
-EXPO_PUBLIC_API_URL=https://nexgen-backend-production.up.railway.app
+EXPO_PUBLIC_API_URL=https://kairo-backend-production-aedf.up.railway.app
 EXPO_PUBLIC_USE_API=1
 EXPO_PUBLIC_SHOW_DEBUG_OTP=1
 ```
@@ -87,7 +87,7 @@ File: `eas.json`
     },
     "preview": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://nexgen-backend-production.up.railway.app",
+        "EXPO_PUBLIC_API_URL": "https://kairo-backend-production-aedf.up.railway.app",
         "EXPO_PUBLIC_SHOW_DEBUG_OTP": "1"
       }
     },

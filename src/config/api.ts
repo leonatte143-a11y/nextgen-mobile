@@ -48,7 +48,7 @@
  * ═══════════════════════════════════════════════════════════════════
  *
  * Create .env.staging or use EAS build:
- * EXPO_PUBLIC_API_URL=https://nexgen-backend-production.up.railway.app
+ * EXPO_PUBLIC_API_URL=https://kairo-backend-production-aedf.up.railway.app
  *
  * To build for staging:
  * npx eas build --platform ios --profile staging
