@@ -25,6 +25,8 @@ export const colors = {
   orangeTint: '#FFF5E6',
   black: '#1A1A1A',
   cardShadow: 'rgba(0,0,0,0.04)',
+  verifiedBlue: '#1E88E5',
+  categoryTagPurple: '#4A148C',
 } as const;
 
 export const darkColors = {

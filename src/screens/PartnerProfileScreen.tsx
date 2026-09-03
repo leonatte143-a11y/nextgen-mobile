@@ -162,6 +162,23 @@ export function PartnerProfileScreen() {
     }
   };
 
+  const removeCategory = (cat: string) => {
+    Alert.alert('Remove category', `Remove "${cat}" from your service categories?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await updateProfile({ categories: profile.categories.filter((c) => c !== cat) });
+          } catch (e) {
+            Alert.alert('Update failed', e instanceof Error ? e.message : 'Could not remove category.');
+          }
+        },
+      },
+    ]);
+  };
+
   const confirmDeleteAccount = () => {
     Alert.alert(
       'Delete account?',
@@ -286,6 +303,19 @@ export function PartnerProfileScreen() {
         <Ionicons name="chevron-forward" size={20} color={colors.grey} />
       </Pressable>
 
+      <Pressable style={styles.menuRow} onPress={() => (navigation as any).navigate('PartnerGallery')}>
+        <Ionicons name="images-outline" size={20} color={colors.primary} />
+        <Text style={styles.menuTxt}>Add photos to the gallery</Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.grey} />
+      </Pressable>
+      {profile.photos && profile.photos.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryPreviewRow}>
+          {profile.photos.map((uri, idx) => (
+            <Image key={`${uri}-${idx}`} source={{ uri }} style={styles.galleryPreviewThumb} />
+          ))}
+        </ScrollView>
+      ) : null}
+
       <View style={styles.categoriesSection}>
         <Text style={styles.categoriesTitle}>Manage Categories</Text>
         <View style={styles.tagsRow}>
@@ -293,6 +323,9 @@ export function PartnerProfileScreen() {
             profile.categories.map((cat) => (
               <View key={cat} style={styles.tag}>
                 <Text style={styles.tagText}>{cat}</Text>
+                <Pressable onPress={() => removeCategory(cat)} hitSlop={6}>
+                  <Ionicons name="close-circle" size={16} color={colors.grey} />
+                </Pressable>
               </View>
             ))
           ) : (
@@ -413,8 +446,18 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 14, color: colors.grey, fontWeight: '700', marginBottom: spacing.sm },
   sectionText: { fontSize: 15, color: colors.charcoal, marginBottom: spacing.xs },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  tag: { backgroundColor: colors.primary, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.sm },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+  },
   tagText: { color: colors.white, fontWeight: '700' },
+  galleryPreviewRow: { marginTop: spacing.xs, marginBottom: spacing.sm },
+  galleryPreviewThumb: { width: 56, height: 56, borderRadius: radius.sm, marginRight: spacing.sm, backgroundColor: colors.greyLight },
   bioInput: { borderRadius: radius.md, backgroundColor: colors.greyLight, minHeight: 64, padding: spacing.md, textAlignVertical: 'top', color: colors.charcoal },
   bioInputReadonly: { opacity: 0.85 },
   categoriesSection: {

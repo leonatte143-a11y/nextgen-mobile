@@ -107,6 +107,7 @@ export function MainTabs() {
         options={{
           title: t(language, 'store'),
           tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} />,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tab.Screen

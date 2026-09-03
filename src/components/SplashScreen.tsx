@@ -1,9 +1,9 @@
 ﻿import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors, spacing } from '../constants/theme';
 
-const SPLASH_ORANGE = colors.primary;
+const SPLASH_BG = '#FFFFFF';
 
 type Props = {
   onAnimationComplete?: () => void;
@@ -54,7 +54,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <View style={styles.center}>
         <Animated.View
           style={[
@@ -65,7 +65,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
             },
           ]}
         >
-          <Text style={styles.logoLetter}>K</Text>
+          <Image source={require('../../assets/kairo_icon.jpeg')} style={styles.logoImage} resizeMode="contain" />
         </Animated.View>
         <Animated.View
           style={{
@@ -85,7 +85,7 @@ export function SplashScreenView({ onAnimationComplete }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: SPLASH_ORANGE,
+    backgroundColor: SPLASH_BG,
   },
   center: {
     flex: 1,
@@ -98,17 +98,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.lg,
   },
-  logoLetter: {
-    fontSize: 112,
-    fontWeight: '900',
-    color: colors.white,
-    letterSpacing: -4,
-    includeFontPadding: false,
+  logoImage: {
+    width: 160,
+    height: 160,
   },
   brand: {
     fontSize: 26,
     fontWeight: '800',
-    color: colors.white,
+    color: colors.navy,
     letterSpacing: 4,
     textAlign: 'center',
   },
@@ -116,7 +113,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     fontSize: 14,
     fontWeight: '500',
-    color: 'rgba(255,255,255,0.92)',
+    color: colors.grey,
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 280,

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, spacing } from '../constants/theme';
+import { KairoLogo } from '../components/KairoLogo';
 import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
@@ -204,9 +205,7 @@ export function UserLoginScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled">
-      <View style={styles.logo}>
-        <Text style={styles.logoN}>K</Text>
-      </View>
+      <KairoLogo size={64} style={styles.logo} />
       <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Login</Text>
       <Text style={styles.sub}>Enter your mobile number. We will send a one-time code.</Text>

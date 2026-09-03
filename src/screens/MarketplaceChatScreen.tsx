@@ -30,7 +30,7 @@ export function MarketplaceChatScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
-  const { listingId, otherPartyName } = route.params;
+  const { listingId, conversationId, otherPartyName } = route.params;
 
   const [conversation, setConversation] = useState<MarketplaceConversation | null>(null);
   const [messages, setMessages] = useState<MarketplaceMessage[]>([]);
@@ -54,10 +54,9 @@ export function MarketplaceChatScreen() {
     (async () => {
       setLoading(true);
       try {
-        const { conversation: conv, messages: msgs } = await marketplaceService.startOrGetConversation(
-          ROLE,
-          listingId,
-        );
+        const { conversation: conv, messages: msgs } = conversationId
+          ? await marketplaceService.getConversation(ROLE, conversationId)
+          : await marketplaceService.startOrGetConversation(ROLE, listingId!);
         if (!active) return;
         setConversation(conv);
         setMessages(msgs);
@@ -70,7 +69,7 @@ export function MarketplaceChatScreen() {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listingId]);
+  }, [listingId, conversationId]);
 
   useEffect(() => {
     if (messages.length) listRef.current?.scrollToEnd({ animated: true });

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -20,6 +21,7 @@ import { KairoTextInput } from '../components/KairoTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { getDraft, saveDraft } from '../lib/adDrafts';
+import { bannerService } from '../services/bannerService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -30,6 +32,7 @@ const RATIO_TOLERANCE = 0.08;
 // Mirrors backend/src/controllers/bannerController.js MAX_IMAGE_DATA_URL_LENGTH — checked
 // client-side too so an oversized clip is rejected before the payment screen, not after.
 const MAX_MEDIA_DATA_URL_LENGTH = 8 * 1024 * 1024;
+const MAX_VIDEO_DURATION_SECONDS = 30;
 
 export function AdvertiseBusinessScreen() {
   const insets = useSafeAreaInsets();
@@ -44,6 +47,14 @@ export function AdvertiseBusinessScreen() {
   const [bannerType, setBannerType] = useState<'image' | 'video' | null>(null);
   const [draftId, setDraftId] = useState<string | undefined>(route.params?.draftId);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const editAdId = route.params?.editAdId;
+  const editAdScope = route.params?.editAdScope ?? 'user';
+  const videoPlayer = useVideoPlayer(bannerType === 'video' ? bannerUri ?? '' : '', (player) => {
+    player.loop = true;
+    player.muted = true;
+    player.play();
+  });
 
   useEffect(() => {
     (async () => {
@@ -63,7 +74,7 @@ export function AdvertiseBusinessScreen() {
   const pickBanner = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo library access to upload your cover banner.');
+      Alert.alert('Permission needed', 'Allow photo library access to upload your poster or video.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -86,6 +97,14 @@ export function AdvertiseBusinessScreen() {
         );
         return;
       }
+    }
+
+    if (isVideo && asset.duration && asset.duration / 1000 > MAX_VIDEO_DURATION_SECONDS) {
+      Alert.alert(
+        'Video too long',
+        `Your video is longer than the ${MAX_VIDEO_DURATION_SECONDS}-second limit. Please choose a shorter clip.`,
+      );
+      return;
     }
 
     const dataUrl = asset.base64 ? `data:${asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg')};base64,${asset.base64}` : null;
@@ -129,7 +148,7 @@ export function AdvertiseBusinessScreen() {
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!businessName.trim()) {
       Alert.alert('Required', 'Please enter your business name.');
       return;
@@ -139,9 +158,32 @@ export function AdvertiseBusinessScreen() {
       return;
     }
     if (!bannerUri) {
-      Alert.alert('Required', 'Please upload a cover banner (image or video).');
+      Alert.alert('Required', 'Please upload a poster or video.');
       return;
     }
+
+    if (editAdId) {
+      setSavingEdit(true);
+      try {
+        await bannerService.updateAd(
+          editAdId,
+          {
+            businessName: businessName.trim(),
+            businessAddress: businessAddress.trim(),
+            imageUrl: bannerBase64 || bannerUri,
+            mediaType: bannerType || 'image',
+          },
+          editAdScope,
+        );
+        Alert.alert('Ad updated', 'Your changes are live.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      } catch (e) {
+        Alert.alert('Update failed', e instanceof Error ? e.message : 'Please try again later.');
+      } finally {
+        setSavingEdit(false);
+      }
+      return;
+    }
+
     navigation.navigate('AdvertisePlan', {
       businessName: businessName.trim(),
       businessAddress: businessAddress.trim(),
@@ -176,16 +218,18 @@ export function AdvertiseBusinessScreen() {
           multiline
         />
 
-        <Text style={styles.label}>Cover Banner</Text>
+        <Text style={styles.label}>Poster / Video</Text>
         <Text style={styles.hint}>Upload an image or short video for your ad banner slot.</Text>
         <Text style={styles.ratioHint}>Required aspect ratio: 16:9</Text>
         <Pressable style={styles.bannerPicker} onPress={pickBanner}>
           {bannerUri ? (
             bannerType === 'video' ? (
-              <View style={styles.bannerPlaceholder}>
-                <Ionicons name="videocam" size={28} color={colors.primary} />
-                <Text style={styles.bannerPlaceholderTxt}>Video selected</Text>
-              </View>
+              <VideoView
+                style={styles.bannerPreview}
+                player={videoPlayer}
+                contentFit="cover"
+                nativeControls={false}
+              />
             ) : (
               <Image source={{ uri: bannerUri }} style={styles.bannerPreview} resizeMode="cover" />
             )
@@ -211,7 +255,12 @@ export function AdvertiseBusinessScreen() {
           placeholder="https://instagram.com/yourbusiness"
         />
 
-        <PrimaryButton title="Submit" onPress={submit} style={styles.submitBtn} />
+        <PrimaryButton
+          title={editAdId ? 'Save Changes' : 'Submit'}
+          onPress={submit}
+          loading={savingEdit}
+          style={styles.submitBtn}
+        />
         <Pressable onPress={saveAsDraft} disabled={savingDraft} style={styles.draftBtn}>
           <Ionicons name="save-outline" size={18} color={colors.primary} />
           <Text style={styles.draftBtnTxt}>{savingDraft ? 'Saving…' : 'Save as Draft'}</Text>
@@ -245,7 +294,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderStyle: 'dashed',
   },
-  bannerPreview: { width: '100%', height: 160 },
+  bannerPreview: { width: '100%', aspectRatio: 16 / 9 },
   bannerPlaceholder: {
     height: 140,
     alignItems: 'center',

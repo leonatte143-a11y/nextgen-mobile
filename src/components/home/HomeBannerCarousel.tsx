@@ -4,7 +4,6 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -13,6 +12,7 @@ import {
   View,
   type ListRenderItem,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { colors, radius, spacing } from '../../constants/theme';
 import { handleBannerPress } from '../../navigation/bannerActions';
 import { bannerService, parseCityFromLocation } from '../../services/bannerService';
@@ -23,7 +23,6 @@ import { BannerSkeleton } from './BannerSkeleton';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BANNER_WIDTH = SCREEN_WIDTH - spacing.md * 2;
-const BANNER_HEIGHT = 68;
 const AUTO_MS = 4000;
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -39,6 +38,7 @@ function HomeBannerCarouselComponent({ locationLabel }: Props) {
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const indexRef = useRef(0);
+  const directionRef = useRef<1 | -1>(1);
   const userDragging = useRef(false);
 
   const city = parseCityFromLocation(locationLabel);
@@ -51,6 +51,7 @@ function HomeBannerCarouselComponent({ locationLabel }: Props) {
     setLoading(false);
     setIndex(0);
     indexRef.current = 0;
+    directionRef.current = 1;
   }, [city]);
 
   useEffect(() => {
@@ -61,7 +62,15 @@ function HomeBannerCarouselComponent({ locationLabel }: Props) {
     if (banners.length <= 1) return undefined;
     const timer = setInterval(() => {
       if (userDragging.current) return;
-      const next = (indexRef.current + 1) % banners.length;
+      const count = banners.length;
+      let next = indexRef.current + directionRef.current;
+      if (next >= count) {
+        directionRef.current = -1;
+        next = count - 2 >= 0 ? count - 2 : 0;
+      } else if (next < 0) {
+        directionRef.current = 1;
+        next = count > 1 ? 1 : 0;
+      }
       listRef.current?.scrollToIndex({ index: next, animated: true });
       indexRef.current = next;
       setIndex(next);
@@ -88,7 +97,9 @@ function HomeBannerCarouselComponent({ locationLabel }: Props) {
           <Image
             source={{ uri: item.imageUrl }}
             style={styles.image}
-            resizeMode="cover"
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={150}
           />
         ) : (
           <View style={styles.imageFallback} />
@@ -167,7 +178,7 @@ const styles = StyleSheet.create({
   },
   slide: {
     width: BANNER_WIDTH,
-    height: BANNER_HEIGHT,
+    aspectRatio: 16 / 9,
     borderRadius: radius.lg,
     overflow: 'hidden',
     backgroundColor: colors.primary,

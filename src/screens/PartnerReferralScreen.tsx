@@ -48,18 +48,22 @@ export function PartnerReferralScreen() {
     <View style={styles.root}>
       <View style={[styles.top, { paddingTop: insets.top + spacing.sm }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
         <Text style={styles.title}>Referral Earnings</Text>
         <View style={{ width: 24 }} />
       </View>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.xl }]}>
-        <View style={styles.section}>
-          {referralsLoading ? (
-            <Text style={styles.sectionText}>Loading referral earnings…</Text>
-          ) : referrals ? (
-            <>
-              <Text style={styles.referralCode}>{referrals.referralCode}</Text>
+        {referralsLoading ? (
+          <Text style={styles.loadingTxt}>Loading referral earnings…</Text>
+        ) : referrals ? (
+          <>
+            <View style={styles.heroCard}>
+              <Ionicons name="gift" size={36} color={colors.white} />
+              <Text style={styles.heroHeadline}>Get 150 points for each person you refer</Text>
+              <View style={styles.codeBox}>
+                <Text style={styles.referralCode}>{referrals.referralCode}</Text>
+              </View>
               <View style={styles.referralActions}>
                 <Pressable
                   style={styles.referralActionBtn}
@@ -78,12 +82,29 @@ export function PartnerReferralScreen() {
                   <Text style={styles.referralActionTxt}>Share</Text>
                 </Pressable>
               </View>
-              <Text style={styles.sectionText}>Total earned: ₹{referrals.totalEarned}</Text>
-            </>
-          ) : (
-            <Text style={styles.sectionText}>Could not load referral earnings.</Text>
-          )}
-        </View>
+            </View>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Ionicons name="star" size={22} color={colors.primary} />
+                <Text style={styles.statValue}>{referrals.rewardPoints}</Text>
+                <Text style={styles.statLabel}>Points earned</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="wallet" size={22} color={colors.primary} />
+                <Text style={styles.statValue}>₹{referrals.totalEarned}</Text>
+                <Text style={styles.statLabel}>Cash earned</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="people" size={22} color={colors.primary} />
+                <Text style={styles.statValue}>{referrals.referralCount}</Text>
+                <Text style={styles.statLabel}>Referrals</Text>
+              </View>
+            </View>
+          </>
+        ) : (
+          <Text style={styles.loadingTxt}>Could not load referral earnings.</Text>
+        )}
       </ScrollView>
       {showCopiedToast ? (
         <View style={styles.copiedToast} pointerEvents="none">
@@ -101,16 +122,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: spacing.md,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.primary,
   },
-  title: { fontSize: 18, fontWeight: '800', color: colors.charcoal },
+  title: { fontSize: 18, fontWeight: '800', color: colors.white },
   content: { padding: spacing.lg },
-  section: { backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.lg },
-  sectionText: { fontSize: 15, color: colors.charcoal, marginBottom: spacing.xs },
-  referralCode: { fontSize: 22, fontWeight: '900', color: colors.charcoal, letterSpacing: 1 },
-  referralActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.xs },
+  loadingTxt: { fontSize: 15, color: colors.charcoal, textAlign: 'center', marginTop: spacing.xl },
+  heroCard: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    gap: spacing.sm,
+  },
+  heroHeadline: { color: colors.white, fontWeight: '800', fontSize: 16, textAlign: 'center' },
+  codeBox: {
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+  },
+  referralCode: { fontSize: 22, fontWeight: '900', color: colors.primary, letterSpacing: 2 },
+  referralActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   referralActionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,11 +151,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.orangeTint,
+    backgroundColor: colors.white,
   },
   referralActionTxt: { color: colors.primary, fontWeight: '700' },
+  statsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
+    gap: 4,
+  },
+  statValue: { fontSize: 18, fontWeight: '900', color: colors.charcoal },
+  statLabel: { fontSize: 11, color: colors.grey, fontWeight: '600' },
   copiedToast: {
     position: 'absolute',
     bottom: spacing.xl,

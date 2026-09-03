@@ -13,15 +13,28 @@ export function useSequentialAdIndexState(
   durationMs = 9_000,
 ): [number, Dispatch<SetStateAction<number>>] {
   const [idx, setIdx] = useState(0);
+  // Bounces 0->count-1->0 instead of wrapping abruptly back to 0.
+  const directionRef = useRef<1 | -1>(1);
 
   useEffect(() => {
     setIdx(0);
+    directionRef.current = 1;
   }, [count]);
 
   useEffect(() => {
     if (count <= 1) return undefined;
     const timer = setInterval(() => {
-      setIdx((i) => (i + 1) % count);
+      setIdx((i) => {
+        let next = i + directionRef.current;
+        if (next >= count) {
+          directionRef.current = -1;
+          next = count - 2 >= 0 ? count - 2 : 0;
+        } else if (next < 0) {
+          directionRef.current = 1;
+          next = count > 1 ? 1 : 0;
+        }
+        return next;
+      });
     }, durationMs);
     return () => clearInterval(timer);
   }, [count, durationMs]);

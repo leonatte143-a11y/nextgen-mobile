@@ -77,6 +77,9 @@ export const MAIN_CATEGORIES: MainCategory[] = [
       { id: 'hr_wm', title: 'Washing Machine', subtitle: 'Repair', icon: 'shirt-outline', searchQuery: 'washing machine' },
       { id: 'hr_fridge', title: 'Fridge Repair', subtitle: 'Refrigerator', icon: 'cube-outline', searchQuery: 'fridge refrigerator' },
       { id: 'hr_tv', title: 'TV Repair', subtitle: 'Wall mount', icon: 'tv-outline', searchQuery: 'television tv' },
+      { id: 'hr_dth', title: 'DTH Technician', subtitle: 'Dish / Set-top box', icon: 'radio-outline', searchQuery: 'dth technician' },
+      { id: 'hr_solar', title: 'Solar Installation', subtitle: 'Panel install & service', icon: 'sunny-outline', searchQuery: 'solar installation' },
+      { id: 'hr_cctv', title: 'CCTV Technician', subtitle: 'Install & repair', icon: 'videocam-outline', searchQuery: 'cctv technician' },
     ],
   },
   {
@@ -87,13 +90,14 @@ export const MAIN_CATEGORIES: MainCategory[] = [
     icon: 'school-outline',
     subServices: [
       { id: 'pe_travels', title: 'Car Travels', subtitle: 'Outstation trips', icon: 'car-sport-outline', searchQuery: 'car travels' },
-      { id: 'pe_driver', title: 'Drivers', subtitle: 'Hourly/Daily', icon: 'car-outline', searchQuery: 'driver' },
+      { id: 'pe_driver', title: 'Drivers', subtitle: 'Part-Time / Full-Time', icon: 'car-outline', searchQuery: 'driver' },
       { id: 'pe_auto', title: 'Auto', subtitle: 'City rides', icon: 'navigate-outline', searchQuery: 'auto driver' },
       { id: 'pe_carmech', title: 'Car Mechanic', subtitle: 'Repair & service', icon: 'build-outline', searchQuery: 'car mechanic' },
       { id: 'pe_bikemech', title: 'Bike Mechanic', subtitle: 'Repair & service', icon: 'bicycle-outline', searchQuery: 'bike mechanic' },
       { id: 'pe_eng', title: 'Engineers', subtitle: 'Technical experts', icon: 'construct-outline', searchQuery: 'engineer' },
       { id: 'pe_super', title: 'Supervisors', subtitle: 'Site management', icon: 'clipboard-outline', searchQuery: 'supervisor' },
-      { id: 'pe_teacher', title: 'Teachers', subtitle: 'Tutors/Home Study', icon: 'book-outline', searchQuery: 'teacher tutor' },
+      { id: 'pe_teacher', title: 'Teachers', subtitle: 'Home Tuition / Online Class', icon: 'book-outline', searchQuery: 'teacher tutor' },
+      { id: 'pe_influencer', title: 'Influencers', subtitle: 'Social media promotion', icon: 'megaphone-outline', searchQuery: 'influencer' },
     ],
   },
   {
@@ -105,6 +109,7 @@ export const MAIN_CATEGORIES: MainCategory[] = [
     subServices: [
       { id: 'lh_rmp', title: 'RMP Doctors', subtitle: 'Quick Consult', icon: 'medical-outline', searchQuery: 'rmp doctor' },
       { id: 'lh_diag', title: 'Lab Technician', subtitle: 'Blood Test/Home', icon: 'flask-outline', searchQuery: 'lab technician blood test' },
+      { id: 'lh_caretaker', title: 'Care Takers', subtitle: 'Elderly/patient care', icon: 'heart-outline', searchQuery: 'care taker' },
     ],
   },
   {

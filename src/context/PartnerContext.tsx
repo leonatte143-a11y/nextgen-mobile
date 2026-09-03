@@ -38,6 +38,9 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
   const requestsInitializedRef = useRef(false);
   const hasLoadedOnceRef = useRef(false);
   const isOnlineRef = useRef(false);
+  // Monotonic counter so an in-flight background poll response that resolves after a more
+  // recent profile save (or another poll) doesn't silently overwrite the newer profile data.
+  const profileRequestSeqRef = useRef(0);
 
   const dismissIncomingLead = useCallback(() => setIncomingLead(null), []);
 
@@ -45,13 +48,14 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
     if (!partnerToken) return;
     const silent = opts?.background || hasLoadedOnceRef.current;
     if (!silent) setIsLoading(true);
+    const seq = ++profileRequestSeqRef.current;
     try {
       const [profileResult, requestsResult, earningsResult] = await Promise.allSettled([
         partnerService.getProfile(),
         partnerService.getRequests(),
         partnerService.getEarnings(),
       ]);
-      if (profileResult.status === 'fulfilled') {
+      if (profileResult.status === 'fulfilled' && seq === profileRequestSeqRef.current) {
         setProfile(profileResult.value);
         isOnlineRef.current = profileResult.value.isOnline;
       }
@@ -212,6 +216,9 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = useCallback(async (payload: Partial<PartnerProfile>) => {
     const updated = await partnerService.updateProfile(payload);
+    // Bump the sequence so any background poll already in flight (started before this save)
+    // gets discarded by refreshPartner's guard instead of overwriting this fresher profile.
+    profileRequestSeqRef.current += 1;
     setProfile(updated);
   }, []);
 

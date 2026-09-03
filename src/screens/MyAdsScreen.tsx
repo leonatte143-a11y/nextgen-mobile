@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BackHandler, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
@@ -84,6 +84,38 @@ export function MyAdsScreen() {
         bannerType: item.mediaType as 'image' | 'video',
       },
     });
+  };
+
+  const editAd = (item: MyAdRequest) => {
+    navigation.navigate('AdvertiseBusiness', {
+      editAdId: item.id,
+      editAdScope: item.partnerId ? 'partner' : 'user',
+      prefill: {
+        businessName: item.title,
+        businessAddress: item.subtitle ?? undefined,
+        bannerUri: item.imageUrl,
+        bannerBase64: item.imageUrl,
+        bannerType: item.mediaType as 'image' | 'video',
+      },
+    });
+  };
+
+  const deleteAd = (item: MyAdRequest) => {
+    Alert.alert('Delete ad', 'Are you sure you want to delete this ad? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await bannerService.deleteAd(item.id, item.partnerId ? 'partner' : 'user');
+            setAds((prev) => prev.filter((a) => a.id !== item.id));
+          } catch (e) {
+            Alert.alert('Delete failed', e instanceof Error ? e.message : 'Please try again later.');
+          }
+        },
+      },
+    ]);
   };
 
   const openDraft = (draft: AdDraft) => {
@@ -178,12 +210,22 @@ export function MyAdsScreen() {
                     {item.reviewNote || (item.status === 'rejected' ? 'Rejected — contact support for details.' : 'Under review by KAIRO.')}
                   </Text>
                 ) : null}
-                {tab === 'live' ? (
-                  <Pressable style={styles.renewBtn} onPress={() => renew(item)}>
-                    <Ionicons name="refresh-outline" size={14} color={colors.white} />
-                    <Text style={styles.renewTxt}>Renew</Text>
+                <View style={styles.actionsRow}>
+                  {tab === 'live' ? (
+                    <Pressable style={styles.renewBtn} onPress={() => renew(item)}>
+                      <Ionicons name="refresh-outline" size={14} color={colors.white} />
+                      <Text style={styles.renewTxt}>Renew</Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable style={styles.editBtn} onPress={() => editAd(item)}>
+                    <Ionicons name="create-outline" size={14} color={colors.primary} />
+                    <Text style={styles.editTxt}>Edit</Text>
                   </Pressable>
-                ) : null}
+                  <Pressable style={styles.deleteAdBtn} onPress={() => deleteAd(item)}>
+                    <Ionicons name="trash-outline" size={14} color={colors.error} />
+                    <Text style={styles.deleteAdTxt}>Delete</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           )}
@@ -249,4 +291,29 @@ const styles = StyleSheet.create({
   },
   renewTxt: { color: colors.white, fontWeight: '700', fontSize: 12 },
   deleteBtn: { padding: spacing.md },
+  actionsRow: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xs, flexWrap: 'wrap' },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  editTxt: { color: colors.primary, fontWeight: '700', fontSize: 12 },
+  deleteAdBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: colors.error,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  deleteAdTxt: { color: colors.error, fontWeight: '700', fontSize: 12 },
 });

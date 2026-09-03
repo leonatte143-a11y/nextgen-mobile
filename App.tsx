@@ -9,6 +9,7 @@ import { DevDebugPanel } from './src/components/DevDebugPanel';
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
+import { MarketplaceFavoritesProvider } from './src/context/MarketplaceFavoritesContext';
 import { PartnerProvider } from './src/context/PartnerContext';
 import { onNavigationStateChange } from './src/navigation/navigationDev';
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -46,7 +47,9 @@ export default function App() {
         <AuthProvider>
           <PartnerProvider>
             <FavoritesProvider>
-              <AppShell />
+              <MarketplaceFavoritesProvider>
+                <AppShell />
+              </MarketplaceFavoritesProvider>
             </FavoritesProvider>
           </PartnerProvider>
         </AuthProvider>

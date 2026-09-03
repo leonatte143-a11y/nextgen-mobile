@@ -3,7 +3,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Image,
   LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -13,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { colors, radius, spacing } from '../../constants/theme';
 import {
   sortBannersByQueue,
@@ -130,7 +130,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
                 onPress={() => handleBannerPress(banner, navigation)}
               >
                 {mediaUrl && banner.mediaType !== 'video' ? (
-                  <Image source={{ uri: mediaUrl }} style={styles.image} resizeMode="cover" />
+                  <Image source={{ uri: mediaUrl }} style={styles.image} contentFit="cover" cachePolicy="memory-disk" transition={150} />
                 ) : (
                   <View style={styles.imageFallback} />
                 )}
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   wrap: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.xs,
-    height: AD_HEIGHT,
+    aspectRatio: 16 / 9,
     borderRadius: radius.lg,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   card: {
-    height: AD_HEIGHT,
+    aspectRatio: 16 / 9,
     backgroundColor: colors.navy,
   },
   pressed: { opacity: 0.92 },

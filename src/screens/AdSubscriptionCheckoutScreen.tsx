@@ -98,11 +98,16 @@ export function AdSubscriptionCheckoutScreen() {
         </View>
 
         <View style={styles.totalCard}>
+          <View style={styles.offerBadge}>
+            <Text style={styles.offerBadgeTxt}>100% OFF</Text>
+          </View>
           <Text style={styles.totalLabel}>Total amount</Text>
-          <Text style={styles.totalAmount}>₹{params.totalAmount.toLocaleString('en-IN')}</Text>
+          <Text style={styles.strikeAmount}>₹{params.totalAmount.toLocaleString('en-IN')}</Text>
+          <Text style={styles.totalAmount}>₹0</Text>
+          <Text style={styles.offerHint}>Free for a limited time while we finalize subscription pricing.</Text>
         </View>
 
-        <PrimaryButton title="Continue" onPress={onContinue} loading={submitting} />
+        <PrimaryButton title="Activate for Free" onPress={onContinue} loading={submitting} />
       </ScrollView>
     </View>
   );
@@ -145,4 +150,20 @@ const styles = StyleSheet.create({
   },
   totalLabel: { color: colors.grey, fontWeight: '600' },
   totalAmount: { fontSize: 30, fontWeight: '900', color: colors.primary, marginTop: 4 },
+  offerBadge: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    marginBottom: spacing.sm,
+  },
+  offerBadgeTxt: { color: colors.white, fontWeight: '800', fontSize: 12 },
+  strikeAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.grey,
+    textDecorationLine: 'line-through',
+    marginTop: 2,
+  },
+  offerHint: { color: colors.grey, fontSize: 12, marginTop: spacing.sm, textAlign: 'center' },
 });

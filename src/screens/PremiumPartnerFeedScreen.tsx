@@ -31,15 +31,18 @@ export function PremiumPartnerFeedScreen() {
         const coords = await getCoordsIfPermitted();
         const matches = await catalogService.searchServices(route.params.searchQuery);
         const partnerLists = await Promise.all(
-          matches.slice(0, 3).map((m) => catalogService.getServicePartners(m.id, coords)),
+          matches.slice(0, 3).map(async (m) => ({
+            serviceId: m.id,
+            list: await catalogService.getServicePartners(m.id, coords),
+          })),
         );
         const seen = new Set<string>();
         const merged: PartnerSummary[] = [];
-        for (const list of partnerLists) {
+        for (const { serviceId, list } of partnerLists) {
           for (const p of list ?? []) {
             if (seen.has(p.id)) continue;
             seen.add(p.id);
-            merged.push(p);
+            merged.push({ ...p, serviceId });
           }
         }
         setPartners(merged);
@@ -70,7 +73,17 @@ export function PremiumPartnerFeedScreen() {
         />
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
-          <PremiumPartnerFeed partners={partners} />
+          <PremiumPartnerFeed
+            partners={partners}
+            categoryTag={route.params.title}
+            onViewProfile={(partner) => {
+              if (!partner.serviceId) return;
+              navigation.navigate('ServiceDetail', {
+                serviceId: partner.serviceId,
+                selectedPartnerId: partner.id,
+              });
+            }}
+          />
         </ScrollView>
       )}
     </View>

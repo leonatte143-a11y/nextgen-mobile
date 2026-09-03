@@ -2,6 +2,7 @@ import { apiService } from './apiService';
 import type {
   MarketplaceCategory,
   MarketplaceConversation,
+  MarketplaceConversationSummary,
   MarketplaceListing,
   MarketplaceMessage,
   PostListingPayload,
@@ -47,6 +48,17 @@ export const marketplaceService = {
 
   reportListing(role: Role, id: string, reason: string): Promise<{ ok: boolean }> {
     return apiService.post(`/api/v1/marketplace/listings/${id}/report`, { reason }, role);
+  },
+
+  listMyConversations(role: Role): Promise<MarketplaceConversationSummary[]> {
+    return apiService.get('/api/v1/marketplace/chat', role);
+  },
+
+  getConversation(
+    role: Role,
+    conversationId: string,
+  ): Promise<{ conversation: MarketplaceConversation; messages: MarketplaceMessage[] }> {
+    return apiService.get(`/api/v1/marketplace/chat/${conversationId}`, role);
   },
 
   startOrGetConversation(

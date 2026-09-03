@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useMemo, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -43,16 +44,18 @@ export function CategoryServicesScreen() {
     try {
       const results = await catalogService.searchServices(item.searchQuery);
       const inBucket = results.filter((s) => s.bucketId === category.bucketId);
-      const match = inBucket[0] ?? results[0];
+      let match = inBucket[0];
+      if (!match) {
+        // Same fallback ServiceListScreen uses internally — resolve directly against the
+        // bucket + sub-icon search term instead of routing through an intermediate list page.
+        const byBucket = await catalogService.getServicesByBucket(category.bucketId, item.searchQuery);
+        match = byBucket[0];
+      }
       if (match) {
-        navigation.navigate('ServiceProviders', { serviceId: match.id });
+        navigation.navigate('ServiceProviders', { serviceId: match.id, subIconQuery: item.searchQuery });
         return;
       }
-      navigation.navigate('ServiceList', {
-        bucketId: category.bucketId,
-        title: item.title,
-        searchQuery: item.searchQuery,
-      });
+      Alert.alert('No partners available', `No partners are currently available for ${item.title} in your location.`);
     } finally {
       setNavigating(false);
     }

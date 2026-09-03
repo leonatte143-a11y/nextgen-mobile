@@ -15,11 +15,14 @@ import { LiveBookingScreen } from '../screens/LiveBookingScreen';
 import { PostListingScreen } from '../screens/PostListingScreen';
 import { ListingDetailScreen } from '../screens/ListingDetailScreen';
 import { MarketplaceChatScreen } from '../screens/MarketplaceChatScreen';
+import { MarketplaceChatsScreen } from '../screens/MarketplaceChatsScreen';
+import { MyMarketplaceListingsScreen } from '../screens/MyMarketplaceListingsScreen';
 import { MyAdsScreen } from '../screens/MyAdsScreen';
 import { MyFavoritesScreen } from '../screens/MyFavoritesScreen';
 import { ConversationsScreen } from '../screens/ConversationsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { PartnerHomeScreen } from '../screens/PartnerHomeScreen';
+import { PartnerPendingApprovalScreen } from '../screens/PartnerPendingApprovalScreen';
 import { PartnerLoginScreen } from '../screens/PartnerLoginScreen';
 import { PartnerRegisterScreen } from '../screens/PartnerRegisterScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
@@ -64,6 +67,7 @@ export function RootNavigator() {
       <Stack.Screen name="PartnerLogin" component={PartnerLoginScreen} />
       <Stack.Screen name="PartnerRegister" component={PartnerRegisterScreen} />
       <Stack.Screen name="PartnerHome" component={PartnerHomeScreen} />
+      <Stack.Screen name="PartnerPendingApproval" component={PartnerPendingApprovalScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="AllServices" component={AllServicesScreen} />
       <Stack.Screen name="CategoryServices" component={CategoryServicesScreen} />
@@ -94,6 +98,8 @@ export function RootNavigator() {
       <Stack.Screen name="PostListing" component={PostListingScreen} />
       <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="MarketplaceChat" component={MarketplaceChatScreen} />
+      <Stack.Screen name="MarketplaceChats" component={MarketplaceChatsScreen} />
+      <Stack.Screen name="MyMarketplaceListings" component={MyMarketplaceListingsScreen} />
       <Stack.Screen name="AdvertiseBusiness" component={AdvertiseBusinessScreen} />
       <Stack.Screen name="AdvertisePlan" component={AdvertisePlanScreen} />
       <Stack.Screen name="AdSubscriptionCheckout" component={AdSubscriptionCheckoutScreen} />
