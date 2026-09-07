@@ -4,7 +4,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubCategoryGrid } from '../components/home/SubCategoryGrid';
+import { EmptyState } from '../components/EmptyState';
 import { colors, spacing } from '../constants/theme';
 import { getMainCategory, type SubServiceItem } from '../data/serviceCatalog';
 import { catalogService } from '../services/catalogService';
@@ -28,6 +28,7 @@ export function CategoryServicesScreen() {
   const route = useRoute<R>();
   const insets = useSafeAreaInsets();
   const [navigating, setNavigating] = useState(false);
+  const [noPartnersFor, setNoPartnersFor] = useState<string | null>(null);
 
   const category = getMainCategory(route.params.categoryId);
 
@@ -41,6 +42,7 @@ export function CategoryServicesScreen() {
   const onSubPress = async (item: SubServiceItem) => {
     if (!category || navigating) return;
     setNavigating(true);
+    setNoPartnersFor(null);
     try {
       const results = await catalogService.searchServices(item.searchQuery);
       const inBucket = results.filter((s) => s.bucketId === category.bucketId);
@@ -55,7 +57,7 @@ export function CategoryServicesScreen() {
         navigation.navigate('ServiceProviders', { serviceId: match.id, subIconQuery: item.searchQuery });
         return;
       }
-      Alert.alert('No partners available', `No partners are currently available for ${item.title} in your location.`);
+      setNoPartnersFor(item.title);
     } finally {
       setNavigating(false);
     }
@@ -83,7 +85,15 @@ export function CategoryServicesScreen() {
       </View>
 
       {navigating ? <ScreenLoader /> : null}
-      {filtered.length === 0 ? (
+      {noPartnersFor ? (
+        <EmptyState
+          icon="📵"
+          title="No partners available for this service right now in your location"
+          subtitle={`We couldn't find an approved provider for ${noPartnersFor} right now. Please check again later.`}
+          actionLabel="Back to Services"
+          onAction={() => setNoPartnersFor(null)}
+        />
+      ) : filtered.length === 0 ? (
         <Text style={styles.empty}>No services available.</Text>
       ) : (
         <SubCategoryGrid
