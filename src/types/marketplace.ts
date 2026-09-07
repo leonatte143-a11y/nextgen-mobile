@@ -19,8 +19,10 @@ export type MarketplaceListing = {
   latitude: number | null;
   longitude: number | null;
   status: string;
+  moderationStatus: string | null;
   distanceKm: number | null;
   createdAt: string;
+  featured: boolean;
 };
 
 export type PostListingPayload = {
@@ -57,4 +59,15 @@ export type MarketplaceMessage = {
   senderId?: string | null;
   message: string;
   createdAt: string;
+};
+
+export type MarketplaceConversationSummary = {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  listingPhoto: string | null;
+  role: 'buyer' | 'seller';
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  status: string;
 };

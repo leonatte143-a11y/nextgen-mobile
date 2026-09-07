@@ -150,7 +150,7 @@ export function PartnerLoginScreen({ navigation }: Props) {
       setConn('ok');
     } catch (e: unknown) {
       setConn('fail');
-      const msg = e instanceof Error ? e.message : 'Network request failed';
+      const msg = e instanceof Error ? e.message : 'Network request failed -pHANI 33';
       setErr(msg);
     }
   };

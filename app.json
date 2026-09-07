@@ -5,27 +5,27 @@
     "scheme": "kairo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/kairo_icon.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/kairo_icon.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#FF8C00"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FF8C00"
+        "foregroundImage": "./assets/kairo_icon.jpeg",
+        "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/kairo_icon.jpeg"
     },
     "owner": "kairo-expo",
     "extra": {

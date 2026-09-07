@@ -4,8 +4,9 @@ import { Alert, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'reac
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../../constants/theme';
 import { PrimaryButton } from '../PrimaryButton';
+import { detectCityFromGps } from '../../services/locationService';
 
-const CITIES = ['Rajahmundry', 'Guntur', 'Vijayawada'] as const;
+const CITIES = ['Rajahmundry', 'Vijayawada'] as const;
 
 type Props = {
   initialCity: string;
@@ -20,6 +21,18 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
   const [radOpen, setRadOpen] = useState(false);
   const [mapHint, setMapHint] = useState('');
   const [rInput, setRInput] = useState(String(initialRadius));
+  const [detecting, setDetecting] = useState(false);
+
+  const useMyLocation = async () => {
+    setDetecting(true);
+    try {
+      const detected = await detectCityFromGps(CITIES);
+      if (detected) setCity(detected);
+      else Alert.alert('Location', 'Could not detect your city. Please select one below.');
+    } finally {
+      setDetecting(false);
+    }
+  };
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
@@ -33,7 +46,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
             {mapHint || city} · {radius} km
           </Text>
           <Text style={styles.subMeta} numberOfLines={1}>
-            Rajahmundry / Guntur
+            Rajahmundry / Vijayawada
           </Text>
         </View>
         <Pressable onPress={() => setRadOpen(true)} hitSlop={8}>
@@ -47,8 +60,12 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
             <Text style={styles.modalH}>Service territory</Text>
             <Text style={styles.gpsPill}>GPS: Active — location lock enabled</Text>
             <Text style={styles.modalSub}>
-              Primary zone: Rajahmundry / Guntur. Set center by city or type an area (e.g. Danavaipeta).
+              Primary zone: Rajahmundry / Vijayawada. Set center by city or type an area (e.g. Danavaipeta).
             </Text>
+            <Pressable style={styles.gpsBtn} onPress={useMyLocation} disabled={detecting}>
+              <Ionicons name="locate-outline" size={16} color={colors.primary} />
+              <Text style={styles.gpsBtnTxt}>{detecting ? 'Detecting…' : 'Use my location'}</Text>
+            </Pressable>
             {CITIES.map((c) => (
               <Pressable
                 key={c}
@@ -146,6 +163,19 @@ const styles = StyleSheet.create({
   modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg },
   modalH: { fontSize: 17, fontWeight: '800' },
   modalSub: { color: colors.grey, marginTop: 6, marginBottom: spacing.md, fontSize: 13 },
+  gpsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  gpsBtnTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   chip: { padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.greyLight, marginBottom: 8 },
   chipOn: { backgroundColor: colors.orangeTint, borderWidth: 1, borderColor: colors.primary },
   chipTxt: { fontWeight: '600' },

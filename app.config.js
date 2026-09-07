@@ -23,11 +23,11 @@ module.exports = ({ config }) => {
     slug: 'kairo-mobile',
     scheme: 'kairo',
     version: '1.0.0',
-    icon: './assets/icon.png',
+    icon: './assets/kairo_icon.jpeg',
     splash: {
-      image: './assets/splash-icon.png',
+      image: './assets/kairo_icon.jpeg',
       resizeMode: 'contain',
-      backgroundColor: '#FF8C00'
+      backgroundColor: '#FFFFFF'
     },
     android: {
       ...config.android,
@@ -38,8 +38,8 @@ module.exports = ({ config }) => {
       // `expo prebuild`/local dev.
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
       adaptiveIcon: {
-        foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#FF8C00'
+        foregroundImage: './assets/kairo_icon.jpeg',
+        backgroundColor: '#FFFFFF'
       }
     },
     extra: {
@@ -48,6 +48,7 @@ module.exports = ({ config }) => {
     plugins: [
       ...(config.plugins || []),
       'expo-font',
+      'expo-video',
       '@react-native-firebase/app',
       '@react-native-firebase/auth',
     ]

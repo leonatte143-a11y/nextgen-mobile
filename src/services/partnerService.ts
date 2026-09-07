@@ -26,6 +26,7 @@ export type PartnerOnboardingPayload = {
   idNumber?: string;
   pincode?: string;
   customCategory?: string;
+  locationArea?: string;
 };
 
 function unwrapPricingList(data: PartnerPricingListResponse | PartnerPricingRow[]): PartnerPricingListResponse {

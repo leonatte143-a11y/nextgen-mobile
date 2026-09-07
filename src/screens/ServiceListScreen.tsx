@@ -68,11 +68,11 @@ export function ServiceListScreen() {
         <ScreenLoader />
       ) : items.length === 0 ? (
         <EmptyState
-          icon="🔍"
-          title="No services"
-          subtitle="Try another category or search."
-          actionLabel="Browse all"
-          onAction={() => navigation.replace('AllServices')}
+          icon="📵"
+          title="No partners available for this service right now in your location"
+          subtitle="We couldn't find an approved provider for this service right now. Please check again later."
+          actionLabel="Back to Services"
+          onAction={() => navigation.goBack()}
         />
       ) : (
         <FlatList
@@ -82,7 +82,7 @@ export function ServiceListScreen() {
           renderItem={({ item }) => (
             <ServiceCard
               service={item}
-              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id })}
+              onPress={() => navigation.navigate('ServiceProviders', { serviceId: item.id, subIconQuery: searchQuery })}
             />
           )}
         />

@@ -21,12 +21,17 @@ export const catalogService = {
     return apiService.get(`/api/v1/catalog/services/${id}`);
   },
 
-  async getServicePartners(id: string, coords?: { latitude: number; longitude: number } | null): Promise<PartnerSummary[]> {
+  async getServicePartners(
+    id: string,
+    coords?: { latitude: number; longitude: number } | null,
+    subIconQuery?: string,
+  ): Promise<PartnerSummary[]> {
     const query = new URLSearchParams();
     if (coords) {
       query.set('lat', String(coords.latitude));
       query.set('lng', String(coords.longitude));
     }
+    if (subIconQuery?.trim()) query.set('q', subIconQuery.trim());
     const qs = query.toString();
     return apiService.get(`/api/v1/catalog/services/${id}/partners${qs ? `?${qs}` : ''}`);
   },

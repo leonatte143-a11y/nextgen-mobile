@@ -19,17 +19,13 @@ import { authService } from '../services/authService';
 import { partnerService } from '../services/partnerService';
 import { SHOW_DEBUG_OTP } from '../config/debug';
 import { logAuth } from '../lib/devLog';
-import { MAIN_CATEGORIES } from '../data/serviceCatalog';
 import type { RootStackParamList } from '../navigation/types';
 
-const STATIC_PARTNER_SERVICES = Array.from(
-  new Set(MAIN_CATEGORIES.flatMap((category) => category.subServices.map((service) => service.title))),
-).filter((name) => !/^other/i.test(name.trim()));
+const PARTNER_CATEGORIES = ['Hospitals', 'Diagnostics', 'Ambulance', 'Clinics'];
 
-const ID_TYPES = ['Aadhaar', 'PAN', 'Driving License', 'Voter ID'] as const;
-type IdType = (typeof ID_TYPES)[number];
+const REGISTRATION_FEE = 99;
 
-const REGISTRATION_FEE = 49;
+type PostOffice = { Name: string; District: string; State: string };
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'PartnerRegister'> };
 
@@ -48,46 +44,46 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
-  const [customCategory, setCustomCategory] = useState('');
   const [pincode, setPincode] = useState('');
-  const [idType, setIdType] = useState<IdType | null>(null);
-  const [idTypeOpen, setIdTypeOpen] = useState(false);
-  const [idNumber, setIdNumber] = useState('');
+  const [locationArea, setLocationArea] = useState('');
+  const [locationOptions, setLocationOptions] = useState<PostOffice[]>([]);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [devOtpHint, setDevOtpHint] = useState('');
-  const [extraCategories, setExtraCategories] = useState<string[]>([]);
 
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
+    const digits = pincode.trim();
+    if (digits.length !== 6) {
+      setLocationOptions([]);
+      setLocationArea('');
+      setLocationError('');
+      return;
+    }
     let cancelled = false;
+    setLocationLoading(true);
+    setLocationError('');
     (async () => {
       try {
-        const backendCategories = await partnerService.getCategories();
+        const res = await fetch(`https://api.postalpincode.in/pincode/${digits}`);
+        const data = await res.json();
         if (cancelled) return;
-        setExtraCategories(backendCategories.map((c) => c.nameEn).filter(Boolean));
+        const offices: PostOffice[] = data?.[0]?.Status === 'Success' ? data[0].PostOffice ?? [] : [];
+        setLocationOptions(offices);
+        if (offices.length === 0) setLocationError('No areas found for this pincode.');
       } catch {
-        if (!cancelled) setExtraCategories([]);
+        if (!cancelled) setLocationError('Could not fetch areas for this pincode.');
+      } finally {
+        if (!cancelled) setLocationLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const allPartnerServices = React.useMemo(() => {
-    const seen = new Set(STATIC_PARTNER_SERVICES.map((s) => s.toLowerCase()));
-    const merged = [...STATIC_PARTNER_SERVICES];
-    for (const name of extraCategories) {
-      const key = name.toLowerCase();
-      if (/^other/i.test(key.trim())) continue;
-      if (!seen.has(key)) {
-        seen.add(key);
-        merged.push(name);
-      }
-    }
-    return merged;
-  }, [extraCategories]);
+  }, [pincode]);
 
   const sendOtp = async () => {
     const digits = phone.replace(/\D/g, '').slice(0, 10);
@@ -138,8 +134,6 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
     otpVerified &&
     selectedCategories.length > 0 &&
     pincode.trim().length >= 6 &&
-    !!idType &&
-    idNumber.trim().length > 3 &&
     acceptedTerms;
 
   const onNext = () => {
@@ -171,17 +165,11 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         serviceCategory: selectedCategories[0],
         categories: selectedCategories,
         skills: [...selectedCategories],
-        idType: idType ?? undefined,
-        idNumber: idNumber.trim(),
         pincode: pincode.trim(),
-        customCategory: customCategory.trim() || undefined,
+        locationArea: locationArea.trim() || undefined,
       });
       logAuth('partner_register_saved', { partnerId: profile.id, phoneLast4: digits.slice(-4) });
-      Alert.alert(
-        'KAIRO Partner',
-        'Registration and payment complete. On the partner login screen, request an OTP to sign in.',
-      );
-      navigation.replace('PartnerLogin');
+      navigation.replace('PartnerPendingApproval', { fresh: true });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Could not save registration.';
       logAuth('partner_register_failed', { message: msg });
@@ -203,10 +191,14 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
               To activate your KAIRO Partner account and start receiving job requests, complete the
               one-time registration payment below.
             </Text>
-            <Text style={styles.payAmount}>₹{REGISTRATION_FEE}</Text>
+            <View style={styles.offerBadge}>
+              <Text style={styles.offerBadgeTxt}>100% OFF</Text>
+            </View>
+            <Text style={styles.strikeAmount}>₹{REGISTRATION_FEE}</Text>
+            <Text style={styles.payAmount}>₹0</Text>
           </View>
           <PrimaryButton
-            title={paying ? 'Processing payment…' : `Pay ₹${REGISTRATION_FEE} to complete registration`}
+            title={paying ? 'Processing…' : 'Activate for Free'}
             onPress={completeRegistration}
             loading={paying}
           />
@@ -292,12 +284,6 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
       </Pressable>
 
       <KairoTextInput
-        label="Other / Custom Category"
-        value={customCategory}
-        onChangeText={setCustomCategory}
-      />
-
-      <KairoTextInput
         label="Pincode"
         value={pincode}
         keyboardType="number-pad"
@@ -305,18 +291,21 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         onChangeText={(v) => setPincode(v.replace(/\D/g, '').slice(0, 6))}
       />
 
-      <Text style={styles.lab}>ID Type</Text>
-      <Pressable style={styles.dropdown} onPress={() => setIdTypeOpen(true)}>
-        <Text style={styles.dropdownTxt}>{idType ?? 'Select an ID type'}</Text>
-        <Ionicons name="chevron-down" size={18} color={colors.grey} />
-      </Pressable>
-
-      {idType ? (
-        <KairoTextInput
-          label={`Enter ${idType} Number`}
-          value={idNumber}
-          onChangeText={setIdNumber}
-        />
+      {pincode.trim().length === 6 ? (
+        <>
+          <Text style={styles.lab}>Location</Text>
+          <Pressable
+            style={styles.dropdown}
+            onPress={() => (locationOptions.length > 0 ? setLocationOpen(true) : undefined)}
+          >
+            <Text style={styles.dropdownTxt} numberOfLines={1}>
+              {locationLoading
+                ? 'Fetching nearby areas…'
+                : locationArea || (locationOptions.length > 0 ? 'Select your area' : locationError || 'No areas found')}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={colors.grey} />
+          </Pressable>
+        </>
       ) : null}
 
       <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
@@ -337,7 +326,7 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
             />
             <ScrollView style={styles.modalScroll}>
               <View style={styles.chips}>
-                {allPartnerServices
+                {PARTNER_CATEGORIES
                   .filter((o) => o.toLowerCase().includes(categorySearch.toLowerCase()))
                   .map((option) => {
                     const selected = selectedCategories.includes(option);
@@ -368,24 +357,30 @@ export function PartnerRegisterFlowScreen({ navigation }: Props) {
         </View>
       </Modal>
 
-      <Modal visible={idTypeOpen} transparent animationType="fade">
+      <Modal visible={locationOpen} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Select ID type</Text>
-            {ID_TYPES.map((option) => (
-              <Pressable
-                key={option}
-                style={styles.idOption}
-                onPress={() => {
-                  setIdType(option);
-                  setIdTypeOpen(false);
-                }}
-              >
-                <Text style={styles.idOptionTxt}>{option}</Text>
-                {idType === option ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
-              </Pressable>
-            ))}
-            <Pressable style={styles.modalCancel} onPress={() => setIdTypeOpen(false)}>
+            <Text style={styles.modalTitle}>Select your area</Text>
+            <ScrollView style={styles.modalScroll}>
+              {locationOptions.map((po, idx) => (
+                <Pressable
+                  key={`${po.Name}-${idx}`}
+                  style={styles.idOption}
+                  onPress={() => {
+                    setLocationArea(po.Name);
+                    setLocationOpen(false);
+                  }}
+                >
+                  <Text style={styles.idOptionTxt}>
+                    {po.Name} — {po.District}
+                  </Text>
+                  {locationArea === po.Name ? (
+                    <Ionicons name="checkmark" size={20} color={colors.primary} />
+                  ) : null}
+                </Pressable>
+              ))}
+            </ScrollView>
+            <Pressable style={styles.modalCancel} onPress={() => setLocationOpen(false)}>
               <Text style={styles.modalCancelTxt}>Cancel</Text>
             </Pressable>
           </View>
@@ -451,7 +446,22 @@ const styles = StyleSheet.create({
   },
   payTitle: { fontSize: 17, fontWeight: '800', color: colors.navy, marginTop: spacing.sm },
   paySub: { color: colors.charcoal, textAlign: 'center', lineHeight: 20 },
-  payAmount: { fontSize: 36, fontWeight: '900', color: colors.primary, marginTop: spacing.sm },
+  payAmount: { fontSize: 36, fontWeight: '900', color: colors.primary, marginTop: 2 },
+  offerBadge: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    marginTop: spacing.sm,
+  },
+  offerBadgeTxt: { color: colors.white, fontWeight: '800', fontSize: 12 },
+  strikeAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.grey,
+    textDecorationLine: 'line-through',
+    marginTop: spacing.sm,
+  },
   modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.lg },
   modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg, maxHeight: '80%' },
   modalTitle: { fontSize: 18, fontWeight: '800', marginBottom: spacing.md },

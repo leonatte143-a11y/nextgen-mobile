@@ -60,10 +60,12 @@ export function PartnerCommandHeader({ name, photoUrl, rating, isOnline, onToggl
       </View>
 
       <View style={styles.toggleCol}>
-        <Text style={styles.tinyOn}>{isOnline ? 'Online' : 'Offline'}</Text>
+        <Text style={[styles.tinyOn, { color: isOnline ? colors.success : colors.error }]}>
+          {isOnline ? 'Online' : 'Offline'}
+        </Text>
         <Pressable
           onPress={() => onToggleOnline(!isOnline)}
-          style={[styles.smallToggle, isOnline && styles.smallToggleOn]}
+          style={[styles.smallToggle, isOnline ? styles.smallToggleOn : styles.smallToggleOff]}
           hitSlop={8}
           accessibilityLabel="Toggle online"
         >
@@ -132,7 +134,8 @@ const styles = StyleSheet.create({
     padding: 2,
     justifyContent: 'center',
   },
-  smallToggleOn: { backgroundColor: ORANGE },
+  smallToggleOn: { backgroundColor: colors.success },
+  smallToggleOff: { backgroundColor: colors.error },
   knob: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.white, alignSelf: 'flex-start' },
   knobOn: { alignSelf: 'flex-end' },
 });

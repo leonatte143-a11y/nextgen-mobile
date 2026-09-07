@@ -31,7 +31,7 @@ export function ServiceProvidersScreen() {
         const coords = await getCoordsIfPermitted();
         const [svc, partners] = await Promise.all([
           catalogService.getServiceById(route.params.serviceId),
-          catalogService.getServicePartners(route.params.serviceId, coords),
+          catalogService.getServicePartners(route.params.serviceId, coords, route.params.subIconQuery),
         ]);
         setService(svc);
         setProviders(partners ?? []);
@@ -45,7 +45,13 @@ export function ServiceProvidersScreen() {
     return <ScreenLoader />;
   }
 
-  const title = service?.name || 'Service Providers';
+  const categoryTag = (service?.categoryLabel || service?.name || 'Service').toUpperCase();
+
+  const viewProfile = (item: PartnerSummary) =>
+    navigation.navigate('ServiceDetail', {
+      serviceId: route.params.serviceId,
+      selectedPartnerId: item.id,
+    });
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -56,20 +62,12 @@ export function ServiceProvidersScreen() {
         <Text style={styles.title}>Service Providers</Text>
         <View style={{ width: 24 }} />
       </View>
-      <View style={styles.header}>
-        <Text style={styles.serviceName}>{title}</Text>
-        {service ? (
-          <Text style={styles.serviceMeta} numberOfLines={1}>
-            {service.categoryLabel} · ★ {service.rating.toFixed(1)} ({service.reviewsCount})
-          </Text>
-        ) : null}
-      </View>
       {providers.length === 0 ? (
         <EmptyState
           icon="📵"
-          title="No partners available for this service right now."
+          title="No partners available for this service right now in your location"
           subtitle="We couldn't find an approved provider for this service right now. Please check again later."
-          actionLabel="Back to services"
+          actionLabel="Back to Services"
           onAction={() => navigation.goBack()}
         />
       ) : (
@@ -78,50 +76,46 @@ export function ServiceProvidersScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <Pressable
-              style={styles.card}
-              onPress={() =>
-                navigation.navigate('ServiceDetail', {
-                  serviceId: route.params.serviceId,
-                  selectedPartnerId: item.id,
-                })
-              }
-            >
-              <View style={styles.row}>
-                <View style={styles.photo}>
-                  {item.photoUrl ? (
-                    <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
-                  ) : (
-                    <Text style={styles.photoTxt}>{item.name[0]}</Text>
-                  )}
+            <View style={styles.card}>
+              <View style={styles.photo}>
+                {item.photoUrl ? (
+                  <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
+                ) : (
+                  <Text style={styles.photoTxt}>{item.name[0]}</Text>
+                )}
+              </View>
+              <View style={styles.info}>
+                <View style={styles.badgeRow}>
+                  <View style={styles.categoryTag}>
+                    <Text style={styles.categoryTagTxt} numberOfLines={1}>{categoryTag}</Text>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={18} color={colors.verifiedBlue} />
                 </View>
-                <View style={styles.info}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <View style={[styles.statusBadge, item.isOnline ? styles.online : styles.offline]}>
-                      <Text style={styles.statusText}>{item.isOnline ? 'Online' : 'Offline'}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.rating} numberOfLines={1}>
-                    ★ {item.rating.toFixed(1)} · {item.reviewsCount ?? 0} reviews
+                <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+                {item.description ? (
+                  <Text style={styles.description} numberOfLines={3}>
+                    {item.description}
                   </Text>
-                  <Text style={styles.meta} numberOfLines={1}>
-                    Jobs completed: {item.jobsCompleted}
-                  </Text>
-                  {item.description ? (
-                    <Text style={styles.description} numberOfLines={2}>
-                      {item.description}
-                    </Text>
-                  ) : null}
-                  <View style={styles.distanceRow}>
-                    <Ionicons name="location" size={14} color={colors.primary} />
-                    <Text style={styles.distance}>
-                      {item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : '—'}
+                ) : null}
+                <View style={styles.bottomBlock}>
+                  <View style={styles.metaRow}>
+                    <Ionicons name="location" size={13} color={colors.grey} />
+                    <Text style={styles.metaTxt}>
+                      {item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km away` : 'Nearby'}
                     </Text>
                   </View>
+                  <View style={styles.metaRow}>
+                    <Ionicons name="star" size={13} color={colors.primary} />
+                    <Text style={styles.ratingTxt}>{item.rating.toFixed(1)}</Text>
+                    <Text style={styles.metaTxt}>({item.reviewsCount ?? 0})</Text>
+                  </View>
+                  <Pressable style={styles.viewProfileBtn} onPress={() => viewProfile(item)}>
+                    <Text style={styles.viewProfileTxt}>View Profile</Text>
+                    <Ionicons name="arrow-forward" size={14} color={colors.white} />
+                  </Pressable>
                 </View>
               </View>
-            </Pressable>
+            </View>
           )}
         />
       )}
@@ -141,40 +135,55 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   title: { fontSize: 18, fontWeight: '800' },
-  header: { padding: spacing.md, paddingBottom: 0 },
-  serviceName: { fontSize: 22, fontWeight: '800', color: colors.charcoal },
-  serviceMeta: { fontSize: 13, color: colors.grey, marginTop: spacing.xs },
   list: { padding: spacing.md, paddingBottom: spacing.xl },
   card: {
+    flexDirection: 'row',
     marginBottom: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
   },
-  row: { flexDirection: 'row', gap: spacing.md },
   photo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: '35%',
     backgroundColor: colors.orangeTint,
     alignItems: 'center',
     justifyContent: 'center',
+    borderTopLeftRadius: radius.md,
+    borderBottomLeftRadius: radius.md,
     overflow: 'hidden',
   },
   photoImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  photoTxt: { color: colors.primary, fontSize: 28, fontWeight: '800' },
-  info: { flex: 1 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
-  name: { fontSize: 16, fontWeight: '700', color: colors.charcoal, flex: 1 },
-  statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: radius.full },
-  online: { backgroundColor: colors.online },
-  offline: { backgroundColor: colors.offline },
-  statusText: { fontSize: 11, fontWeight: '800', color: colors.white },
-  rating: { fontSize: 13, color: colors.charcoal, marginTop: spacing.xs },
-  meta: { fontSize: 12, color: colors.grey, marginTop: spacing.xs },
-  description: { fontSize: 12, color: colors.charcoal, marginTop: spacing.xs, lineHeight: 16 },
-  distanceRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.xs },
-  distance: { fontSize: 13, fontWeight: '700', color: colors.charcoal },
+  photoTxt: { color: colors.primary, fontSize: 32, fontWeight: '800' },
+  info: { flex: 1, padding: spacing.md },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  categoryTag: {
+    backgroundColor: colors.categoryTagPurple,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    maxWidth: '80%',
+  },
+  categoryTagTxt: { color: colors.white, fontSize: 10, fontWeight: '800' },
+  name: { fontSize: 15, fontWeight: '800', color: colors.charcoal, marginTop: spacing.sm, marginBottom: 4 },
+  description: { fontSize: 12, color: colors.grey, lineHeight: 16, marginBottom: spacing.sm },
+  bottomBlock: { alignItems: 'flex-end', marginTop: 'auto', gap: 4 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaTxt: { fontSize: 12, color: colors.grey },
+  ratingTxt: { fontSize: 12, fontWeight: '800', color: colors.charcoal },
+  viewProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    marginTop: 4,
+  },
+  viewProfileTxt: { color: colors.white, fontWeight: '700', fontSize: 12 },
 });

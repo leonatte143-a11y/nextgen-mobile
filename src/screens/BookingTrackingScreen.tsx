@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KairoLogo } from '../components/KairoLogo';
 import { LiveTrackingAdBanner } from '../components/LiveTrackingAdBanner';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -81,9 +82,7 @@ export function BookingTrackingScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.top}>
-        <View style={styles.logoMark}>
-          <Text style={styles.logoN}>K</Text>
-        </View>
+        <KairoLogo size={28} />
         <Text style={styles.brandName}>KAIRO</Text>
       </View>
 

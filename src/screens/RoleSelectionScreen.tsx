@@ -2,6 +2,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../constants/theme';
+import { KairoLogo } from '../components/KairoLogo';
 import { PrimaryButton } from '../components/PrimaryButton';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -10,9 +11,7 @@ type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'RoleSe
 export function RoleSelectionScreen({ navigation }: Props) {
   return (
     <View style={styles.root}>
-      <View style={styles.logo}>
-        <Text style={styles.logoN}>K</Text>
-      </View>
+      <KairoLogo size={80} style={styles.logo} />
       <Text style={styles.title}>KAIRO</Text>
       <Text style={styles.h1}>Welcome</Text>
       <Text style={styles.sub}>Choose your role to continue</Text>

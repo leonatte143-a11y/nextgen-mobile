@@ -64,6 +64,20 @@ export const bannerService = {
     return Array.isArray(data) ? data : [];
   },
 
+  async updateAd(
+    id: string,
+    payload: Partial<SubmitAdRequestPayload>,
+    scope: 'user' | 'partner' = 'user',
+  ): Promise<AdvertisementBanner> {
+    const path = scope === 'partner' ? `/api/v1/partners/ads/${id}` : `/api/v1/users/ads/${id}`;
+    return apiService.patch<AdvertisementBanner>(path, payload, scope);
+  },
+
+  async deleteAd(id: string, scope: 'user' | 'partner' = 'user'): Promise<{ id: string }> {
+    const path = scope === 'partner' ? `/api/v1/partners/ads/${id}` : `/api/v1/users/ads/${id}`;
+    return apiService.delete<{ id: string }>(path, scope);
+  },
+
   async getHomeBanners(
     city?: string,
     { force = false, placement = 'home_dashboard', coords }: { force?: boolean; placement?: string; coords?: Coords | null } = {},

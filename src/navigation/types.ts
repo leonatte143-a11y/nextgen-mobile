@@ -14,11 +14,12 @@ export type RootStackParamList = {
   PartnerLogin: undefined;
   PartnerRegister: undefined;
   PartnerHome: undefined;
+  PartnerPendingApproval: { fresh?: boolean } | undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   AllServices: undefined;
   CategoryServices: { categoryId: MainCategoryId };
   ServiceList: { bucketId?: BucketId | null; title?: string; searchQuery?: string };
-  ServiceProviders: { serviceId: string };
+  ServiceProviders: { serviceId: string; subIconQuery?: string };
   ServiceDetail: { serviceId: string; selectedPartnerId?: string };
   BookingTracking: { bookingId: string };
   LiveBooking: { bookingId: string };
@@ -42,9 +43,13 @@ export type RootStackParamList = {
   Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
   PostListing: undefined;
   ListingDetail: { listingId: string };
-  MarketplaceChat: { listingId: string; otherPartyName?: string };
+  MarketplaceChat: { listingId?: string; conversationId?: string; otherPartyName?: string };
+  MarketplaceChats: undefined;
+  MyMarketplaceListings: undefined;
   AdvertiseBusiness: {
     draftId?: string;
+    editAdId?: string;
+    editAdScope?: 'user' | 'partner';
     prefill?: {
       businessName?: string;
       businessAddress?: string;

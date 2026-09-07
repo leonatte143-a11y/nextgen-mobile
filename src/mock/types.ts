@@ -39,6 +39,9 @@ export interface PartnerSummary {
   /** Service territory — used to gate booking when the requester is outside the partner's zone. */
   serviceOuterRadiusKm?: number | null;
   allowOutOfStation?: boolean;
+  /** Set client-side by screens that merge partners from multiple matched services (e.g.
+   * PremiumPartnerFeedScreen) so a "View Profile" action knows which service to open. */
+  serviceId?: string;
 }
 
 export interface ServiceMenuItem {
@@ -110,7 +113,7 @@ export interface PartnerProfile {
   lifetimeEarnings: number;
   bankName: string;
   bankAccount: string;
-  verificationStatus: 'Verified' | 'Pending' | 'Needs Review';
+  verificationStatus: 'Verified' | 'Pending' | 'Needs Review' | 'Rejected';
   trainingProgress: number;
   badges: string[];
   strikeCount: number;
@@ -138,6 +141,8 @@ export type PartnerReferralEarning = {
 export type PartnerReferralSummary = {
   referralCode: string;
   totalEarned: number;
+  rewardPoints: number;
+  referralCount: number;
   earnings: PartnerReferralEarning[];
 };
 

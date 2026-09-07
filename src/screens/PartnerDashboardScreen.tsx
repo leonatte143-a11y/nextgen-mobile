@@ -1,7 +1,8 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KairoLogo } from '../components/KairoLogo';
 import { PartnerCommandHeader } from '../components/partner/PartnerCommandHeader';
 import { PartnerCommandGrid } from '../components/partner/PartnerCommandGrid';
 import { PartnerServiceLocationBar } from '../components/partner/PartnerServiceLocationBar';
@@ -10,7 +11,7 @@ import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
 type Props = { navigation: { navigate: (k: string) => void } };
 
-export function PartnerDashboardScreen(_props: Props) {
+export function PartnerDashboardScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { profile, earnings, requests, toggleOnline, isLoading } = usePartner();
 
@@ -32,9 +33,7 @@ export function PartnerDashboardScreen(_props: Props) {
         contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm, paddingBottom: 120 + insets.bottom }]}
       >
         <View style={styles.brandRow}>
-          <View style={styles.logoMark}>
-            <Text style={styles.logoN}>K</Text>
-          </View>
+          <KairoLogo size={32} />
           <Text style={styles.brandName}>KAIRO</Text>
         </View>
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
@@ -54,6 +53,26 @@ export function PartnerDashboardScreen(_props: Props) {
           lifetimeCompleted={profile.jobsCompleted}
         />
         <PartnerSocialProofSection />
+
+        <View style={styles.galleryHeaderRow}>
+          <Text style={styles.section}>Manage Gallery Photos</Text>
+          <Pressable onPress={() => navigation.navigate('PartnerGallery')} hitSlop={8}>
+            <Text style={styles.galleryManageTxt}>Manage</Text>
+          </Pressable>
+        </View>
+        {profile.photos && profile.photos.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryRow}>
+            {profile.photos.map((uri, idx) => (
+              <Image key={`${uri}-${idx}`} source={{ uri }} style={styles.galleryThumb} />
+            ))}
+          </ScrollView>
+        ) : (
+          <Pressable style={styles.galleryEmpty} onPress={() => navigation.navigate('PartnerGallery')}>
+            <Ionicons name="images-outline" size={22} color={colors.primary} />
+            <Text style={styles.galleryEmptyTxt}>Add photos to your gallery</Text>
+          </Pressable>
+        )}
+
         <Text style={styles.section}>Recent Activity</Text>
         {requests.slice(0, 3).map((item) => (
           <View key={item.id} style={styles.activityItem}>
@@ -107,6 +126,27 @@ const styles = StyleSheet.create({
   welcome: { color: colors.charcoal, fontSize: 20, fontWeight: '800' },
   welcomeSub: { color: colors.grey, marginTop: 4, marginBottom: 4, fontSize: 13, fontWeight: '600' },
   section: { marginTop: spacing.lg, fontSize: 16, fontWeight: '800' },
+  galleryHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.lg,
+  },
+  galleryManageTxt: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  galleryRow: { marginTop: spacing.sm },
+  galleryThumb: { width: 72, height: 72, borderRadius: radius.md, marginRight: spacing.sm, backgroundColor: colors.greyLight },
+  galleryEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  galleryEmptyTxt: { color: colors.primary, fontWeight: '600', fontSize: 13 },
   activityItem: {
     marginTop: spacing.sm,
     flexDirection: 'row',

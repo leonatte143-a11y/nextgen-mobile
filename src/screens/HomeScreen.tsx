@@ -18,6 +18,7 @@ import { PopularServicesGrid } from '../components/home/PopularServicesGrid';
 import { SearchFilterModal, type SearchFilters } from '../components/home/SearchFilterModal';
 import { TopRatedCarousel } from '../components/home/TopRatedCarousel';
 import { ScreenLoader } from '../components/ScreenLoader';
+import { KairoLogo } from '../components/KairoLogo';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
@@ -156,9 +157,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     <View style={[styles.root, { paddingTop: insets.top + spacing.xs }]}>
       <View style={styles.header}>
         <View style={styles.appHeader}>
-          <View style={styles.logoMark}>
-            <Text style={styles.logoN}>K</Text>
-          </View>
+          <KairoLogo size={32} />
           <Text style={styles.brandName}>KAIRO</Text>
         </View>
         <View style={[styles.headerSide, styles.headerActions]}>
@@ -208,7 +207,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <Text style={[styles.h2, styles.storeH2]}>KAIRO Store</Text>
         <View style={styles.shopExoRow}>
           <Pressable
-            style={[styles.exoCard, { backgroundColor: getAccentTint('hs_int') }]}
+            style={[styles.exoCard, { backgroundColor: '#FFE0B2' }]}
             onPress={() => navigation.navigate('MainTabs', { screen: 'Store', params: { initialTab: 'materials' } })}
           >
             <View style={styles.marketIcon}>
@@ -233,6 +232,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
         <View style={styles.footer}>
           <Text style={styles.footerBrand}>KAIRO</Text>
           <Text style={styles.footerTag}>Your trusted home services platform — Andhra Pradesh</Text>
+          <Text style={styles.footerSupport}>kairoservicess@gmail.com</Text>
         </View>
       </ScrollView>
 
@@ -395,7 +395,8 @@ const styles = StyleSheet.create({
   whyIcon: { fontSize: 24 },
   whyTitle: { fontWeight: '700', color: colors.charcoal },
   whySub: { color: colors.grey, fontSize: 13, marginTop: 2 },
-  footer: { padding: spacing.xl, alignItems: 'center', backgroundColor: colors.greyLight },
+  footer: { padding: spacing.xl, marginTop: spacing.lg, alignItems: 'center', backgroundColor: colors.greyLight },
   footerBrand: { fontWeight: '900', fontSize: 18, color: colors.primary },
   footerTag: { color: colors.grey, textAlign: 'center', marginTop: spacing.sm },
+  footerSupport: { color: colors.grey, fontSize: 12, marginTop: spacing.xs },
 });
