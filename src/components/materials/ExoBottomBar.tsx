@@ -24,17 +24,10 @@ export function ExoBottomBar() {
   const onPress = (key: string) => {
     switch (key) {
       case 'home':
-<<<<<<< HEAD
         navigation.navigate('Home' as never);
         break;
       case 'account':
         navigation.navigate('Profile' as never);
-=======
-        navigation.getParent()?.navigate('Home' as never);
-        break;
-      case 'account':
-        navigation.getParent()?.navigate('Profile' as never);
->>>>>>> 6ccd495c76401a8f3fadeea32d010ad09a813778
         break;
       case 'sell':
         navigation.navigate('PostListing');
