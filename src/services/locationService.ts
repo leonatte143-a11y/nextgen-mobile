@@ -95,6 +95,21 @@ export async function getCoordsIfPermitted(): Promise<Coords | null> {
   }
 }
 
+/** Best-guess free-text city/area name from GPS, unconstrained by a known-city list — used by
+ * the Post Ad location picker so any city can be captured, not just the AP service-area list. */
+export async function reverseGeocodeCityName(coords: Coords): Promise<string | null> {
+  const mod = await getLocationModule();
+  if (!mod) return null;
+  try {
+    const results = await mod.reverseGeocodeAsync(coords);
+    const raw = results[0];
+    if (!raw) return null;
+    return raw.city || raw.subregion || raw.district || raw.region || null;
+  } catch {
+    return null;
+  }
+}
+
 /** Match GPS reverse-geocode result to a known AP city name. */
 export async function detectCityFromGps(cityOptions: readonly string[]): Promise<string | null> {
   const mod = await getLocationModule();

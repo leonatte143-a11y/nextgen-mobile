@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../constants/theme';
+import { KairoLogo } from '../components/KairoLogo';
 import { MaterialsTabContent } from '../components/materials/MaterialsTabContent';
 import type { MainTabScreenProps } from '../navigation/types';
 
@@ -17,7 +18,10 @@ export function ShopsRentalsMainScreen(_props: MainTabScreenProps<'Store'>) {
 
   const header = (
     <View style={styles.header}>
-      <Text style={styles.title}>EXO</Text>
+      <View style={styles.logoRow}>
+        <KairoLogo size={28} />
+        <Text style={styles.brandTxt}>KAIRO</Text>
+      </View>
       <Pressable style={styles.locationPill} onPress={() => setPickerOpen(true)}>
         <Ionicons name="location-outline" size={16} color={colors.charcoal} />
         <Text style={styles.locationTxt} numberOfLines={1}>{city}</Text>
@@ -66,6 +70,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   title: { fontSize: 26, fontWeight: '900', color: colors.navy },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandTxt: { fontSize: 20, fontWeight: '900', color: colors.navy },
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',

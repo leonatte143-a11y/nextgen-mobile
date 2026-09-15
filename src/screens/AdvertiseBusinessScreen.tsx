@@ -107,8 +107,32 @@ export function AdvertiseBusinessScreen() {
       return;
     }
 
-    const dataUrl = asset.base64 ? `data:${asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg')};base64,${asset.base64}` : null;
-    if (dataUrl && dataUrl.length > MAX_MEDIA_DATA_URL_LENGTH) {
+    // expo-image-picker never populates `base64` for video assets (only images), even with
+    // base64: true — read the file manually via fetch+Blob+FileReader (works for large local
+    // file/content URIs; expo-file-system's readAsStringAsync was unreliable for video here).
+    let base64 = asset.base64;
+    if (!base64 && isVideo) {
+      try {
+        const fileBlob = await (await fetch(asset.uri)).blob();
+        const dataUrlResult = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(reader.error);
+          reader.onload = () => resolve(String(reader.result));
+          reader.readAsDataURL(fileBlob);
+        });
+        const commaIndex = dataUrlResult.indexOf(',');
+        base64 = commaIndex >= 0 ? dataUrlResult.slice(commaIndex + 1) : dataUrlResult;
+      } catch (e) {
+        console.warn('[AdvertiseBusiness] failed to read video as base64', e);
+        base64 = null;
+      }
+    }
+    if (!base64) {
+      Alert.alert('Upload failed', 'Could not read the selected file. Please try a different image or video.');
+      return;
+    }
+    const dataUrl = `data:${asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg')};base64,${base64}`;
+    if (dataUrl.length > MAX_MEDIA_DATA_URL_LENGTH) {
       Alert.alert(
         'File too large',
         isVideo

@@ -1,24 +1,11 @@
-﻿import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KairoTextInput } from '../components/KairoTextInput';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
-import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
+import { MARKETPLACE_FIXED_CATEGORIES } from '../constants/marketplaceCategories';
 import { marketplaceService } from '../services/marketplaceService';
 import type { ListingType, MarketplaceCategory } from '../types/marketplace';
 import type { RootStackParamList } from '../navigation/types';
@@ -31,134 +18,33 @@ const TYPES: { value: ListingType; label: string; hint: string }[] = [
   { value: 'resale', label: 'Resale', hint: 'Leftover project materials at a discount' },
 ];
 
-const MAX_PHOTOS = 4;
+const OTHERS = { name: 'Others', icon: 'ellipsis-horizontal-outline' as const };
 
-// Quick-pick shortcuts for the categories called out for the OLX-style expansion. Selecting
-// one just pre-fills the (already dynamic, DB-backed) category autocomplete above — it isn't
-// a separate hardcoded taxonomy, so any of these that also exist as real categories in the
-// database will match by name and carry a categoryId; the rest post as free-text category names.
-const QUICK_CATEGORIES: { label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { label: 'Rented Buildings', icon: 'business-outline' },
-  { label: 'Sites for Sale', icon: 'map-outline' },
-  { label: 'Part-Time Jobs', icon: 'briefcase-outline' },
-  { label: 'Vehicles', icon: 'car-sport-outline' },
-];
-
+// Step 1 of the Sell flow — pick what you're posting and a category, then move on to the
+// dedicated details form. Kept intentionally minimal (no photos/title/price here).
 export function PostListingScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const [listingType, setListingType] = useState<ListingType>('sell');
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [categories, setCategories] = useState<MarketplaceCategory[]>([]);
-  const [categoryQuery, setCategoryQuery] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [price, setPrice] = useState('');
-  const [depositAmount, setDepositAmount] = useState('');
-  const [rentPricePerDay, setRentPricePerDay] = useState('');
-  const [city, setCity] = useState('');
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     marketplaceService.getCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
-  const OTHERS_CATEGORY: MarketplaceCategory = { id: '', name: 'Others' };
-
-  const filteredSuggestions = useMemo(() => {
-    const q = categoryQuery.trim().toLowerCase();
-    const matches = !q
-      ? categories.slice(0, 8)
-      : categories.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 8);
-    return [...matches, OTHERS_CATEGORY];
-  }, [categoryQuery, categories]);
-
-  const pickPhoto = async () => {
-    if (photos.length >= MAX_PHOTOS) {
-      Alert.alert('Limit reached', `You can add up to ${MAX_PHOTOS} photos.`);
-      return;
-    }
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo library access to add listing photos.');
-      return;
-    }
-    const remaining = MAX_PHOTOS - photos.length;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.5,
-      base64: true,
-      allowsMultipleSelection: true,
-      selectionLimit: remaining,
+  const pickCategory = (name: string) => {
+    const match = categories.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    navigation.navigate('PostAdDetails', {
+      listingType,
+      categoryId: match?.id ?? '',
+      categoryName: name,
     });
-    if (result.canceled || !result.assets?.length) return;
-    const picked = result.assets.filter((a) => a.base64);
-    const toAdd = picked.slice(0, remaining);
-    const newUris = toAdd.map((asset) => `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`);
-    setPhotos((prev) => [...prev, ...newUris]);
-    if (picked.length > remaining) {
-      Alert.alert('Limit reached', `Only ${remaining} photo${remaining === 1 ? '' : 's'} added — you can have up to ${MAX_PHOTOS} photos.`);
-    }
   };
 
-  const pickQuickCategory = (label: string) => {
-    const match = categories.find((c) => c.name.toLowerCase() === label.toLowerCase());
-    setCategoryId(match?.id ?? '');
-    setCategoryQuery(label);
-    setShowSuggestions(false);
-  };
-
-  const useMyLocation = async () => {
-    setLocating(true);
-    try {
-      const ok = await requestLocationPermission();
-      if (!ok) return;
-      const c = await getCurrentCoords();
-      if (c) setCoords(c);
-    } finally {
-      setLocating(false);
-    }
-  };
-
-  const canSave =
-    title.trim().length > 2 &&
-    (categoryId || categoryQuery.trim()) &&
-    (listingType === 'rent' ? Number(depositAmount) > 0 : Number(price) > 0);
-
-  const submit = async () => {
-    if (!canSave) return;
-    setSaving(true);
-    try {
-      await marketplaceService.createListing('user', {
-        listingType,
-        categoryId: categoryId || undefined,
-        categoryName: categoryId ? undefined : categoryQuery.trim(),
-        title: title.trim(),
-        description: description.trim() || undefined,
-        photos,
-        price: listingType === 'rent' ? undefined : Number(price) || undefined,
-        depositAmount: listingType === 'rent' ? Number(depositAmount) || undefined : undefined,
-        rentPricePerDay: listingType === 'rent' ? Number(rentPricePerDay) || undefined : undefined,
-        city: city.trim() || undefined,
-        latitude: coords?.latitude,
-        longitude: coords?.longitude,
-      });
-      Alert.alert('Posted!', 'Your listing is live on KAIRO Market.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
-    } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Could not post listing.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const GRID_ITEMS = [...MARKETPLACE_FIXED_CATEGORIES, OTHERS];
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <View style={styles.flex}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
@@ -166,7 +52,7 @@ export function PostListingScreen() {
         <Text style={styles.headerTitle}>Post Ad</Text>
         <View style={{ width: 24 }} />
       </View>
-      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.card}>
           <Text style={styles.label}>What are you posting?</Text>
           <View style={styles.typeRow}>
@@ -185,122 +71,29 @@ export function PostListingScreen() {
 
         <View style={styles.card}>
           <Text style={styles.label}>Popular categories</Text>
-          <View style={styles.quickRow}>
-            {QUICK_CATEGORIES.map((qc) => (
-              <Pressable
-                key={qc.label}
-                style={[styles.quickChip, categoryQuery === qc.label && styles.quickChipOn]}
-                onPress={() => pickQuickCategory(qc.label)}
-              >
-                <Ionicons
-                  name={qc.icon}
-                  size={18}
-                  color={categoryQuery === qc.label ? colors.white : colors.primary}
-                />
-                <Text style={[styles.quickTxt, categoryQuery === qc.label && styles.quickTxtOn]}>{qc.label}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Text style={styles.label}>Category</Text>
-          <KairoTextInput
-            value={categoryQuery}
-            onChangeText={(t) => {
-              setCategoryQuery(t);
-              setCategoryId('');
-              setShowSuggestions(true);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder="e.g. Heavy Tools, Real Estate, Vehicles…"
-          />
-          {showSuggestions && filteredSuggestions.length > 0 ? (
-            <View style={styles.suggestBox}>
-              {filteredSuggestions.map((c) => (
+          <View style={styles.quickGrid}>
+            {GRID_ITEMS.map((qc, i) => {
+              const isLastCol = i % 2 === 1;
+              const isLastRow = i >= GRID_ITEMS.length - (GRID_ITEMS.length % 2 === 0 ? 2 : 1);
+              return (
                 <Pressable
-                  key={c.id || 'others'}
-                  style={styles.suggestRow}
-                  onPress={() => {
-                    if (c === OTHERS_CATEGORY) {
-                      setCategoryId('');
-                      setShowSuggestions(false);
-                      return;
-                    }
-                    setCategoryId(c.id);
-                    setCategoryQuery(c.name);
-                    setShowSuggestions(false);
-                  }}
+                  key={qc.name}
+                  style={[
+                    styles.quickCell,
+                    !isLastCol && styles.quickCellBorderRight,
+                    !isLastRow && styles.quickCellBorderBottom,
+                  ]}
+                  onPress={() => pickCategory(qc.name)}
                 >
-                  <Text style={styles.suggestTxt}>{c.name}</Text>
+                  <Ionicons name={qc.icon} size={28} color={colors.charcoal} />
+                  <Text style={styles.quickCellTxt}>{qc.name}</Text>
                 </Pressable>
-              ))}
-            </View>
-          ) : null}
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.label}>Photos ({photos.length}/{MAX_PHOTOS})</Text>
-          <View style={styles.photoRow}>
-            {photos.map((uri, i) => (
-              <View key={i} style={styles.photoThumbWrap}>
-                <Image source={{ uri }} style={styles.photoThumb} />
-                <Pressable
-                  style={styles.photoRemove}
-                  onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
-                >
-                  <Ionicons name="close" size={14} color={colors.white} />
-                </Pressable>
-              </View>
-            ))}
-            {photos.length < MAX_PHOTOS ? (
-              <Pressable style={styles.photoAdd} onPress={pickPhoto}>
-                <Ionicons name="camera-outline" size={22} color={colors.primary} />
-              </Pressable>
-            ) : null}
+              );
+            })}
           </View>
-
-          <KairoTextInput label="Product Name" value={title} onChangeText={setTitle} placeholder="e.g. Hand-cutting machine" />
-
-          {listingType === 'rent' ? (
-            <>
-              <KairoTextInput
-                label="Security Deposit Amount (₹)"
-                value={depositAmount}
-                onChangeText={(t) => setDepositAmount(t.replace(/\D/g, ''))}
-                keyboardType="number-pad"
-              />
-              <KairoTextInput
-                label="Rent per day (₹, optional)"
-                value={rentPricePerDay}
-                onChangeText={(t) => setRentPricePerDay(t.replace(/\D/g, ''))}
-                keyboardType="number-pad"
-              />
-              <Text style={styles.hint}>
-                The deposit is held until the item is returned — you and the renter settle it directly.
-              </Text>
-            </>
-          ) : (
-            <KairoTextInput
-              label="Price (₹)"
-              value={price}
-              onChangeText={(t) => setPrice(t.replace(/\D/g, ''))}
-              keyboardType="number-pad"
-            />
-          )}
-
-          <KairoTextInput label="Description" value={description} onChangeText={setDescription} multiline />
         </View>
-
-        <View style={styles.card}>
-          <KairoTextInput label="City (optional)" value={city} onChangeText={setCity} />
-          <Pressable style={styles.locBtn} onPress={useMyLocation}>
-            <Ionicons name="locate-outline" size={18} color={colors.primary} />
-            <Text style={styles.locTxt}>{locating ? 'Fetching location…' : coords ? 'Location added ✓' : 'Use my current location'}</Text>
-          </Pressable>
-        </View>
-
-        <PrimaryButton title="Post listing" onPress={submit} loading={saving} disabled={!canSave} style={styles.submitBtn} />
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -329,22 +122,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
-  quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
-  quickChip: {
+  quickGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.full,
-    backgroundColor: colors.orangeTint,
+    flexWrap: 'wrap',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    overflow: 'hidden',
   },
-  quickChipOn: { backgroundColor: colors.primary },
-  quickTxt: { fontWeight: '700', color: colors.primary, fontSize: 13 },
-  quickTxtOn: { color: colors.white },
-  submitBtn: { marginTop: spacing.xs },
-  label: { fontWeight: '700', color: colors.charcoal, marginTop: spacing.md, marginBottom: spacing.sm },
-  hint: { color: colors.grey, fontSize: 12, marginBottom: spacing.sm, lineHeight: 18 },
+  quickCell: {
+    width: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.white,
+  },
+  quickCellBorderRight: { borderRightWidth: 1, borderRightColor: colors.border },
+  quickCellBorderBottom: { borderBottomWidth: 1, borderBottomColor: colors.border },
+  quickCellTxt: { marginTop: spacing.sm, fontWeight: '600', color: colors.charcoal, fontSize: 13 },
+  label: { fontWeight: '700', color: colors.charcoal, marginBottom: spacing.sm },
+  hint: { color: colors.grey, fontSize: 12, marginTop: spacing.sm, lineHeight: 18 },
   typeRow: { flexDirection: 'row', gap: spacing.sm },
   typeChip: {
     flex: 1,
@@ -356,43 +153,4 @@ const styles = StyleSheet.create({
   typeChipOn: { backgroundColor: colors.primary },
   typeTxt: { fontWeight: '700', color: colors.charcoal, fontSize: 13 },
   typeTxtOn: { color: colors.white },
-  photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
-  photoThumbWrap: { width: 72, height: 72, borderRadius: radius.md, overflow: 'hidden' },
-  photoThumb: { width: '100%', height: '100%' },
-  photoRemove: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 10,
-    padding: 2,
-  },
-  photoAdd: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.greyLight,
-  },
-  suggestBox: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-  },
-  suggestRow: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
-  suggestTxt: { fontWeight: '600', color: colors.charcoal },
-  locBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    marginBottom: spacing.md,
-  },
-  locTxt: { color: colors.primary, fontWeight: '700' },
 });

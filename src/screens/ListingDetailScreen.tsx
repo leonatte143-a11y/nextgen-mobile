@@ -7,7 +7,6 @@ import {
   Alert,
   Dimensions,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,6 +16,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
@@ -92,7 +92,7 @@ export function ListingDetailScreen() {
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => <Image source={{ uri: item }} style={styles.photo} resizeMode="cover" />}
+            renderItem={({ item }) => <Image source={{ uri: item }} style={styles.photo} contentFit="cover" />}
           />
         ) : (
           <View style={[styles.photo, styles.photoFallback]}>

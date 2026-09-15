@@ -11,11 +11,13 @@ type Props = {
   slot: PopularServiceSlot;
   service?: CatalogService;
   onPress: () => void;
+  favorited: boolean;
+  onToggleFavorite: () => void;
 };
 
 const CARD_WIDTH = getGridCardWidth();
 
-function PopularServiceCardComponent({ slot, service, onPress }: Props) {
+function PopularServiceCardComponent({ slot, service, onPress, favorited, onToggleFavorite }: Props) {
   const tint = getAccentTint(slot.subServiceId ?? slot.id);
   return (
     <Pressable
@@ -25,9 +27,18 @@ function PopularServiceCardComponent({ slot, service, onPress }: Props) {
       <View style={styles.iconWrap}>
         <Ionicons name={slot.icon as IconName} size={19} color={colors.primary} />
       </View>
-      <Text style={styles.name} numberOfLines={1}>
-        {service?.name ?? slot.name}
-      </Text>
+      <View style={styles.nameRow}>
+        <Text style={styles.name} numberOfLines={1}>
+          {service?.name ?? slot.name}
+        </Text>
+        <Pressable onPress={onToggleFavorite} hitSlop={8} style={styles.heartBtn}>
+          <Ionicons
+            name={favorited ? 'heart' : 'heart-outline'}
+            size={13}
+            color={favorited ? colors.primary : colors.grey}
+          />
+        </Pressable>
+      </View>
     </Pressable>
   );
 }
@@ -56,7 +67,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.xs,
   },
-  name: { fontSize: 12, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3, maxWidth: '100%' },
+  name: { fontSize: 12, fontWeight: '800', color: colors.charcoal, textAlign: 'center', flexShrink: 1 },
+  heartBtn: { padding: 1 },
   meta: { marginTop: spacing.xs },
   rate: { fontSize: 10, fontWeight: '600', color: colors.grey },
   price: { fontSize: 11, fontWeight: '800', color: colors.primary, marginTop: 2 },

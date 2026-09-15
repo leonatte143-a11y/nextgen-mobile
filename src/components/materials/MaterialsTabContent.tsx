@@ -2,9 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { HomeAdBanner } from '../home/HomeAdBanner';
+import { Alert, FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
 import { colors, radius, spacing } from '../../constants/theme';
+import { MARKETPLACE_FIXED_CATEGORIES } from '../../constants/marketplaceCategories';
+import { TYPEWRITER_SEARCH_TERMS, useTypewriterPlaceholder } from '../../hooks/useTypewriterPlaceholder';
 import { useMarketplaceFavorites } from '../../context/MarketplaceFavoritesContext';
 import { getCoordsIfPermitted } from '../../services/locationService';
 import { marketplaceService } from '../../services/marketplaceService';
@@ -15,46 +17,21 @@ import { ExoBottomBar } from './ExoBottomBar';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  vehicle: 'car-outline',
-  car: 'car-outline',
-  property: 'business-outline',
-  real: 'business-outline',
-  mobile: 'phone-portrait-outline',
-  phone: 'phone-portrait-outline',
-  electronic: 'tv-outline',
-  furniture: 'bed-outline',
-  tool: 'hammer-outline',
-  heavy: 'construct-outline',
-  construction: 'construct-outline',
-  job: 'briefcase-outline',
-};
-
-function iconForCategory(name: string): keyof typeof Ionicons.glyphMap {
-  const key = name.toLowerCase();
-  const match = Object.keys(CATEGORY_ICONS).find((k) => key.includes(k));
-  return match ? CATEGORY_ICONS[match] : 'pricetag-outline';
-}
-
-function relativeDate(iso: string) {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const days = Math.floor(diffMs / 86400000);
-  if (days <= 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+/** ₹ 10,50,000 — Indian lakh/crore digit grouping. */
+function formatINR(amount: number): string {
+  return `₹ ${new Intl.NumberFormat('en-IN').format(Math.round(amount))}`;
 }
 
 function ListingCard({ item, onPress }: { item: MarketplaceListing; onPress: () => void }) {
   const { isFavorite, toggleFavorite } = useMarketplaceFavorites();
   const favorited = isFavorite(item.id);
   const priceLabel =
-    item.listingType === 'rent' ? `₹${item.rentPricePerDay ?? 0}/day` : `₹${item.price ?? 0}`;
+    item.listingType === 'rent' ? `${formatINR(item.rentPricePerDay ?? 0)}/day` : formatINR(item.price ?? 0);
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.imageWrap}>
         {item.photos?.[0] ? (
-          <Image source={{ uri: item.photos[0] }} style={styles.image} resizeMode="cover" />
+          <Image source={{ uri: item.photos[0] }} style={styles.image} contentFit="cover" />
         ) : (
           <View style={styles.imageFallback}>
             <Ionicons name="image-outline" size={28} color={colors.grey} />
@@ -69,11 +46,25 @@ function ListingCard({ item, onPress }: { item: MarketplaceListing; onPress: () 
           <Ionicons name={favorited ? 'heart' : 'heart-outline'} size={16} color={favorited ? colors.primary : colors.charcoal} />
         </Pressable>
       </View>
-      <Text style={styles.price}>{priceLabel}</Text>
-      <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-      <Text style={styles.meta} numberOfLines={1}>
-        {(item.city || 'Nearby')} · {relativeDate(item.createdAt)}
-      </Text>
+      <View style={styles.cardBody}>
+        <Text style={styles.price}>{priceLabel}</Text>
+        <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">{item.title}</Text>
+        <View style={styles.cardFooter}>
+          <View style={styles.footerLocation}>
+            <Ionicons name="location-outline" size={12} color={colors.grey} />
+            <Text style={styles.meta} numberOfLines={1}>{(item.city || 'Nearby').toUpperCase()}</Text>
+          </View>
+          {item.contactPhone ? (
+            <Pressable
+              style={styles.callBtn}
+              onPress={() => Linking.openURL(`tel:${item.contactPhone}`)}
+              hitSlop={8}
+            >
+              <Ionicons name="call" size={14} color={colors.white} />
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
     </Pressable>
   );
 }
@@ -82,8 +73,10 @@ export function MaterialsTabContent({ header, locationLabel }: { header?: React.
   const navigation = useNavigation<Nav>();
   const { favoriteIds } = useMarketplaceFavorites();
   const [search, setSearch] = useState('');
+  const animatedPlaceholder = useTypewriterPlaceholder(TYPEWRITER_SEARCH_TERMS, "Search for '", search.length > 0);
   const [categories, setCategories] = useState<MarketplaceCategory[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [activeCategoryName, setActiveCategoryName] = useState<string | null>(null);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -134,13 +127,32 @@ export function MaterialsTabContent({ header, locationLabel }: { header?: React.
 
   const visibleListings = favoritesOnly ? listings.filter((l) => favoriteIds.includes(l.id)) : listings;
 
+  const onPressFixedCategory = (name: string) => {
+    if (activeCategoryName === name) {
+      setActiveCategoryName(null);
+      setCategoryId(null);
+      setSearch('');
+      return;
+    }
+    setActiveCategoryName(name);
+    setSearch('');
+    const match = categories.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (match) {
+      setCategoryId(match.id);
+    } else {
+      // No matching backend category registered yet — fall back to a text search on the name.
+      setCategoryId(null);
+      setSearch(name);
+    }
+  };
+
   return (
     <View style={styles.root}>
       <FlatList
         data={visibleListings}
         keyExtractor={(l) => l.id}
         numColumns={2}
-        columnWrapperStyle={{ gap: spacing.sm }}
+        columnWrapperStyle={styles.gridRow}
         contentContainerStyle={styles.grid}
         refreshing={loading}
         onRefresh={load}
@@ -152,7 +164,7 @@ export function MaterialsTabContent({ header, locationLabel }: { header?: React.
                 <Ionicons name="search-outline" size={18} color={colors.grey} />
                 <TextInput
                   style={styles.searchIn}
-                  placeholder="Search 'Jobs', 'Mobiles', etc."
+                  placeholder={animatedPlaceholder}
                   placeholderTextColor={colors.grey}
                   value={search}
                   onChangeText={setSearch}
@@ -179,36 +191,34 @@ export function MaterialsTabContent({ header, locationLabel }: { header?: React.
               </Pressable>
             </View>
 
-            <View style={styles.bannerWrap}>
-              <HomeAdBanner locationLabel={locationLabel || 'Rajahmundry'} />
-            </View>
-
-            {categories.length > 0 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.categoryGrid}
-              >
-                {[{ id: null, name: 'All' } as { id: string | null; name: string }, ...categories].map((c) => (
-                  <Pressable
-                    key={c.id ?? 'all'}
-                    style={styles.categoryTile}
-                    onPress={() => setCategoryId(categoryId === c.id ? null : c.id)}
-                  >
-                    <View style={[styles.categorySquare, categoryId === c.id && styles.categorySquareOn]}>
-                      <Ionicons
-                        name={c.id ? iconForCategory(c.name) : 'apps-outline'}
-                        size={26}
-                        color={categoryId === c.id ? colors.primary : colors.charcoal}
-                      />
+            <View style={styles.categoryGrid}>
+              {MARKETPLACE_FIXED_CATEGORIES.map((c) => {
+                const isOn = activeCategoryName === c.name;
+                return (
+                  <Pressable key={c.name} style={styles.categoryTile} onPress={() => onPressFixedCategory(c.name)}>
+                    <View style={[styles.categorySquare, isOn && styles.categorySquareOn]}>
+                      <Ionicons name={c.icon} size={26} color={isOn ? colors.primary : colors.charcoal} />
                     </View>
                     <Text style={styles.categoryLabel} numberOfLines={1}>{c.name}</Text>
                   </Pressable>
-                ))}
-              </ScrollView>
-            ) : null}
+                );
+              })}
+            </View>
 
-            <Text style={styles.sectionTitle}>Fresh recommendations</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Fresh recommendations</Text>
+              <Pressable
+                onPress={() => {
+                  setCategoryId(null);
+                  setActiveCategoryName(null);
+                  setSearch('');
+                  setFavoritesOnly(false);
+                }}
+                hitSlop={8}
+              >
+                <Text style={styles.seeAll}>See All &gt;</Text>
+              </Pressable>
+            </View>
           </>
         }
         ListEmptyComponent={
@@ -258,46 +268,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   badgeTxt: { color: colors.white, fontSize: 9, fontWeight: '800' },
-  bannerWrap: { paddingHorizontal: spacing.md, marginBottom: spacing.md },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.md,
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    maxWidth: 900,
+    paddingBottom: spacing.sm,
   },
-  categoryTile: { alignItems: 'center', width: 72 },
+  categoryTile: { alignItems: 'center', width: '20%', marginBottom: spacing.md },
   categorySquare: {
-    width: 60,
-    height: 60,
+    width: 56,
+    height: 56,
     borderRadius: radius.md,
     backgroundColor: colors.greyLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   categorySquareOn: { backgroundColor: colors.orangeTint },
-  categoryLabel: { marginTop: 4, fontSize: 11, fontWeight: '600', color: colors.charcoal, textAlign: 'center' },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
+  categoryLabel: {
+    marginTop: 4,
+    fontSize: 10,
+    fontWeight: '600',
     color: colors.charcoal,
+    textAlign: 'center',
+    paddingHorizontal: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
   },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.charcoal },
+  seeAll: { fontSize: 13, fontWeight: '700', color: colors.categoryTagPurple },
   grid: { paddingHorizontal: spacing.md, paddingBottom: 24 },
+  gridRow: { gap: spacing.sm },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
   card: {
     flex: 1,
     backgroundColor: colors.white,
-    borderRadius: radius.md,
-    marginBottom: spacing.md,
+    borderRadius: 6,
+    marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#E0E0E0',
     overflow: 'hidden',
   },
-  imageWrap: { height: 110, backgroundColor: colors.greyLight },
-  image: { width: '100%', height: '100%', borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
+  cardBody: { padding: 8, flex: 1 },
+  imageWrap: { height: 140, backgroundColor: colors.greyLight },
+  image: { width: '100%', height: '100%' },
   imageFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   featuredBadge: {
     position: 'absolute',
@@ -311,16 +329,37 @@ const styles = StyleSheet.create({
   featuredTxt: { color: '#1A1A1A', fontWeight: '800', fontSize: 9 },
   heartBtn: {
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: 8,
+    right: 8,
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  price: { fontWeight: '800', color: colors.charcoal, fontSize: 16 },
+  title: { fontWeight: '500', color: colors.charcoal, fontSize: 13, marginTop: 2 },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 'auto',
+    paddingTop: spacing.sm,
+  },
+  footerLocation: { flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1, marginRight: spacing.sm },
+  meta: { color: colors.grey, fontSize: 10, fontWeight: '600', letterSpacing: 0.3 },
+  callBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#1976D2',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  price: { fontWeight: '800', color: colors.charcoal, fontSize: 14, marginHorizontal: spacing.sm, marginTop: spacing.sm },
-  title: { fontWeight: '600', color: colors.charcoal, fontSize: 13, marginHorizontal: spacing.sm, marginTop: 2 },
-  meta: { color: colors.grey, fontSize: 11, marginHorizontal: spacing.sm, marginTop: 2, marginBottom: spacing.sm },
 });

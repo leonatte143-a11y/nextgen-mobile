@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, BackHandler, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import type { AdDraft } from '../lib/adDrafts';
@@ -19,6 +20,27 @@ function formatDate(value: string | null): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// Video ads store a data: URL for the clip itself, which <Image> can't render — showing a
+// paused, muted VideoView instead surfaces the first frame as a thumbnail without needing a
+// separate native thumbnail-extraction library/rebuild.
+function AdThumbnail({ uri, isVideo }: { uri: string | null; isVideo: boolean }) {
+  const player = useVideoPlayer(isVideo && uri ? uri : '', (p) => {
+    p.muted = true;
+  });
+
+  if (!uri) {
+    return (
+      <View style={[styles.image, styles.imageFallback]}>
+        <Ionicons name="image-outline" size={28} color={colors.grey} />
+      </View>
+    );
+  }
+  if (isVideo) {
+    return <VideoView style={styles.image} player={player} contentFit="cover" nativeControls={false} />;
+  }
+  return <Image source={{ uri }} style={styles.image} resizeMode="cover" />;
 }
 
 export function MyAdsScreen() {
@@ -162,13 +184,7 @@ export function MyAdsScreen() {
           }
           renderItem={({ item }) => (
             <Pressable style={styles.card} onPress={() => openDraft(item)}>
-              {item.bannerUri ? (
-                <Image source={{ uri: item.bannerUri }} style={styles.image} resizeMode="cover" />
-              ) : (
-                <View style={[styles.image, styles.imageFallback]}>
-                  <Ionicons name="image-outline" size={28} color={colors.grey} />
-                </View>
-              )}
+              <AdThumbnail uri={item.bannerUri || null} isVideo={item.bannerType === 'video'} />
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle} numberOfLines={1}>{item.businessName || 'Untitled draft'}</Text>
                 <Text style={styles.cardDates}>Saved {formatDate(item.savedAt)}</Text>
@@ -193,13 +209,7 @@ export function MyAdsScreen() {
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
-              {item.imageUrl ? (
-                <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
-              ) : (
-                <View style={[styles.image, styles.imageFallback]}>
-                  <Ionicons name="image-outline" size={28} color={colors.grey} />
-                </View>
-              )}
+              <AdThumbnail uri={item.imageUrl || null} isVideo={item.mediaType === 'video'} />
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
                 <Text style={styles.cardDates}>

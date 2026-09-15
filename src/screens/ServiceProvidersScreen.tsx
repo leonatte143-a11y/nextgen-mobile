@@ -83,13 +83,18 @@ export function ServiceProvidersScreen() {
                 ) : (
                   <Text style={styles.photoTxt}>{item.name[0]}</Text>
                 )}
+                <View style={styles.verifiedBadge}>
+                  <Ionicons name="checkmark-circle" size={18} color={colors.verifiedBlue} />
+                </View>
               </View>
               <View style={styles.info}>
                 <View style={styles.badgeRow}>
                   <View style={styles.categoryTag}>
                     <Text style={styles.categoryTagTxt} numberOfLines={1}>{categoryTag}</Text>
                   </View>
-                  <Ionicons name="checkmark-circle" size={18} color={colors.verifiedBlue} />
+                  <View style={[styles.statusTag, item.isOnline ? styles.online : styles.offline]}>
+                    <Text style={styles.statusTagTxt}>{item.isOnline ? 'Online' : 'Offline'}</Text>
+                  </View>
                 </View>
                 <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
                 {item.description ? (
@@ -159,8 +164,26 @@ const styles = StyleSheet.create({
   },
   photoImage: { width: '100%', height: '100%', resizeMode: 'cover' },
   photoTxt: { color: colors.primary, fontSize: 32, fontWeight: '800' },
+  verifiedBadge: {
+    position: 'absolute',
+    top: '50%',
+    right: 6,
+    marginTop: -9,
+    backgroundColor: colors.white,
+    borderRadius: radius.full,
+    padding: 1,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+  },
   info: { flex: 1, padding: spacing.md },
   badgeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  statusTag: { paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full },
+  statusTagTxt: { color: colors.white, fontSize: 10, fontWeight: '800' },
+  online: { backgroundColor: colors.online },
+  offline: { backgroundColor: colors.offline },
   categoryTag: {
     backgroundColor: colors.categoryTagPurple,
     borderRadius: radius.full,
@@ -181,9 +204,9 @@ const styles = StyleSheet.create({
     gap: 4,
     backgroundColor: colors.primary,
     borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 10,
     marginTop: 4,
   },
-  viewProfileTxt: { color: colors.white, fontWeight: '700', fontSize: 12 },
+  viewProfileTxt: { color: colors.white, fontWeight: '700', fontSize: 14 },
 });

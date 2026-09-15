@@ -18,6 +18,7 @@ export type MarketplaceListing = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  contactPhone: string | null;
   status: string;
   moderationStatus: string | null;
   distanceKm: number | null;

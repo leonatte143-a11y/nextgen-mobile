@@ -27,6 +27,7 @@ import { catalogService } from '../services/catalogService';
 import { getCurrentCoords } from '../services/locationService';
 import { notificationService } from '../services/notificationService';
 import { getAccentTint } from '../utils/accentColor';
+import { TYPEWRITER_SEARCH_TERMS, useTypewriterPlaceholder } from '../hooks/useTypewriterPlaceholder';
 import { incrementSearchQueryCount } from '../lib/localStorage';
 import { t } from '../i18n/strings';
 import type { RootStackParamList } from '../navigation/types';
@@ -47,6 +48,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const { language } = useAuth();
   const [location] = useState('Danavaipeta, Rajahmundry');
   const [search, setSearch] = useState('');
+  const animatedPlaceholder = useTypewriterPlaceholder(TYPEWRITER_SEARCH_TERMS, "Search for '", search.length > 0);
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
   const [catalog, setCatalog] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,7 +180,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
             <Ionicons name="search-outline" size={20} color={colors.grey} />
             <TextInput
               style={styles.searchIn}
-              placeholder={t(language, 'searchPlaceholder')}
+              placeholder={animatedPlaceholder}
               placeholderTextColor={colors.grey}
               value={search}
               onChangeText={setSearch}

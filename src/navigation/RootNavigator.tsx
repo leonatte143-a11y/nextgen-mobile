@@ -13,6 +13,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { LanguageScreen } from '../screens/LanguageScreen';
 import { LiveBookingScreen } from '../screens/LiveBookingScreen';
 import { PostListingScreen } from '../screens/PostListingScreen';
+import { PostAdDetailsScreen } from '../screens/PostAdDetailsScreen';
 import { ListingDetailScreen } from '../screens/ListingDetailScreen';
 import { MarketplaceChatScreen } from '../screens/MarketplaceChatScreen';
 import { MarketplaceChatsScreen } from '../screens/MarketplaceChatsScreen';
@@ -96,6 +97,7 @@ export function RootNavigator() {
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="Conversations" component={ConversationsScreen} />
       <Stack.Screen name="PostListing" component={PostListingScreen} />
+      <Stack.Screen name="PostAdDetails" component={PostAdDetailsScreen} />
       <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="MarketplaceChat" component={MarketplaceChatScreen} />
       <Stack.Screen name="MarketplaceChats" component={MarketplaceChatsScreen} />

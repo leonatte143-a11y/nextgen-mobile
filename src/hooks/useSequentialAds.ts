@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { getCoordsIfPermitted } from '../services/locationService';
 import { isPointInPolygon } from '../utils/geoFence';
@@ -7,39 +7,33 @@ import type { AdvertisementBanner } from '../types/banner';
 
 /** Rotate through queued ads one at a time (9s per doc 8), exposing the setter so callers can
  * also drive the same index from manual interaction (e.g. a swipeable carousel) without the
- * auto-advance timer fighting the manual change — both read/write the same state. */
+ * auto-advance timer fighting the manual change — both read/write the same state.
+ * Pass `paused: true` (e.g. while the active ad is a video still playing) to hold the current
+ * index — the third return value lets the caller manually advance once it decides it's time
+ * (e.g. when that video's `playToEnd` event fires). */
 export function useSequentialAdIndexState(
   count: number,
   durationMs = 9_000,
-): [number, Dispatch<SetStateAction<number>>] {
+  paused = false,
+): [number, Dispatch<SetStateAction<number>>, () => void] {
   const [idx, setIdx] = useState(0);
-  // Bounces 0->count-1->0 instead of wrapping abruptly back to 0.
-  const directionRef = useRef<1 | -1>(1);
 
   useEffect(() => {
     setIdx(0);
-    directionRef.current = 1;
+  }, [count]);
+
+  // Always forward, wrapping straight from the last ad back to the first (no backward bounce).
+  const advance = useCallback(() => {
+    setIdx((i) => (count > 0 ? (i + 1) % count : 0));
   }, [count]);
 
   useEffect(() => {
-    if (count <= 1) return undefined;
-    const timer = setInterval(() => {
-      setIdx((i) => {
-        let next = i + directionRef.current;
-        if (next >= count) {
-          directionRef.current = -1;
-          next = count - 2 >= 0 ? count - 2 : 0;
-        } else if (next < 0) {
-          directionRef.current = 1;
-          next = count > 1 ? 1 : 0;
-        }
-        return next;
-      });
-    }, durationMs);
+    if (count <= 1 || paused) return undefined;
+    const timer = setInterval(advance, durationMs);
     return () => clearInterval(timer);
-  }, [count, durationMs]);
+  }, [count, durationMs, paused, advance]);
 
-  return [idx, setIdx];
+  return [idx, setIdx, advance];
 }
 
 /** Rotate through queued ads one at a time (9s per doc 8). */

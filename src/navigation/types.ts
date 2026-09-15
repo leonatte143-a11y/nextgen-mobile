@@ -42,6 +42,7 @@ export type RootStackParamList = {
   ShopJoin: undefined;
   Chat: { role: 'user' | 'partner'; bookingId?: string; otherPartyName?: string };
   PostListing: undefined;
+  PostAdDetails: { listingType: 'rent' | 'sell' | 'resale'; categoryId: string; categoryName: string };
   ListingDetail: { listingId: string };
   MarketplaceChat: { listingId?: string; conversationId?: string; otherPartyName?: string };
   MarketplaceChats: undefined;

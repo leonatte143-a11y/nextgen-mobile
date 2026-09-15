@@ -124,6 +124,7 @@ export const MAIN_CATEGORIES: MainCategory[] = [
       { id: 'ev_sham', title: 'Shamiyana', subtitle: 'Tent setup', icon: 'umbrella-outline', searchQuery: 'shamiyana' },
       { id: 'ev_cat', title: 'Catering', subtitle: 'Food service', icon: 'restaurant-outline', searchQuery: 'catering' },
       { id: 'ev_beauty', title: 'Beauty Service', subtitle: 'Salon at home', icon: 'cut-outline', searchQuery: 'beauty service' },
+      { id: 'ev_saloon', title: 'Saloon', subtitle: 'Haircut & grooming', icon: 'body-outline', searchQuery: 'saloon' },
       { id: 'ev_bridal', title: 'Bride & Groom Makeup', subtitle: 'Bridal services', icon: 'flower-outline', searchQuery: 'bride groom makeup' },
       { id: 'ev_mehandi', title: 'Mehandi Artist', subtitle: 'Designs', icon: 'color-fill-outline', searchQuery: 'mehandi' },
       { id: 'ev_hall', title: 'Wedding Halls', subtitle: 'Venues', icon: 'business-outline', searchQuery: 'wedding hall' },

@@ -1,4 +1,5 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -13,6 +14,8 @@ import {
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
+import * as FileSystem from 'expo-file-system/legacy';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { colors, radius, spacing } from '../../constants/theme';
 import {
   sortBannersByQueue,
@@ -36,6 +39,150 @@ type Props = {
 const AD_HEIGHT = 184;
 const ROTATE_MS = 5_000;
 
+/**
+ * expo-video's native players (ExoPlayer/AVPlayer) don't reliably load `data:` base64 URIs as a
+ * video source — only expo-image's decoder handles those. Banners are stored as base64 data URLs,
+ * so for video ads we write the payload out to a real cache file once and hand the player a
+ * `file://` path instead. Keyed by banner id so repeated re-fetches reuse the same cached file.
+ */
+function useLocalVideoUri(dataUrlOrUri: string | null, cacheKey: string): string | null {
+  const [localUri, setLocalUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!dataUrlOrUri) {
+      setLocalUri(null);
+      return undefined;
+    }
+    if (!dataUrlOrUri.startsWith('data:')) {
+      setLocalUri(dataUrlOrUri);
+      return undefined;
+    }
+    (async () => {
+      try {
+        const commaIdx = dataUrlOrUri.indexOf(',');
+        const meta = commaIdx >= 0 ? dataUrlOrUri.slice(5, commaIdx) : '';
+        const base64 = commaIdx >= 0 ? dataUrlOrUri.slice(commaIdx + 1) : dataUrlOrUri;
+        const ext = meta.includes('quicktime') || meta.includes('mov') ? 'mov' : 'mp4';
+        const path = `${FileSystem.cacheDirectory}banner_${cacheKey}.${ext}`;
+        const info = await FileSystem.getInfoAsync(path);
+        if (!info.exists) {
+          await FileSystem.writeAsStringAsync(path, base64, { encoding: FileSystem.EncodingType.Base64 });
+        }
+        if (!cancelled) setLocalUri(path);
+      } catch (e) {
+        console.warn('[HomeAdBanner] failed to materialize video file', e);
+        if (!cancelled) setLocalUri(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [dataUrlOrUri, cacheKey]);
+
+  return localUri;
+}
+
+function BannerMedia({
+  bannerId,
+  mediaUrl,
+  isVideo,
+  isActive,
+  muted,
+  loopAlone,
+  onEnded,
+}: {
+  bannerId: string;
+  mediaUrl: string | null;
+  isVideo: boolean;
+  isActive: boolean;
+  muted: boolean;
+  loopAlone: boolean;
+  onEnded: () => void;
+}) {
+  const [videoReady, setVideoReady] = useState(false);
+  const isScreenFocused = useIsFocused();
+  const localVideoUri = useLocalVideoUri(isVideo ? mediaUrl : null, bannerId);
+  // Source is always '' here and never changes across renders — useVideoPlayer treats a changed
+  // source as "create a new player and release the old one", which crashed VideoView with
+  // "shared object already released" once the local file resolved from null to a real path.
+  // Swapping the source on an already-mounted player must go through player.replaceAsync().
+  const player = useVideoPlayer('', (p) => {
+    p.loop = false;
+    p.muted = muted;
+  });
+
+  // Keep muted state in sync whenever the user taps the sound toggle.
+  useEffect(() => {
+    player.muted = muted;
+  }, [muted, player]);
+
+  useEffect(() => {
+    if (!isVideo || !localVideoUri) return;
+    player
+      .replaceAsync(localVideoUri)
+      .then(() => {
+        if (isActive && isScreenFocused) player.play();
+      })
+      .catch((e) => console.warn('[HomeAdBanner] failed to load video', e));
+    // isActive/isScreenFocused intentionally excluded — this only needs to fire once per
+    // resolved source; the separate play/pause effect below already reacts to focus changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVideo, localVideoUri, player]);
+
+  // Play only the active slide, and only while this screen actually has focus — leaving the
+  // screen (e.g. navigating to a category page) must not leave audio running in the background.
+  // Reset to the start every time this slide becomes active: after a video plays to the end its
+  // position stays there, so simply calling play() again on the next loop had nothing left to
+  // play — no playToEnd ever fired again, which silently stalled the carousel from ever advancing.
+  useEffect(() => {
+    if (!isVideo) return;
+    if (isActive && isScreenFocused) {
+      player.currentTime = 0;
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [isActive, isScreenFocused, isVideo, player]);
+
+  useEffect(() => {
+    if (!isVideo) return undefined;
+    const statusSub = player.addListener('statusChange', ({ status }) => {
+      if (status === 'readyToPlay') setVideoReady(true);
+      // A broken/unplayable video must not freeze the carousel on this slide forever.
+      if (status === 'error' && !loopAlone) onEnded();
+    });
+    const endSub = player.addListener('playToEnd', () => {
+      // Only one banner to show — keep it looping rather than freezing on the last frame.
+      if (loopAlone) player.replay();
+      else onEnded();
+    });
+    return () => {
+      statusSub.remove();
+      endSub.remove();
+    };
+  }, [isVideo, player, onEnded, loopAlone]);
+
+  if (isVideo) {
+    return (
+      <>
+        <VideoView
+          style={styles.image}
+          player={player}
+          contentFit="cover"
+          nativeControls={false}
+          surfaceType="textureView"
+        />
+        {!videoReady ? <View style={styles.imageFallback} /> : null}
+      </>
+    );
+  }
+  if (mediaUrl) {
+    return <Image source={{ uri: mediaUrl }} style={styles.image} contentFit="cover" cachePolicy="memory-disk" transition={150} />;
+  }
+  return <View style={styles.imageFallback} />;
+}
+
 function HomeAdBannerComponent({ locationLabel }: Props) {
   const navigation = useNavigation<Nav>();
   const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
@@ -44,9 +191,18 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const isManualScroll = useRef(false);
   const visibleBanners = useGeoFenceVisibleBanners(banners);
-  const [idx, setIdx] = useSequentialAdIndexState(visibleBanners.length, ROTATE_MS);
+  const [muted, setMuted] = useState(false);
+  // Auto-slide must hold while the active ad is a video — this is set a beat after `ad` changes
+  // (see effect below) rather than computed inline, since the hook that owns `idx` is what
+  // produces `ad` in the first place.
+  const [pauseForVideo, setPauseForVideo] = useState(false);
+  const [idx, setIdx, advance] = useSequentialAdIndexState(visibleBanners.length, ROTATE_MS, pauseForVideo);
   const ad = visibleBanners[idx];
   const fadeOpacity = useAdFadeAnimation(ad?.id);
+
+  useEffect(() => {
+    setPauseForVideo(ad?.mediaType === 'video');
+  }, [ad?.id, ad?.mediaType]);
 
   const load = useCallback(
     async (force = false) => {
@@ -122,18 +278,23 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
           scrollEnabled={visibleBanners.length > 1}
         >
           {visibleBanners.map((banner) => {
-            const mediaUrl = banner.mediaUrl || banner.imageUrl;
+            const mediaUrl = banner.mediaUrl || banner.imageUrl || null;
+            const isVideo = banner.mediaType === 'video';
             return (
               <Pressable
                 key={banner.id}
                 style={({ pressed }) => [styles.card, { width: pageWidth || undefined }, pressed && styles.pressed]}
                 onPress={() => handleBannerPress(banner, navigation)}
               >
-                {mediaUrl && banner.mediaType !== 'video' ? (
-                  <Image source={{ uri: mediaUrl }} style={styles.image} contentFit="cover" cachePolicy="memory-disk" transition={150} />
-                ) : (
-                  <View style={styles.imageFallback} />
-                )}
+                <BannerMedia
+                  bannerId={banner.id}
+                  mediaUrl={mediaUrl}
+                  isVideo={isVideo}
+                  isActive={banner.id === ad?.id}
+                  muted={muted}
+                  loopAlone={visibleBanners.length <= 1}
+                  onEnded={advance}
+                />
                 <View style={styles.overlay} />
                 <View style={styles.textBlock}>
                   <Text style={styles.sponsored}>Sponsored</Text>
@@ -146,6 +307,18 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
                     </Text>
                   ) : null}
                 </View>
+                {isVideo && banner.id === ad?.id ? (
+                  <Pressable
+                    style={styles.muteBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setMuted((m) => !m);
+                    }}
+                    hitSlop={10}
+                  >
+                    <Ionicons name={muted ? 'volume-mute' : 'volume-high'} size={16} color={colors.white} />
+                  </Pressable>
+                ) : null}
               </Pressable>
             );
           })}
@@ -177,6 +350,19 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.92 },
   image: { ...StyleSheet.absoluteFillObject },
   imageFallback: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.primaryDark },
+  muteBtn: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 20,
+    elevation: 20,
+  },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.28)' },
   textBlock: { flex: 1, justifyContent: 'flex-end', padding: spacing.md },
   sponsored: {
