@@ -1,6 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '../components/EmptyState';
@@ -26,21 +26,29 @@ export function BookingsScreen({ navigation: tabNav }: MainTabScreenProps<'Booki
   const [items, setItems] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (background = false) => {
+    if (!background) setLoading(true);
     try {
       const all = await bookingService.getBookings();
       setItems(all);
     } catch {
-      setItems([]);
+      if (!background) setItems([]);
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  // Poll while focused (matching the interval used for live status elsewhere, e.g.
+  // LiveBookingScreen) so a booking that flips to completed/cancelled moves to History
+  // without the user having to pull-to-refresh. Polls run in the background (no spinner)
+  // so they don't flicker the list every few seconds.
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      const timer = setInterval(() => load(true), 4000);
+      return () => clearInterval(timer);
+    }, [load]),
+  );
 
   const filtered = items.filter((b) => (tab === 'active' ? isActive(b.status) : !isActive(b.status)));
 

@@ -6,7 +6,9 @@ import { Alert, FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View 
 import { Image } from 'expo-image';
 import { colors, radius, spacing } from '../../constants/theme';
 import { MARKETPLACE_FIXED_CATEGORIES } from '../../constants/marketplaceCategories';
-import { TYPEWRITER_SEARCH_TERMS, useTypewriterPlaceholder } from '../../hooks/useTypewriterPlaceholder';
+import { useTypewriterPlaceholder } from '../../hooks/useTypewriterPlaceholder';
+
+const EXO_SEARCH_TERMS = ['Cars', 'Bikes', 'Furniture', 'Properties', 'Mobiles'];
 import { useMarketplaceFavorites } from '../../context/MarketplaceFavoritesContext';
 import { getCoordsIfPermitted } from '../../services/locationService';
 import { marketplaceService } from '../../services/marketplaceService';
@@ -73,7 +75,7 @@ export function MaterialsTabContent({ header, locationLabel }: { header?: React.
   const navigation = useNavigation<Nav>();
   const { favoriteIds } = useMarketplaceFavorites();
   const [search, setSearch] = useState('');
-  const animatedPlaceholder = useTypewriterPlaceholder(TYPEWRITER_SEARCH_TERMS, "Search for '", search.length > 0);
+  const animatedPlaceholder = useTypewriterPlaceholder(EXO_SEARCH_TERMS, "Search for '", search.length > 0);
   const [categories, setCategories] = useState<MarketplaceCategory[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [activeCategoryName, setActiveCategoryName] = useState<string | null>(null);

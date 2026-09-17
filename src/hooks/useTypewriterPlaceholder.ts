@@ -5,7 +5,7 @@ const DELETE_MS = 90;
 const PAUSE_MS = 2800;
 const NEXT_WORD_DELAY_MS = 150;
 
-/** Shared list covering major app + EXO Marketplace categories, used by both search bars. */
+/** Terms cycled in the main Home service search bar. */
 export const TYPEWRITER_SEARCH_TERMS = [
   'Plumber',
   'Electrician',

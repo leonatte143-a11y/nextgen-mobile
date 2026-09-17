@@ -1,7 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { spacing } from '../../constants/theme';
-import { useFavoriteIds } from '../../hooks/useFavoriteIds';
 import type { CatalogService } from '../../mock/types';
 import { buildPopularDisplay, type PopularServiceSlot } from '../../data/serviceCatalog';
 import { GRID_COLUMNS } from '../../utils/gridLayout';
@@ -16,19 +15,12 @@ type Props = {
 
 function PopularServicesGridComponent({ catalog, onItemPress }: Props) {
   const data = buildPopularDisplay(catalog);
-  const { isFavorite, toggleFavorite } = useFavoriteIds('kairo_fav_popular_services_v1');
 
   const renderItem = useCallback(
     ({ item }: { item: PopularItem }) => (
-      <PopularServiceCard
-        slot={item}
-        service={item.service}
-        onPress={() => onItemPress(item)}
-        favorited={isFavorite(item.id)}
-        onToggleFavorite={() => toggleFavorite(item.id)}
-      />
+      <PopularServiceCard slot={item} service={item.service} onPress={() => onItemPress(item)} />
     ),
-    [onItemPress, isFavorite, toggleFavorite],
+    [onItemPress],
   );
 
   return (

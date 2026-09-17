@@ -53,7 +53,7 @@ export function BookingTrackingScreen() {
       bookingService.getBooking(route.params.bookingId).then((b) => {
         if (active) setBooking(b);
       }).catch(() => undefined);
-    }, 5000);
+    }, 2500);
     return () => {
       active = false;
       clearInterval(timer);

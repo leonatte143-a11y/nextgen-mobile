@@ -1,5 +1,5 @@
 ﻿import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KairoLogo } from '../components/KairoLogo';
@@ -9,11 +9,23 @@ import { PartnerServiceLocationBar } from '../components/partner/PartnerServiceL
 import { PartnerSocialProofSection } from '../components/partner/PartnerSocialProofSection';
 import { usePartner } from '../context/PartnerContext';
 import { colors, radius, spacing } from '../constants/theme';
+import { getCoordsIfPermitted, reverseGeocodeCityName } from '../services/locationService';
 type Props = { navigation: { navigate: (k: string) => void } };
 
 export function PartnerDashboardScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { profile, earnings, requests, toggleOnline, isLoading } = usePartner();
+  const [detectedCity, setDetectedCity] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profile?.primaryCity) return;
+    (async () => {
+      const coords = await getCoordsIfPermitted();
+      if (!coords) return;
+      const city = await reverseGeocodeCityName(coords);
+      if (city) setDetectedCity(city);
+    })();
+  }, [profile?.primaryCity]);
 
   if (isLoading || !profile || !earnings) {
     return (
@@ -33,8 +45,13 @@ export function PartnerDashboardScreen({ navigation }: Props) {
         contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm, paddingBottom: 120 + insets.bottom }]}
       >
         <View style={styles.brandRow}>
-          <KairoLogo size={32} />
-          <Text style={styles.brandName}>KAIRO</Text>
+          <KairoLogo size={40} />
+          <View style={styles.locationHeaderRow}>
+            <Ionicons name="location-outline" size={16} color={colors.navy} />
+            <Text style={styles.brandName} numberOfLines={1}>
+              {profile.primaryCity || detectedCity || 'Detecting location…'}
+            </Text>
+          </View>
         </View>
         <Text style={styles.welcome}>Welcome, {profile.name.split(' ')[0]}</Text>
         <Text style={styles.welcomeSub}>Service Partner Command Center</Text>
@@ -120,6 +137,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { padding: spacing.lg, paddingTop: 16 + 8, paddingBottom: spacing.xl },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
+  locationHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 1 },
   logoMark: { width: 32, height: 32, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
   brandName: { fontSize: 18, fontWeight: '900', color: colors.navy, letterSpacing: 1 },

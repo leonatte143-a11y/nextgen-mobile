@@ -143,10 +143,6 @@ export function ProfileScreen(_props: MainTabScreenProps<'Profile'>) {
             {user.firstName} {user.lastName}
           </Text>
           <Text style={styles.email}>{user.phone}</Text>
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={14} color={colors.grey} />
-            <Text style={styles.locationTxt}>Danavaipeta, Rajahmundry</Text>
-          </View>
           <View style={styles.cardActions}>
             <Pressable style={styles.pairBtn} onPress={() => navigation.navigate('EditProfile')}>
               <Ionicons name="create-outline" size={16} color={colors.primary} />
@@ -366,8 +362,6 @@ const styles = StyleSheet.create({
   avText: { fontSize: 34, fontWeight: '800', color: colors.primary },
   name: { fontSize: 20, fontWeight: '800', color: colors.charcoal, textAlign: 'center' },
   email: { fontSize: 14, color: colors.grey, marginTop: 4, textAlign: 'center' },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  locationTxt: { fontSize: 13, color: colors.grey },
   editBtn: {
     marginTop: spacing.md,
     paddingHorizontal: spacing.lg,

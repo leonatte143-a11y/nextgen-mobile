@@ -122,11 +122,17 @@ function BannerMedia({
     player
       .replaceAsync(localVideoUri)
       .then(() => {
+        // replaceAsync swaps the underlying native media item, which can drop back to the
+        // native default (unmuted) — reassert the user's current mute preference here so it
+        // isn't silently overridden the moment the video source resolves.
+        player.muted = muted;
         if (isActive && isScreenFocused) player.play();
       })
       .catch((e) => console.warn('[HomeAdBanner] failed to load video', e));
     // isActive/isScreenFocused intentionally excluded — this only needs to fire once per
     // resolved source; the separate play/pause effect below already reacts to focus changes.
+    // muted intentionally excluded too — the dedicated mute-sync effect above handles live
+    // toggles; this only needs the value at the moment the source resolves.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVideo, localVideoUri, player]);
 
@@ -154,14 +160,18 @@ function BannerMedia({
     });
     const endSub = player.addListener('playToEnd', () => {
       // Only one banner to show — keep it looping rather than freezing on the last frame.
-      if (loopAlone) player.replay();
-      else onEnded();
+      if (loopAlone) {
+        // replay() can reset the native player back to its unmuted default — reapply the
+        // user's mute preference so it survives the loop instead of silently reverting.
+        player.muted = muted;
+        player.replay();
+      } else onEnded();
     });
     return () => {
       statusSub.remove();
       endSub.remove();
     };
-  }, [isVideo, player, onEnded, loopAlone]);
+  }, [isVideo, player, onEnded, loopAlone, muted]);
 
   if (isVideo) {
     return (
@@ -188,6 +198,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
   const [banners, setBanners] = useState<AdvertisementBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageWidth, setPageWidth] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
   const isManualScroll = useRef(false);
   const visibleBanners = useGeoFenceVisibleBanners(banners);
@@ -199,6 +210,13 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
   const [idx, setIdx, advance] = useSequentialAdIndexState(visibleBanners.length, ROTATE_MS, pauseForVideo);
   const ad = visibleBanners[idx];
   const fadeOpacity = useAdFadeAnimation(ad?.id);
+  // Tracks whichever card is actually >=50% in view during a manual drag (ScrollView has no
+  // built-in viewabilityConfig like FlatList) so a mid-swipe card doesn't keep its video/audio
+  // running once it's mostly scrolled off, well before onMomentumScrollEnd settles `idx`.
+  const visibleIdx = pageWidth > 0
+    ? Math.min(visibleBanners.length - 1, Math.max(0, Math.round(scrollX / pageWidth)))
+    : idx;
+  const visibleAd = visibleBanners[visibleIdx] ?? ad;
 
   useEffect(() => {
     setPauseForVideo(ad?.mediaType === 'video');
@@ -253,6 +271,10 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
     }
   };
 
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setScrollX(e.nativeEvent.contentOffset.x);
+  };
+
   if (loading) {
     return <BannerSkeleton height={AD_HEIGHT} />;
   }
@@ -275,6 +297,8 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onMomentumScrollEnd}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           scrollEnabled={visibleBanners.length > 1}
         >
           {visibleBanners.map((banner) => {
@@ -290,7 +314,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
                   bannerId={banner.id}
                   mediaUrl={mediaUrl}
                   isVideo={isVideo}
-                  isActive={banner.id === ad?.id}
+                  isActive={banner.id === visibleAd?.id}
                   muted={muted}
                   loopAlone={visibleBanners.length <= 1}
                   onEnded={advance}
@@ -307,7 +331,7 @@ function HomeAdBannerComponent({ locationLabel }: Props) {
                     </Text>
                   ) : null}
                 </View>
-                {isVideo && banner.id === ad?.id ? (
+                {isVideo && banner.id === visibleAd?.id ? (
                   <Pressable
                     style={styles.muteBtn}
                     onPress={(e) => {

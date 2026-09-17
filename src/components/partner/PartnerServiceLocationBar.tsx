@@ -4,9 +4,11 @@ import { Alert, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'reac
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../../constants/theme';
 import { PrimaryButton } from '../PrimaryButton';
-import { detectCityFromGps } from '../../services/locationService';
+import { detectCityFromGps, getCurrentCoords, reverseGeocodeCityName, type Coords } from '../../services/locationService';
+import { ANDHRA_PRADESH_CITIES } from '../../constants/apCities';
+import { usePartner } from '../../context/PartnerContext';
 
-const CITIES = ['Rajahmundry', 'Vijayawada'] as const;
+const QUICK_CITIES = ['Rajahmundry', 'Vijayawada'] as const;
 
 type Props = {
   initialCity: string;
@@ -15,6 +17,7 @@ type Props = {
 
 export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props) {
   const insets = useSafeAreaInsets();
+  const { updateProfile } = usePartner();
   const [city, setCity] = useState(initialCity);
   const [radius, setRadius] = useState(initialRadius);
   const [locOpen, setLocOpen] = useState(false);
@@ -22,15 +25,43 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
   const [mapHint, setMapHint] = useState('');
   const [rInput, setRInput] = useState(String(initialRadius));
   const [detecting, setDetecting] = useState(false);
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const [savingLoc, setSavingLoc] = useState(false);
+  const [savingRadius, setSavingRadius] = useState(false);
 
   const useMyLocation = async () => {
     setDetecting(true);
     try {
-      const detected = await detectCityFromGps(CITIES);
-      if (detected) setCity(detected);
+      const pos = await getCurrentCoords();
+      if (pos) setCoords(pos);
+      const detected = await detectCityFromGps(ANDHRA_PRADESH_CITIES);
+      if (detected) {
+        setCity(detected);
+        return;
+      }
+      const fallback = pos ? await reverseGeocodeCityName(pos) : null;
+      if (fallback) setCity(fallback);
       else Alert.alert('Location', 'Could not detect your city. Please select one below.');
     } finally {
       setDetecting(false);
+    }
+  };
+
+  const saveLocation = async () => {
+    setSavingLoc(true);
+    try {
+      const finalCity = (mapHint.trim() || city).trim();
+      await updateProfile({
+        primaryCity: finalCity,
+        ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
+      });
+      setCity(finalCity);
+      setMapHint('');
+      setLocOpen(false);
+    } catch {
+      Alert.alert('Could not save', 'Please check your connection and try again.');
+    } finally {
+      setSavingLoc(false);
     }
   };
 
@@ -46,7 +77,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
             {mapHint || city} · {radius} km
           </Text>
           <Text style={styles.subMeta} numberOfLines={1}>
-            Rajahmundry / Vijayawada
+            Service area: {city}
           </Text>
         </View>
         <Pressable onPress={() => setRadOpen(true)} hitSlop={8}>
@@ -58,15 +89,19 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
         <View style={styles.modalRoot}>
           <View style={styles.modalCard}>
             <Text style={styles.modalH}>Service territory</Text>
-            <Text style={styles.gpsPill}>GPS: Active — location lock enabled</Text>
+            <Text style={styles.gpsPill}>
+              {coords
+                ? `GPS: base point captured (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`
+                : 'GPS: no base point captured yet'}
+            </Text>
             <Text style={styles.modalSub}>
-              Primary zone: Rajahmundry / Vijayawada. Set center by city or type an area (e.g. Danavaipeta).
+              Primary zone: {city}. Set center by city or type an area (e.g. your neighborhood).
             </Text>
             <Pressable style={styles.gpsBtn} onPress={useMyLocation} disabled={detecting}>
               <Ionicons name="locate-outline" size={16} color={colors.primary} />
               <Text style={styles.gpsBtnTxt}>{detecting ? 'Detecting…' : 'Use my location'}</Text>
             </Pressable>
-            {CITIES.map((c) => (
+            {QUICK_CITIES.map((c) => (
               <Pressable
                 key={c}
                 style={[styles.chip, city === c && styles.chipOn]}
@@ -81,7 +116,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
               value={mapHint}
               onChangeText={setMapHint}
             />
-            <PrimaryButton title="Save" onPress={() => setLocOpen(false)} />
+            <PrimaryButton title="Save" onPress={saveLocation} loading={savingLoc} />
           </View>
         </View>
       </Modal>
@@ -90,7 +125,7 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
         <View style={styles.modalRoot}>
           <View style={styles.modalCard}>
             <Text style={styles.modalH}>Service radius (km)</Text>
-            <Text style={styles.modalSub}>Default 10 km. Adjusting is simulated only.</Text>
+            <Text style={styles.modalSub}>Default 10 km.</Text>
             <TextInput
               style={styles.inp}
               keyboardType="number-pad"
@@ -99,12 +134,21 @@ export function PartnerServiceLocationBar({ initialCity, initialRadius }: Props)
             />
             <PrimaryButton
               title="Apply"
-              onPress={() => {
+              loading={savingRadius}
+              onPress={async () => {
                 const n = Math.max(1, Math.min(50, parseInt(rInput, 10) || 10));
-                setRadius(n);
-                setRInput(String(n));
-                Alert.alert('Radius updated', `Partners see jobs within ${n} km.`);
-                setRadOpen(false);
+                setSavingRadius(true);
+                try {
+                  await updateProfile({ serviceOuterRadiusKm: n });
+                  setRadius(n);
+                  setRInput(String(n));
+                  Alert.alert('Radius updated', `Partners see jobs within ${n} km.`);
+                  setRadOpen(false);
+                } catch {
+                  Alert.alert('Could not save', 'Please check your connection and try again.');
+                } finally {
+                  setSavingRadius(false);
+                }
               }}
             />
             <Pressable onPress={() => setRadOpen(false)} style={styles.close}>

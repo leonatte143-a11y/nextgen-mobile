@@ -5,6 +5,7 @@ export const LOCAL_STORAGE_KEYS = {
   notificationSpecialOffers: 'kairo_notify_special_offers',
   notificationAppUpdates: 'kairo_notify_app_updates',
   searchQueryCount: 'kairo_search_query_count',
+  savedAddresses: 'kairo_saved_addresses',
 };
 
 export async function getBooleanSetting(key: string, defaultValue = false): Promise<boolean> {

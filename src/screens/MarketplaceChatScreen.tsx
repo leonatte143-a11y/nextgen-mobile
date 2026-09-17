@@ -75,6 +75,10 @@ export function MarketplaceChatScreen() {
     if (messages.length) listRef.current?.scrollToEnd({ animated: true });
   }, [messages.length]);
 
+  useEffect(() => {
+    if (conversation) marketplaceService.markConversationSeen(conversation.id);
+  }, [conversation, messages.length]);
+
   const isSeller = conversation ? conversation.sellerRole === ROLE : false;
 
   const handleSend = async () => {

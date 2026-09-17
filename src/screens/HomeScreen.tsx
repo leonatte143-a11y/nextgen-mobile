@@ -24,7 +24,7 @@ import { useAuth } from '../context/AuthContext';
 import { MAIN_CATEGORIES, type MainCategory } from '../data/serviceCatalog';
 import type { CatalogService } from '../mock/types';
 import { catalogService } from '../services/catalogService';
-import { getCurrentCoords } from '../services/locationService';
+import { getCurrentCoords, reverseGeocodeCityName } from '../services/locationService';
 import { notificationService } from '../services/notificationService';
 import { getAccentTint } from '../utils/accentColor';
 import { TYPEWRITER_SEARCH_TERMS, useTypewriterPlaceholder } from '../hooks/useTypewriterPlaceholder';
@@ -45,8 +45,8 @@ const DEFAULT_FILTERS: SearchFilters = {
 export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { language } = useAuth();
-  const [location] = useState('Danavaipeta, Rajahmundry');
+  const { language, user } = useAuth();
+  const [location, setLocation] = useState(user?.address || '');
   const [search, setSearch] = useState('');
   const animatedPlaceholder = useTypewriterPlaceholder(TYPEWRITER_SEARCH_TERMS, "Search for '", search.length > 0);
   const [topRated, setTopRated] = useState<CatalogService[]>([]);
@@ -86,8 +86,14 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
   // Auto-fetch location once when Home mounts so distance-dependent screens (booking,
   // ad geofencing, EXO proximity sort) get a real fix without each prompting separately.
   useEffect(() => {
-    void getCurrentCoords();
-  }, []);
+    if (user?.address) return;
+    (async () => {
+      const coords = await getCurrentCoords();
+      if (!coords) return;
+      const city = await reverseGeocodeCityName(coords);
+      if (city) setLocation(city);
+    })();
+  }, [user?.address]);
 
   useFocusEffect(
     useCallback(() => {
@@ -159,8 +165,13 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
     <View style={[styles.root, { paddingTop: insets.top + spacing.xs }]}>
       <View style={styles.header}>
         <View style={styles.appHeader}>
-          <KairoLogo size={32} />
-          <Text style={styles.brandName}>KAIRO</Text>
+          <KairoLogo size={40} />
+          <View style={styles.locationHeaderRow}>
+            <Ionicons name="location-outline" size={16} color={colors.navy} />
+            <Text style={styles.brandName} numberOfLines={1}>
+              {location || 'Detecting location…'}
+            </Text>
+          </View>
         </View>
         <View style={[styles.headerSide, styles.headerActions]}>
           <Pressable onPress={() => navigation.navigate('Notifications')} style={styles.bellWrap} hitSlop={8}>
@@ -261,7 +272,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerSide: { flex: 1 },
-  appHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  appHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  locationHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 1 },
   logoMark: { width: 32, height: 32, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   logoN: { fontSize: 17, fontWeight: '900', color: colors.white },
   brandBlock: { alignItems: 'center', justifyContent: 'center' },

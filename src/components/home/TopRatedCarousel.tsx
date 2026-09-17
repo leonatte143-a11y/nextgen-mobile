@@ -69,7 +69,9 @@ export function TopRatedCarousel({ items, onItemPress }: Props) {
         >
           <View style={styles.topPhoto}>
             {item.partner.photoUrl ? (
-              <Image source={{ uri: item.partner.photoUrl }} style={styles.topPhotoImg} />
+              // Keyed per-provider so RN's reconciler mounts a distinct native image view
+              // per card instead of recycling one in place with a stale cached URI.
+              <Image key={item.partner.id} source={{ uri: item.partner.photoUrl }} style={styles.topPhotoImg} />
             ) : (
               <Text style={styles.topPhotoTxt}>{item.partner.name[0]}</Text>
             )}

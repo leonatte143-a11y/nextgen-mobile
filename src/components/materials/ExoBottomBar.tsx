@@ -1,13 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing } from '../../constants/theme';
+import { marketplaceService } from '../../services/marketplaceService';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+const UNREAD_POLL_MS = 3000;
 
 const ITEMS = [
   { key: 'home', label: 'Home', icon: 'home-outline' as const },
@@ -20,6 +23,25 @@ const ITEMS = [
 export function ExoBottomBar() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
+  const [unreadChats, setUnreadChats] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const poll = () => {
+      marketplaceService
+        .getUnreadConversationCount('user')
+        .then((count) => {
+          if (active) setUnreadChats(count);
+        })
+        .catch(() => undefined);
+    };
+    poll();
+    const timer = setInterval(poll, UNREAD_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
 
   const onPress = (key: string) => {
     switch (key) {
@@ -53,7 +75,14 @@ export function ExoBottomBar() {
           </Pressable>
         ) : (
           <Pressable key={item.key} style={styles.item} onPress={() => onPress(item.key)}>
-            <Ionicons name={item.icon} size={22} color={colors.grey} />
+            <View>
+              <Ionicons name={item.icon} size={22} color={colors.grey} />
+              {item.key === 'chats' && unreadChats > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeTxt}>{unreadChats > 9 ? '9+' : unreadChats}</Text>
+                </View>
+              ) : null}
+            </View>
             <Text style={styles.itemLabel}>{item.label}</Text>
           </Pressable>
         ),
@@ -73,6 +102,19 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   item: { alignItems: 'center', gap: 2, minWidth: 56 },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeTxt: { color: colors.white, fontSize: 9, fontWeight: '800' },
   itemLabel: { fontSize: 11, color: colors.grey, fontWeight: '600' },
   sellWrap: { alignItems: 'center', marginTop: -28 },
   sellFab: {

@@ -16,3 +16,14 @@ export function isPointInPolygon(point: Coords, polygon: { lat: number; lng: num
   }
   return inside;
 }
+
+/** True when `point` is inside at least one zone's polygon, or no zone in the list defines a
+ * polygon yet (fail open — mirrors the backend's geo-fenced-banner behavior). */
+export function isServiceableLocation(
+  point: Coords,
+  zones: { polygon?: { lat: number; lng: number }[] | null }[],
+): boolean {
+  const fenced = zones.filter((z) => Array.isArray(z.polygon) && z.polygon.length >= 3);
+  if (fenced.length === 0) return true;
+  return fenced.some((z) => isPointInPolygon(point, z.polygon as { lat: number; lng: number }[]));
+}

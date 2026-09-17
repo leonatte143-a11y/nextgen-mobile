@@ -5,13 +5,17 @@ import type { RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Alert, Dimensions, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AddressPickerModal, type PickedAddress } from '../components/booking/AddressPickerModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenLoader } from '../components/ScreenLoader';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoritesContext';
 import { formatTelUrl } from '../utils/phone';
+import { isServiceableLocation } from '../utils/geoFence';
 import { catalogService } from '../services/catalogService';
 import { bookingService } from '../services/bookingService';
+import { geoZoneService } from '../services/geoZoneService';
 import { getCoordsIfPermitted } from '../services/locationService';
 import type { CatalogService, PartnerReview, PartnerSummary, ServiceMenuItem } from '../mock/types';
 import type { RootStackParamList } from '../navigation/types';
@@ -29,6 +33,7 @@ export function ServiceDetailScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [svc, setSvc] = useState<CatalogService | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<PartnerSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +45,8 @@ export function ServiceDetailScreen() {
   const [serviceMenuLoading, setServiceMenuLoading] = useState(false);
   const [reviews, setReviews] = useState<PartnerReview[] | null>(null);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [address, setAddress] = useState<PickedAddress>({ line: user?.address ?? '' });
+  const [addressPickerOpen, setAddressPickerOpen] = useState(false);
   const loggedPartnerIdRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
@@ -48,6 +55,9 @@ export function ServiceDetailScreen() {
       setPartnerLoading(true);
 
       const coords = await getCoordsIfPermitted();
+      if (coords) {
+        setAddress((prev) => (prev.latitude != null ? prev : { ...prev, latitude: coords.latitude, longitude: coords.longitude }));
+      }
       const [s, partners] = await Promise.all([
         catalogService.getServiceById(route.params.serviceId),
         catalogService.getServicePartners(route.params.serviceId, coords),
@@ -119,6 +129,17 @@ export function ServiceDetailScreen() {
 
   const bookService = async () => {
     if (!selectedPartner || booking || outsideServiceArea) return;
+    if (address.latitude != null && address.longitude != null) {
+      try {
+        const zones = await geoZoneService.getActiveZones();
+        if (!isServiceableLocation({ latitude: address.latitude, longitude: address.longitude }, zones)) {
+          Alert.alert('Not serviceable in this area', "We don't have partners serving this location yet. Please pick a different address.");
+          return;
+        }
+      } catch {
+        // zone lookup failed — fall through and let the booking proceed rather than block on a network hiccup
+      }
+    }
     setBooking(true);
     setRequestSent(true);
     try {
@@ -126,7 +147,9 @@ export function ServiceDetailScreen() {
         serviceId: svc.id,
         partnerId: selectedPartner.id,
         distanceKm: partnerDistance,
-        address: user?.address ?? 'Rajahmundry, AP',
+        address: address.line.trim() || 'Rajahmundry, AP',
+        userLat: address.latitude,
+        userLng: address.longitude,
         paymentMethod: 'Cash',
       });
       navigation.replace('BookingTracking', { bookingId: b.id });
@@ -182,10 +205,30 @@ export function ServiceDetailScreen() {
                 ) : null}
               </View>
             </View>
-            <View style={[styles.partnerStatus, selectedPartner.isOnline ? styles.online : styles.offline]}>
-              <Text style={styles.statusTextLight}>
-                {selectedPartner.isOnline ? 'Online' : 'Offline'}
-              </Text>
+            <View style={styles.statusRow}>
+              <Pressable
+                onPress={() =>
+                  toggleFavorite({
+                    partnerId: selectedPartner.id,
+                    name: selectedPartner.name,
+                    rating: selectedPartner.rating,
+                    jobsCompleted: selectedPartner.jobsCompleted,
+                    serviceId: svc.id,
+                  })
+                }
+                hitSlop={8}
+              >
+                <Ionicons
+                  name={isFavorite(selectedPartner.id) ? 'heart' : 'heart-outline'}
+                  size={20}
+                  color={isFavorite(selectedPartner.id) ? colors.error : colors.grey}
+                />
+              </Pressable>
+              <View style={[styles.partnerStatus, selectedPartner.isOnline ? styles.online : styles.offline]}>
+                <Text style={styles.statusTextLight}>
+                  {selectedPartner.isOnline ? 'Online' : 'Offline'}
+                </Text>
+              </View>
             </View>
           </View>
         ) : (
@@ -286,6 +329,15 @@ export function ServiceDetailScreen() {
         ) : null}
       </ScrollView>
       <View style={styles.footer}>
+        {selectedPartner ? (
+          <Pressable style={styles.addressRow} onPress={() => setAddressPickerOpen(true)}>
+            <Ionicons name="location-outline" size={16} color={colors.primary} />
+            <Text style={styles.addressTxt} numberOfLines={1}>
+              {address.line.trim() || 'Add delivery address'}
+            </Text>
+            <Text style={styles.addressChange}>Change</Text>
+          </Pressable>
+        ) : null}
         {requestSent ? (
           <Text style={styles.requestSentText}>Request sent — connecting you to a partner…</Text>
         ) : outsideServiceArea ? (
@@ -300,6 +352,15 @@ export function ServiceDetailScreen() {
           />
         )}
       </View>
+      <AddressPickerModal
+        visible={addressPickerOpen}
+        initialAddress={address}
+        onClose={() => setAddressPickerOpen(false)}
+        onConfirm={(picked) => {
+          setAddress(picked);
+          setAddressPickerOpen(false);
+        }}
+      />
     </View>
   );
 }
@@ -325,9 +386,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.greyLight,
     borderRadius: radius.md,
   },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
   partnerStatus: {
     alignSelf: 'flex-start',
-    marginTop: spacing.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
@@ -415,4 +481,12 @@ const styles = StyleSheet.create({
   reviewStars: { color: colors.grey, fontWeight: '600', fontSize: 12 },
   reviewComment: { color: colors.grey, marginTop: 2, lineHeight: 20 },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  addressTxt: { flex: 1, color: colors.charcoal, fontSize: 13 },
+  addressChange: { color: colors.primary, fontWeight: '700', fontSize: 13 },
 });

@@ -4,15 +4,18 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AddressMapPicker } from '../components/booking/AddressMapPicker';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { getCurrentCoords, requestLocationPermission } from '../services/locationService';
+import { LOCAL_STORAGE_KEYS } from '../lib/localStorage';
+import { getCurrentCoords, reverseGeocodeCityName, requestLocationPermission } from '../services/locationService';
 import { userService } from '../services/userService';
 
-const STORAGE_KEY = 'kairo_saved_addresses';
+const STORAGE_KEY = LOCAL_STORAGE_KEYS.savedAddresses;
+const DEFAULT_PIN = { latitude: 17.385, longitude: 78.4867 };
 
-type SavedAddress = { id: string; label: string; line: string; latitude?: number; longitude?: number };
+export type SavedAddress = { id: string; label: string; line: string; latitude?: number; longitude?: number };
 
 export function SavedAddressesScreen() {
   const navigation = useNavigation();
@@ -23,6 +26,7 @@ export function SavedAddressesScreen() {
   const [line, setLine] = useState('');
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locating, setLocating] = useState(false);
+  const [autoLine, setAutoLine] = useState('');
 
   const load = useCallback(async () => {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -67,6 +71,7 @@ export function SavedAddressesScreen() {
     }
     setLine('');
     setCoords(null);
+    setAutoLine('');
     Alert.alert('Saved', 'Address added.');
   };
 
@@ -76,10 +81,27 @@ export function SavedAddressesScreen() {
       const ok = await requestLocationPermission();
       if (!ok) return;
       const c = await getCurrentCoords();
-      if (c) setCoords(c);
-      else Alert.alert('Location unavailable', 'Could not fetch your current location. Try again.');
+      if (!c) {
+        Alert.alert('Location unavailable', 'Could not fetch your current location. Try again.');
+        return;
+      }
+      setCoords(c);
+      const city = await reverseGeocodeCityName(c);
+      if (city) {
+        setLine((prev) => (!prev.trim() || prev === autoLine ? city : prev));
+        setAutoLine(city);
+      }
     } finally {
       setLocating(false);
+    }
+  };
+
+  const onPinMoved = async (lat: number, lng: number) => {
+    setCoords({ latitude: lat, longitude: lng });
+    const city = await reverseGeocodeCityName({ latitude: lat, longitude: lng });
+    if (city) {
+      setLine((prev) => (!prev.trim() || prev === autoLine ? city : prev));
+      setAutoLine(city);
     }
   };
 
@@ -123,20 +145,28 @@ export function SavedAddressesScreen() {
           </View>
         ))}
         <Text style={styles.section}>Add new address</Text>
+        <AddressMapPicker
+          latitude={coords?.latitude ?? DEFAULT_PIN.latitude}
+          longitude={coords?.longitude ?? DEFAULT_PIN.longitude}
+          onLocationChange={(lat, lng) => void onPinMoved(lat, lng)}
+        />
+        <Pressable style={styles.locBtn} onPress={() => void useMyLocation()} disabled={locating}>
+          <Ionicons name="locate-outline" size={18} color={colors.primary} />
+          <Text style={styles.locTxt}>
+            {locating ? 'Fetching location…' : coords ? 'Location pin added ✓' : 'Use my current location'}
+          </Text>
+        </Pressable>
         <TextInput style={styles.input} placeholder="Label (Home, Office)" value={label} onChangeText={setLabel} />
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="Full address"
           value={line}
-          onChangeText={setLine}
+          onChangeText={(v) => {
+            setLine(v);
+            setAutoLine('');
+          }}
           multiline
         />
-        <Pressable style={styles.locBtn} onPress={() => void useMyLocation()} disabled={locating}>
-          <Ionicons name="locate-outline" size={18} color={colors.primary} />
-          <Text style={styles.locTxt}>
-            {locating ? 'Fetching location…' : coords ? 'Location pin added ✓' : 'Use my current location as pin'}
-          </Text>
-        </Pressable>
         <PrimaryButton title="Save address" onPress={() => void addAddress()} />
       </ScrollView>
       </KeyboardAvoidingView>
@@ -188,6 +218,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.md,
     marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   locTxt: { color: colors.primary, fontWeight: '700' },
 });
