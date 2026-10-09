@@ -64,7 +64,7 @@ const SERVICES: ServiceTile[] = [
   {
     id: 'baby',
     title: 'Baby Sitters',
-    subtitle: 'Trusted nannies',
+    subtitle: 'Nanny services',
     icon: 'happy-outline',
     accent: colors.trustTeal,
     onPress: (nav) => nav.navigate('ServiceList', { bucketId: 'life_health', title: 'Baby Sitters', searchQuery: 'babysitter nanny' }),

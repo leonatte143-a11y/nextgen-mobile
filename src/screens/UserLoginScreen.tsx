@@ -39,9 +39,9 @@ export function UserLoginScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [conn, setConn] = useState<'unknown' | 'ok' | 'fail'>('unknown');
-  // Test-only toggle: verifies via real Firebase Phone Auth SMS instead of the
-  // backend debug-OTP flow. Default flow above is untouched.
-  const [useFirebaseOtp, setUseFirebaseOtp] = useState(false);
+  // Real Firebase Phone Auth SMS is the default flow. The backend debug-OTP
+  // path is kept and reachable via the __DEV__-only toggle below for testing.
+  const [useFirebaseOtp, setUseFirebaseOtp] = useState(true);
   const firebaseConfirmationRef = useRef<FirebaseOtpConfirmation | null>(null);
 
   useEffect(() => {

@@ -22,7 +22,7 @@ export function RewardsScreen() {
   const shareMessage = () =>
     referralCode
       ? `Join me on KAIRO using my referral code ${referralCode} and we both get rewarded! Download the app: ${REFERRAL_APP_LINK}`
-      : `Join me on KAIRO - Book trusted local service partners in minutes! Download the app: ${REFERRAL_APP_LINK}`;
+      : `Join me on KAIRO - Book local service partners in minutes! Download the app: ${REFERRAL_APP_LINK}`;
 
   const copyCode = async () => {
     if (!referralCode) return;

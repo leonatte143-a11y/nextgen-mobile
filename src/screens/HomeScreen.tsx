@@ -244,7 +244,7 @@ export function HomeScreen(_props: MainTabScreenProps<'Home'>) {
 
         <View style={styles.footer}>
           <Text style={styles.footerBrand}>KAIRO</Text>
-          <Text style={styles.footerTag}>Your trusted home services platform — Andhra Pradesh</Text>
+          <Text style={styles.footerTag}>Home services platform — Andhra Pradesh</Text>
           <Text style={styles.footerSupport}>kairoservicess@gmail.com</Text>
         </View>
       </ScrollView>
